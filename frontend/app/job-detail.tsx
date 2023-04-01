@@ -180,21 +180,124 @@ export default function JobDetailScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Job Description */}
+        {/* Job Description - Expandable */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Job Description</Text>
-          <Text style={styles.descriptionText}>{job.description}</Text>
+          <TouchableOpacity 
+            style={styles.expandableHeader}
+            onPress={() => toggleSection('description')}
+          >
+            <Text style={styles.sectionTitle}>Job Description</Text>
+            <Ionicons 
+              name={expandedSections.includes('description') ? 'chevron-up' : 'chevron-down'} 
+              size={20} 
+              color={Colors.text.secondary} 
+            />
+          </TouchableOpacity>
+          {expandedSections.includes('description') && (
+            <Text style={styles.descriptionText}>{job.description}</Text>
+          )}
         </View>
 
-        {/* Requirements */}
+        {/* Requirements - Highlighted Matching */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Requirements</Text>
-          {job.requirements.map((requirement, index) => (
-            <View key={index} style={styles.requirementItem}>
-              <Text style={styles.requirementBullet}>•</Text>
-              <Text style={styles.requirementText}>{requirement}</Text>
+          <TouchableOpacity 
+            style={styles.expandableHeader}
+            onPress={() => toggleSection('requirements')}
+          >
+            <Text style={styles.sectionTitle}>Requirements</Text>
+            <Ionicons 
+              name={expandedSections.includes('requirements') ? 'chevron-up' : 'chevron-down'} 
+              size={20} 
+              color={Colors.text.secondary} 
+            />
+          </TouchableOpacity>
+          {expandedSections.includes('requirements') && (
+            <View>
+              {job.requirements.map((requirement, index) => {
+                // Simulate matching - first 3 requirements match user profile
+                const isMatching = index < 3;
+                return (
+                  <View key={index} style={styles.requirementItem}>
+                    <View style={[
+                      styles.requirementBullet,
+                      isMatching && styles.matchingBullet
+                    ]}>
+                      <Ionicons 
+                        name={isMatching ? 'checkmark-circle' : 'ellipse-outline'} 
+                        size={16} 
+                        color={isMatching ? Colors.success : Colors.text.secondary} 
+                      />
+                    </View>
+                    <Text style={[
+                      styles.requirementText,
+                      isMatching && styles.matchingRequirement
+                    ]}>
+                      {requirement}
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
-          ))}
+          )}
+        </View>
+
+        {/* Company Intelligence */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Company Intelligence</Text>
+          <View style={styles.companyIntelligence}>
+            <View style={styles.intelligenceItem}>
+              <View style={styles.intelligenceIcon}>
+                <Ionicons name="people" size={20} color={Colors.primary.navyBlue} />
+              </View>
+              <View style={styles.intelligenceContent}>
+                <Text style={styles.intelligenceLabel}>Size</Text>
+                <Text style={styles.intelligenceValue}>{job.companyIntelligence.size}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.intelligenceItem}>
+              <View style={styles.intelligenceIcon}>
+                <Ionicons name="bulb" size={20} color={Colors.primary.goldenYellow} />
+              </View>
+              <View style={styles.intelligenceContent}>
+                <Text style={styles.intelligenceLabel}>Culture</Text>
+                <Text style={styles.intelligenceValue}>{job.companyIntelligence.culture}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.intelligenceItem}>
+              <View style={styles.intelligenceIcon}>
+                <Ionicons name="newspaper" size={20} color={Colors.primary.warmOrange} />
+              </View>
+              <View style={styles.intelligenceContent}>
+                <Text style={styles.intelligenceLabel}>Recent News</Text>
+                <Text style={styles.intelligenceValue}>{job.companyIntelligence.recentNews}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.intelligenceItem}>
+              <View style={styles.intelligenceIcon}>
+                <Ionicons name="heart" size={20} color={Colors.success} />
+              </View>
+              <View style={styles.intelligenceContent}>
+                <Text style={styles.intelligenceLabel}>Values</Text>
+                <Text style={styles.intelligenceValue}>{job.companyIntelligence.values}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Benefits - Structured List */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Benefits & Perks</Text>
+          <View style={styles.benefitsList}>
+            {job.benefits.map((benefit, index) => (
+              <View key={index} style={styles.benefitItem}>
+                <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
+                <Text style={styles.benefitText}>{benefit}</Text>
+              </View>
+            ))}
+          </View>
         </View>
 
         {/* Skills */}
