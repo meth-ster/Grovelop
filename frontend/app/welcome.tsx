@@ -379,25 +379,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: Typography.fontWeight.medium,
   },
-  testSection: {
-    backgroundColor: Colors.neutral.gray200,
-    borderRadius: Layout.borderRadius.md,
-    padding: Layout.spacing.md,
-    marginVertical: Layout.spacing.lg,
-    borderWidth: 2,
-    borderColor: Colors.primary.goldenYellow,
-    borderStyle: 'dashed',
-  },
-  testButton: {
-    backgroundColor: Colors.primary.goldenYellow,
-    borderRadius: Layout.borderRadius.md,
-    paddingVertical: Layout.spacing.md,
-    alignItems: 'center',
-    minHeight: Layout.touchTarget.medium,
-  },
-  testButtonText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.text.primary,
-  },
 });
