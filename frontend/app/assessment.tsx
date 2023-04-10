@@ -235,6 +235,8 @@ export default function AssessmentScreen() {
   const handleSubmitAssessment = async (finalResponses: QuestionnaireResponse[]) => {
     setIsSubmitting(true);
     try {
+      console.log('Submitting assessment with responses:', finalResponses.length);
+      
       // Mock analysis - in real app this would call Gemini Pro 2.5 API
       const mockArchetype = {
         primary: 'thinker' as const,
@@ -253,18 +255,19 @@ export default function AssessmentScreen() {
         careerSuggestions: ['Data Scientist', 'Research & Development', 'Strategy Consultant'],
       };
 
+      console.log('Updating user with archetype data...');
       await updateUser({
         assessmentCompleted: true,
         archetype: mockArchetype,
       });
-
-      // Direct navigation instead of Alert (which may not work well in web preview)
-      setTimeout(() => {
-        router.replace('/(tabs)/home');
-      }, 1000);
+      
+      console.log('User updated successfully, navigating to home...');
+      
+      // Navigate to home immediately
+      router.replace('/(tabs)/home');
     } catch (error) {
+      console.error('Assessment submission error:', error);
       Alert.alert('Error', 'Failed to submit assessment. Please try again.');
-    } finally {
       setIsSubmitting(false);
     }
   };
