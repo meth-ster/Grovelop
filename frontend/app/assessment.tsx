@@ -495,73 +495,79 @@ export default function AssessmentScreen() {
 
       {/* Navigation Footer */}
       <View style={styles.footer}>
-        {currentQuestionIndex === mockQuestions.length - 1 ? (
-          /* Last question - show completion buttons */
-          <View style={styles.completionButtons}>
-            <TouchableOpacity
-              style={[styles.nextButton, { backgroundColor: Colors.success }]}
-              onPress={() => {
-                console.log('Direct navigation test button clicked');
-                router.replace('/(tabs)/home');
-              }}
-            >
-              <Text style={styles.nextButtonText}>Skip to Dashboard (Test)</Text>
-            </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.nextButton,
+            (!currentAnswer && currentQuestion.required) && styles.disabledButton,
+          ]}
+          onPress={async () => {
+            console.log('Button clicked! Current question index:', currentQuestionIndex, 'Total:', mockQuestions.length);
             
-            <TouchableOpacity
-              style={[
-                styles.nextButton,
-                !currentAnswer && styles.disabledButton,
-              ]}
-              onPress={() => {
-                console.log('Complete Assessment clicked, currentAnswer:', currentAnswer);
-                if (currentAnswer) {
-                  // Update user first
-                  updateUser({
-                    assessmentCompleted: true,
-                    archetype: {
-                      primary: 'thinker' as const,
-                      secondary: 'creator' as const,
-                      scores: { doer: 6, thinker: 9, creator: 8, helper: 5, persuader: 4, organiser: 7 },
-                      description: 'You are a strategic thinker.',
-                      strengths: ['Analytical thinking', 'Problem-solving'],
-                      growthAreas: ['Leadership skills', 'Communication'],
-                      careerSuggestions: ['Data Scientist', 'Strategy Consultant'],
-                    },
-                  }).then(() => {
-                    console.log('User updated, navigating to home');
-                    router.replace('/(tabs)/home');
-                  }).catch(error => {
-                    console.error('Update failed:', error);
-                    router.replace('/(tabs)/home'); // Navigate anyway
-                  });
-                } else {
-                  Alert.alert('Required', 'Please answer this question to complete the assessment.');
-                }
-              }}
-              disabled={isSubmitting}
-            >
-              <Text style={styles.nextButtonText}>
-                {isSubmitting ? 'Analyzing...' : 'Complete Assessment'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          /* Regular Next button */
-          <TouchableOpacity
-            style={[
-              styles.nextButton,
-              (!currentAnswer && currentQuestion.required) && styles.disabledButton,
-            ]}
-            onPress={() => {
-              console.log('Next button clicked - calling handleNext');
-              handleNext();
-            }}
-            disabled={isSubmitting || (!currentAnswer && currentQuestion.required)}
-          >
-            <Text style={styles.nextButtonText}>Next</Text>
-          </TouchableOpacity>
-        )}
+            if (!currentAnswer && currentQuestion.required) {
+              console.log('No answer provided');
+              Alert.alert('Required', 'Please answer this question to continue.');
+              return;
+            }
+
+            if (currentQuestionIndex === mockQuestions.length - 1) {
+              // Last question - complete assessment
+              console.log('Last question - completing assessment');
+              try {
+                await updateUser({
+                  assessmentCompleted: true,
+                  archetype: {
+                    primary: 'thinker' as const,
+                    secondary: 'creator' as const,
+                    scores: { doer: 6, thinker: 9, creator: 8, helper: 5, persuader: 4, organiser: 7 },
+                    description: 'You are a strategic thinker who thrives on solving complex problems.',
+                    strengths: ['Analytical thinking', 'Problem-solving'],
+                    growthAreas: ['Leadership skills', 'Communication'],
+                    careerSuggestions: ['Data Scientist', 'Strategy Consultant'],
+                  },
+                });
+                console.log('User updated successfully, navigating to home');
+                router.replace('/(tabs)/home');
+              } catch (error) {
+                console.error('Error updating user:', error);
+                router.replace('/(tabs)/home'); // Navigate anyway
+              }
+            } else {
+              // Regular next question logic
+              console.log('Moving to next question');
+              const response: QuestionnaireResponse = {
+                questionId: currentQuestion.id,
+                answer: currentAnswer,
+                timestamp: new Date().toISOString(),
+              };
+              const updatedResponses = [...responses.filter(r => r.questionId !== currentQuestion.id), response];
+              setResponses(updatedResponses);
+              
+              // Move to next question with animation
+              Animated.timing(slideAnimation, {
+                toValue: -screenWidth,
+                duration: 300,
+                useNativeDriver: true,
+              }).start(() => {
+                setCurrentQuestionIndex(currentQuestionIndex + 1);
+                setCurrentAnswer(null);
+                slideAnimation.setValue(screenWidth);
+                Animated.timing(slideAnimation, {
+                  toValue: 0,
+                  duration: 300,
+                  useNativeDriver: true,
+                }).start();
+              });
+            }
+          }}
+          disabled={isSubmitting || (!currentAnswer && currentQuestion.required)}
+        >
+          <Text style={styles.nextButtonText}>
+            {currentQuestionIndex === mockQuestions.length - 1 
+              ? (isSubmitting ? 'Analyzing...' : 'Complete Assessment')
+              : 'Next'
+            }
+          </Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
