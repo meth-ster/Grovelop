@@ -10,11 +10,16 @@ export default function Index() {
 
   useEffect(() => {
     if (!isLoading) {
+      console.log('Index routing - isAuthenticated:', isAuthenticated, 'user:', user?.name, 'assessmentCompleted:', user?.assessmentCompleted);
+      
       if (!isAuthenticated) {
+        console.log('Not authenticated, redirecting to welcome');
         router.replace('/welcome');
       } else if (!user?.assessmentCompleted) {
+        console.log('Authenticated but assessment not completed, redirecting to assessment');
         router.replace('/assessment');
       } else {
+        console.log('Authenticated and assessment completed, redirecting to home');
         router.replace('/(tabs)/home');
       }
     }
