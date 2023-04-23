@@ -268,7 +268,7 @@ export default function ActivityPortfolioSelectionScreen() {
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Activity Portfolio Selection</Text>
-          <Text style={styles.headerSubtitle}>Select Evidence from Your Development</Text>
+          <Text style={styles.headerSubtitle}>Select Evidence of Your Knowledge and Skills</Text>
         </View>
         <TouchableOpacity onPress={() => {
           Alert.alert('Help', 'Select activities that best demonstrate your qualifications for this role. Higher relevance scores indicate better alignment.');
@@ -288,7 +288,7 @@ export default function ActivityPortfolioSelectionScreen() {
       <ScrollView style={styles.activitiesList} showsVerticalScrollIndicator={false}>
         {/* Highly Relevant Activities */}
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Recommended Activities for This Role:</Text>
+          <Text style={styles.sectionTitle}>Recommended Portfolio Items for This Role:</Text>
           <Text style={styles.subsectionTitle}>Highly Relevant (Auto-selected):</Text>
           {activities
             .filter(activity => activity.relevanceLevel === 'highly_relevant')

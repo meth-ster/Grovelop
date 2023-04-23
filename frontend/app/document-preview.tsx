@@ -183,91 +183,38 @@ export default function DocumentPreviewScreen() {
         <Text style={styles.contextText}>Application for {jobTitle} at {company}</Text>
       </View>
 
-      {/* Document Tabs - Only show if both documents */}
-      {documentType === 'resume_cover_activity' && (
-        <View style={styles.tabContainer}>
-          {documents.map((doc) => (
-            <TouchableOpacity
-              key={doc.type}
-              style={[
-                styles.tab,
-                activeTab === doc.type && styles.activeTab,
-              ]}
-              onPress={() => setActiveTab(doc.type)}
-            >
-              <Ionicons 
-                name={doc.type === 'resume' ? 'document-text' : 'mail'} 
-                size={16} 
-                color={activeTab === doc.type ? Colors.text.primary : Colors.text.secondary} 
-              />
-              <Text style={[
-                styles.tabText,
-                activeTab === doc.type && styles.activeTabText,
-              ]}>
-                {doc.type === 'resume' ? 'Resume' : 'Cover Letter'}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
 
       {/* Document Content */}
       <View style={styles.documentContainer}>
-        {isEditing ? (
-          <View style={styles.editMode}>
-            <View style={styles.editHeader}>
-              <Text style={styles.editTitle}>Editing {activeTab === 'resume' ? 'Resume' : 'Cover Letter'}</Text>
-              <View style={styles.editActions}>
-                <TouchableOpacity style={styles.cancelEditButton} onPress={handleCancelEdit}>
-                  <Text style={styles.cancelEditText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.saveEditButton} onPress={handleSaveEdit}>
-                  <Text style={styles.saveEditText}>Save</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            <TextInput
-              style={styles.editTextInput}
-              value={editContent}
-              onChangeText={setEditContent}
-              multiline
-              textAlignVertical="top"
-            />
-          </View>
-        ) : (
-          <ScrollView style={styles.previewContainer} showsVerticalScrollIndicator={false}>
+        <ScrollView style={styles.previewContainer} showsVerticalScrollIndicator={false}>
+          {/* Resume Section */}
+          <View style={styles.documentSection}>
+            <Text style={styles.documentSectionTitle}>Resume/CV</Text>
             <View style={styles.documentPreview}>
-              <Text style={styles.documentContent}>{activeDocument?.content}</Text>
+              <Text style={styles.documentContent}>
+                {documents.find(doc => doc.type === 'resume')?.content}
+              </Text>
             </View>
-          </ScrollView>
-        )}
+          </View>
+          
+          {/* Cover Letter Section */}
+          <View style={styles.documentSection}>
+            <Text style={styles.documentSectionTitle}>Cover Letter</Text>
+            <View style={styles.documentPreview}>
+              <Text style={styles.documentContent}>
+                {documents.find(doc => doc.type === 'cover_letter')?.content}
+              </Text>
+            </View>
+          </View>
+        </ScrollView>
       </View>
 
       {/* Action Buttons */}
       <View style={styles.actionBar}>
-        {!isEditing && (
-          <>
-            <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
-              <Ionicons name="pencil" size={20} color={Colors.primary.navyBlue} />
-              <Text style={styles.editButtonText}>Edit</Text>
-            </TouchableOpacity>
-            
-            {activeTab === 'resume' && documentType === 'resume_cover_activity' ? (
-              <TouchableOpacity 
-                style={styles.nextButton} 
-                onPress={() => setActiveTab('cover_letter')}
-              >
-                <Text style={styles.nextButtonText}>Next: Go to Cover Letter</Text>
-                <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity style={styles.exportButton} onPress={handleExportDocuments}>
-                <Text style={styles.exportButtonText}>Export & Apply</Text>
-                <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
-              </TouchableOpacity>
-            )}
-          </>
-        )}
+        <TouchableOpacity style={styles.exportButton} onPress={handleExportDocuments}>
+          <Text style={styles.exportButtonText}>Export & Apply</Text>
+          <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
+        </TouchableOpacity>
       </View>
 
       {/* Document Info */}
@@ -482,6 +429,20 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
+  },
+  documentSection: {
+    marginBottom: Layout.spacing.sm,
+    marginTop: Layout.spacing.md,
+  },
+  documentSectionTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.md,
+    paddingHorizontal: Layout.spacing.lg,
+    borderBottomWidth: 2,
+    borderBottomColor: Colors.primary.goldenYellow,
+    paddingBottom: Layout.spacing.sm,
   },
   documentInfo: {
     flexDirection: 'row',

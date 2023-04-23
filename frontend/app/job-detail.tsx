@@ -320,41 +320,22 @@ export default function JobDetailScreen() {
             </View>
           </View>
         </View> */}
-
-        {/* Action Buttons as specified in PDF */}
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.secondaryActionButton} onPress={handleSave}>
-            <Ionicons name="bookmark-outline" size={20} color={Colors.primary.navyBlue} />
-            <Text style={styles.secondaryActionText}>Save Job</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.secondaryActionButton} onPress={() => {
-            Alert.alert('Message Employer', 'Direct messaging feature coming soon!');
-          }}>
-            <Ionicons name="mail-outline" size={20} color={Colors.primary.navyBlue} />
-            <Text style={styles.secondaryActionText}>Message Employer</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity style={styles.primaryActionButton} onPress={() => {
-          router.push({
-            pathname: '/document-setup',
-            params: { jobId: job.id, jobTitle: job.title, company: job.company }
-          });
-        }}>
-          <Text style={styles.primaryActionButtonText}>Create Tailored Application</Text>
-          <Ionicons name="arrow-forward" size={20} color={Colors.text.inverse} />
-        </TouchableOpacity>
         
       </ScrollView>
 
       {/* Bottom Actions */}
       <View style={styles.bottomActions}>
-        <TouchableOpacity style={styles.bottomActionButton} onPress={handleSave}>
-          <Ionicons name="bookmark-outline" size={24} color={Colors.text.secondary} />
+        <TouchableOpacity style={styles.secondaryActionButton} onPress={() => {
+          router.push({
+            pathname: '/document-setup',
+            params: { jobId: job.id, jobTitle: job.title, company: job.company }
+          });
+        }}>
+          <Text style={styles.secondaryActionText}>Create Tailored Application</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.bottomActionButton, styles.applyButton]} onPress={handleApply}>
-          <Text style={styles.applyButtonText}>Apply for this Job</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.secondaryActionButton} onPress={handleSave}>
+            <Text style={styles.primaryActionButtonText}>Save Job</Text>
+          </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -573,21 +554,6 @@ const styles = StyleSheet.create({
     borderTopColor: Colors.neutral.gray200,
     gap: Layout.spacing.md,
   },
-  bottomActionButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Layout.spacing.md,
-    borderRadius: Layout.borderRadius.md,
-  },
-  applyButton: {
-    flex: 1,
-    backgroundColor: Colors.primary.navyBlue,
-  },
-  applyButtonText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.text.inverse,
-  },
   expandableHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -697,6 +663,7 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.primary.navyBlue,
+    textAlign: 'center',
   },
   primaryActionButton: {
     flexDirection: 'row',

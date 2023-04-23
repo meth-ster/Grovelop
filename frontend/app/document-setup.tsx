@@ -145,7 +145,7 @@ export default function DocumentSetupScreen() {
           'Document Type:',
           [
             { value: 'resume_only', label: 'Resume/CV only', description: 'User skips screen 3 and goes directly to screen 4' },
-            { value: 'resume_cover_activity', label: 'Resume/CV + Cover Letter + Activity Product', description: 'Complete application package with portfolio' },
+            { value: 'resume_cover_activity', label: 'Resume/CV + Cover Letter + Portfolio Item', description: 'Complete application package with portfolio' },
             { value: 'cover_letter_only', label: 'Cover Letter only', description: 'Cover letter tailored for this application' },
           ],
           config.type,

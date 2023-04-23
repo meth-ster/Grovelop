@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -13,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 import Layout from '../constants/Layout';
+import { AlertService } from '../services/alertService';
 
 type FormatOption = 'PDF' | 'Word' | 'Text' | 'HTML';
 type BundleOption = 'resume_cover' | 'resume_only' | 'cover_only' | 'activity_portfolio' | 'complete_bundle';
@@ -85,23 +85,70 @@ export default function ExportDistributionScreen() {
   };
 
   const handleDownload = () => {
-    Alert.alert(
-      'Download Started',
-      'Your documents are being prepared for download. You will be notified when ready.',
-      [
-        { text: 'OK', onPress: () => router.push('/apply-mailbox') }
-      ]
-    );
+    // Get the selected bundle configuration
+    const bundleInfo = getBundleInfo(config.bundle);
+    const formatInfo = config.formats.join(', ');
+    const qualityInfo = getQualityInfo(config.quality);
+    console.log('>>----> handleDownload');
+    
+    // Directly start the download process
+    simulateDownload(bundleInfo, formatInfo, qualityInfo);
   };
 
   const handleEmailToSelf = () => {
-    Alert.alert(
-      'Email Sent',
-      'Your documents have been emailed to your registered email address.',
-      [
-        { text: 'OK', onPress: () => router.push('/apply-mailbox') }
-      ]
-    );
+    const bundleInfo = getBundleInfo(config.bundle);
+    const formatInfo = config.formats.join(', ');
+    
+    // Directly start the email process
+    simulateEmailSend(bundleInfo, formatInfo);
+  };
+
+  const getBundleInfo = (bundle: BundleOption): string => {
+    switch (bundle) {
+      case 'complete_bundle':
+        return 'Complete Application Bundle (Resume + Cover Letter + Portfolio Item)';
+      case 'resume_cover':
+        return 'Resume + Cover Letter';
+      case 'resume_only':
+        return 'Resume Only';
+      case 'cover_only':
+        return 'Cover Letter Only';
+      default:
+        return 'Selected Documents';
+    }
+  };
+
+  const getQualityInfo = (quality: QualityOption): string => {
+    switch (quality) {
+      case 'standard':
+        return 'Standard Quality';
+      case 'high':
+        return 'High Quality';
+      case 'print_ready':
+        return 'Print Ready';
+      default:
+        return 'High Quality';
+    }
+  };
+
+  const simulateDownload = (bundleInfo: string, formatInfo: string, qualityInfo: string) => {
+    console.log(`Downloading: ${bundleInfo} in ${formatInfo} format (${qualityInfo})`);
+    // Simulate download completion
+    setTimeout(() => {
+      console.log('Download completed successfully');
+      AlertService.success('Download completed successfully');
+      router.push('/apply-mailbox');
+    }, 1000);
+  };
+
+  const simulateEmailSend = (bundleInfo: string, formatInfo: string) => {
+    console.log(`Emailing: ${bundleInfo} in ${formatInfo} format`);
+    // Simulate email sending
+    setTimeout(() => {
+      console.log('Email sent successfully');
+      AlertService.success('Email sent successfully');
+      router.push('/apply-mailbox');
+    }, 1000);
   };
 
   const renderOption = (
@@ -149,7 +196,7 @@ export default function ExportDistributionScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Export & Distribution</Text>
+        <Text style={styles.headerTitle}>Export</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -160,12 +207,6 @@ export default function ExportDistributionScreen() {
           <Text style={styles.contextSubtitle}>(your document is saved automatically)</Text>
         </View>
 
-        {/* Skip Option */}
-        <View style={styles.skipSection}>
-          <TouchableOpacity style={styles.skipButton} onPress={() => router.push('/apply-mailbox')}>
-            <Text style={styles.skipButtonText}>Skip: Go to Apply with documents</Text>
-          </TouchableOpacity>
-        </View>
 
         {/* Format Options */}
         {renderOption(
@@ -185,42 +226,15 @@ export default function ExportDistributionScreen() {
         {renderOption(
           'Bundle Options:',
           [
-            { value: 'resume_cover', label: 'Resume + Cover Letter Package', description: 'Complete application package' },
+            { value: 'complete_bundle', label: 'Complete Application Bundle (Resume + Cover Letter + Portfolio Item)', description: 'Everything included' },
+            { value: 'resume_cover', label: 'Resume + Cover Letter', description: 'Complete application package' },
             { value: 'resume_only', label: 'Resume Only', description: 'Just the resume' },
             { value: 'cover_only', label: 'Cover Letter Only', description: 'Just the cover letter' },
-            { value: 'activity_portfolio', label: 'Activity Product Portfolio (Selected activities)', description: 'Portfolio of your activities' },
-            { value: 'complete_bundle', label: 'Complete Application Bundle (Resume + Cover Letter + Activity Products)', description: 'Everything included' },
           ],
           config.bundle,
           handleBundleSelect
         )}
 
-        {/* Activity Product Selection */}
-        <View style={styles.optionGroup}>
-          <Text style={styles.optionLabel}>Activity Product Selection:</Text>
-          <View style={styles.activityProductsList}>
-            {mockActivityProducts.map((product) => (
-              <TouchableOpacity
-                key={product.id}
-                style={[
-                  styles.activityProductItem,
-                  config.activityProducts.includes(product.id) && styles.selectedActivityProduct,
-                ]}
-                onPress={() => handleActivityProductToggle(product.id)}
-              >
-                <View style={styles.activityProductContent}>
-                  <Text style={styles.activityProductTitle}>{product.title}</Text>
-                  <Text style={styles.activityProductPages}>({product.pages} pages)</Text>
-                </View>
-                <Ionicons
-                  name={config.activityProducts.includes(product.id) ? 'checkmark-circle' : 'ellipse-outline'}
-                  size={24}
-                  color={config.activityProducts.includes(product.id) ? Colors.success : Colors.text.secondary}
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
 
         {/* Quality Settings */}
         {renderOption(
@@ -234,11 +248,30 @@ export default function ExportDistributionScreen() {
           handleQualitySelect
         )}
 
+        {/* Export Summary */}
+        <View style={styles.exportSummary}>
+          <Text style={styles.summaryTitle}>Export Summary</Text>
+          <View style={styles.summaryContent}>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Bundle:</Text>
+              <Text style={styles.summaryValue}>{getBundleInfo(config.bundle)}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Format:</Text>
+              <Text style={styles.summaryValue}>{config.formats.join(', ')}</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Quality:</Text>
+              <Text style={styles.summaryValue}>{getQualityInfo(config.quality)}</Text>
+            </View>
+          </View>
+        </View>
+
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.primaryButton} onPress={handleDownload}>
             <Ionicons name="download" size={20} color={Colors.text.primary} />
-            <Text style={styles.primaryButtonText}>Download and go to Apply</Text>
+            <Text style={styles.primaryButtonText}>Download Documents</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={styles.secondaryButton} onPress={handleEmailToSelf}>
@@ -410,5 +443,42 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.medium,
     color: Colors.primary.navyBlue,
+  },
+  exportSummary: {
+    backgroundColor: Colors.background.secondary,
+    marginHorizontal: Layout.spacing.lg,
+    marginBottom: Layout.spacing.xl,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.primary.goldenYellow,
+  },
+  summaryTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.md,
+    textAlign: 'center',
+  },
+  summaryContent: {
+    gap: Layout.spacing.sm,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  summaryLabel: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.secondary,
+    flex: 1,
+  },
+  summaryValue: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    flex: 2,
+    textAlign: 'right',
   },
 });

@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 import Layout from '../constants/Layout';
+import { AlertService } from '../services/alertService';
 
 interface ActivityProduct {
   id: string;
@@ -50,39 +51,20 @@ export default function ApplyMailboxScreen() {
 
   const [emailTo, setEmailTo] = useState('careers@techcorp.com');
   const [emailSubject, setEmailSubject] = useState(`Application for ${jobTitle} Position - John Smith`);
-  const [emailBody, setEmailBody] = useState(`Dear Hiring Manager,
-
-I am writing to express my interest in the ${jobTitle} position at ${company}. I have attached my resume, cover letter, and relevant activity products that demonstrate my qualifications for this role.
-
-I look forward to discussing how my skills and experience can contribute to your team.
-
-Best regards,
-John Smith`);
   const [activityProducts, setActivityProducts] = useState(mockActivityProducts);
 
-  const handleActivityProductToggle = (productId: string) => {
-    setActivityProducts(prev => 
-      prev.map(product => 
-        product.id === productId 
-          ? { ...product, selected: !product.selected }
-          : product
-      )
-    );
-  };
-
   const handleSendApplication = () => {
+    console.log('>>----> handleSendApplication called');
     const selectedProducts = activityProducts.filter(p => p.selected);
-    Alert.alert(
-      'Application Sent',
-      `Your application has been sent to ${emailTo} with ${selectedProducts.length} activity products attached.`,
-      [
-        { text: 'OK', onPress: () => router.push('/(tabs)/jobs') }
-      ]
-    );
+    AlertService.success(`Application sent to ${emailTo} with ${selectedProducts.length} activity products attached.`);
+    // Navigate after a short delay
+    setTimeout(() => {
+      router.push('/(tabs)/jobs');
+    }, 1500);
   };
 
   const handleSaveDraft = () => {
-    Alert.alert('Draft Saved', 'Your application has been saved as a draft.');
+    AlertService.success('Application saved as draft successfully!');
   };
 
   const handleScheduleSend = () => {
@@ -90,8 +72,8 @@ John Smith`);
       'Schedule Send',
       'Choose when to send your application:',
       [
-        { text: 'In 1 hour', onPress: () => Alert.alert('Scheduled', 'Application will be sent in 1 hour.') },
-        { text: 'Tomorrow at 9 AM', onPress: () => Alert.alert('Scheduled', 'Application will be sent tomorrow at 9 AM.') },
+        { text: 'In 1 hour', onPress: () => AlertService.success('Application will be sent in 1 hour.') },
+        { text: 'Tomorrow at 9 AM', onPress: () => AlertService.success('Application will be sent tomorrow at 9 AM.') },
         { text: 'Cancel', style: 'cancel' }
       ]
     );
@@ -185,16 +167,28 @@ John Smith`);
 
         {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.primaryButton} onPress={handleSendApplication}>
+          <TouchableOpacity 
+            style={styles.primaryButton} 
+            onPress={handleSendApplication}
+            activeOpacity={0.8}
+          >
             <Text style={styles.primaryButtonText}>Send Application</Text>
           </TouchableOpacity>
           
           <View style={styles.secondaryButtons}>
-            <TouchableOpacity style={styles.secondaryButton} onPress={handleSaveDraft}>
+            <TouchableOpacity 
+              style={styles.secondaryButton} 
+              onPress={handleSaveDraft}
+              activeOpacity={0.8}
+            >
               <Text style={styles.secondaryButtonText}>Save as Draft</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.secondaryButton} onPress={handleScheduleSend}>
+            <TouchableOpacity 
+              style={styles.secondaryButton} 
+              onPress={handleScheduleSend}
+              activeOpacity={0.8}
+            >
               <Text style={styles.secondaryButtonText}>Schedule Send</Text>
             </TouchableOpacity>
           </View>
@@ -321,17 +315,6 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
     fontStyle: 'italic',
     marginBottom: Layout.spacing.md,
-  },
-  emailBodyInput: {
-    backgroundColor: Colors.background.secondary,
-    borderRadius: Layout.borderRadius.md,
-    padding: Layout.spacing.md,
-    fontSize: Typography.fontSize.base,
-    color: Colors.text.primary,
-    borderWidth: 1,
-    borderColor: Colors.neutral.gray300,
-    textAlignVertical: 'top',
-    minHeight: 120,
   },
   actionButtons: {
     paddingHorizontal: Layout.spacing.lg,

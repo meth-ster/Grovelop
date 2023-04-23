@@ -6,12 +6,12 @@ import {
   ScrollView,
   TouchableOpacity,
   Dimensions,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/useAuthStore';
-import { AlertTest } from '../../components/AlertTest';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import Layout from '../../constants/Layout';
@@ -22,7 +22,7 @@ const gridItemSize = (screenWidth - Layout.spacing.lg * 4) / 3;
 interface GridItem {
   id: string;
   title: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: keyof typeof Ionicons.glyphMap | 'logo';
   route?: string;
   color: string;
   backgroundColor: string;
@@ -67,15 +67,15 @@ export default function HomeScreen() {
       title: 'Job Offers\n& Apply',
       icon: 'briefcase',
       route: 'jobs',
-      color: Colors.text.inverse,
-      backgroundColor: Colors.primary.navyBlue,
+      color: Colors.text.primary,
+      backgroundColor: Colors.primary.goldenYellow,
     },
     {
       id: 'grovelop-logo',
       title: 'Grovelop',
-      icon: 'diamond',
-      color: Colors.text.primary,
-      backgroundColor: Colors.primary.goldenYellow,
+      icon: 'logo',
+      color: Colors.text.inverse,
+      backgroundColor: Colors.primary.navyBlue,
       action: () => {
         // Maybe show app info or achievements
       },
@@ -154,7 +154,15 @@ export default function HomeScreen() {
       }}
       activeOpacity={0.8}
     >
-      <Ionicons name={item.icon} size={32} color={item.color} />
+      {item.icon === 'logo' ? (
+        <Image 
+          source={require('../../assets/images/logo.png')} 
+          style={styles.logoImage}
+          resizeMode="contain"
+        />
+      ) : (
+        <Ionicons name={item.icon} size={32} color={item.color} />
+      )}
       <Text style={[styles.gridItemText, { color: item.color }]}>
         {item.title}
       </Text>
@@ -170,12 +178,12 @@ export default function HomeScreen() {
             <Text style={styles.welcomeText}>
               Welcome back, {user?.name || 'User'}!
             </Text>
-            <Text style={styles.subtitleText}>
+            {/* <Text style={styles.subtitleText}>
               {user?.archetype?.primary 
                 ? `Your archetype: ${user.archetype.primary.charAt(0).toUpperCase() + user.archetype.primary.slice(1)}`
                 : 'Ready to explore your potential?'
               }
-            </Text>
+            </Text> */}
           </View>
           <TouchableOpacity style={styles.notificationButton}>
             <Ionicons name="notifications-outline" size={24} color={Colors.text.primary} />
@@ -183,7 +191,7 @@ export default function HomeScreen() {
         </View>
 
         {/* Daily Insight Card */}
-        {user?.archetype && (
+        {/* {user?.archetype && (
           <View style={styles.insightCard}>
             <View style={styles.insightHeader}>
               <Ionicons name="bulb" size={20} color={Colors.primary.goldenYellow} />
@@ -195,32 +203,13 @@ export default function HomeScreen() {
               requires deep thinking and problem-solving.
             </Text>
           </View>
-        )}
+        )} */}
 
         {/* Main Grid */}
         <View style={styles.gridContainer}>
           <Text style={styles.sectionTitle}>Your Career Dashboard</Text>
           <View style={styles.grid}>
             {gridItems.map(renderGridItem)}
-          </View>
-        </View>
-
-        {/* Quick Stats */}
-        <View style={styles.statsContainer}>
-          <Text style={styles.sectionTitle}>Your Progress</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>12</Text>
-              <Text style={styles.statLabel}>Activities Completed</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>5</Text>
-              <Text style={styles.statLabel}>Job Applications</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>3</Text>
-              <Text style={styles.statLabel}>Skills Improved</Text>
-            </View>
           </View>
         </View>
 
@@ -256,12 +245,6 @@ export default function HomeScreen() {
               </View>
             </View>
           </View>
-        </View>
-
-        {/* Alert Test Section - Remove this after testing */}
-        <View style={styles.recentSection}>
-          <Text style={styles.sectionTitle}>Alert Test (Development Only)</Text>
-          <AlertTest />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -354,6 +337,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: Layout.spacing.sm,
     lineHeight: Typography.lineHeight.tight * Typography.fontSize.xs,
+  },
+  logoImage: {
+    width: 60,
+    height: 60,
   },
   statsContainer: {
     paddingHorizontal: Layout.spacing.lg,
