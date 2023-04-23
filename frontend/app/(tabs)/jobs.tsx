@@ -100,25 +100,49 @@ export default function JobsScreen() {
   });
 
   const handleSaveJob = (jobId: string) => {
-    setJobs(jobs.map(job => 
-      job.id === jobId ? { ...job, saved: !job.saved } : job
-    ));
+    const updatedJobs = jobs.map(job => {
+      if (job.id === jobId) {
+        const newSavedState = !job.saved;
+        // Show feedback
+        Alert.alert(
+          newSavedState ? 'Job Saved!' : 'Job Removed',
+          newSavedState ? 'This job has been added to your saved jobs.' : 'This job has been removed from your saved jobs.',
+          [{ text: 'OK' }]
+        );
+        return { ...job, saved: newSavedState };
+      }
+      return job;
+    });
+    setJobs(updatedJobs);
   };
 
   const handleApplyJob = (jobId: string) => {
+    const job = jobs.find(j => j.id === jobId);
+    if (!job) return;
+    
     Alert.alert(
-      'Apply for Position',
-      'This will redirect you to the application process. Continue?',
+      `Apply for ${job.title}`,
+      `You are about to apply for the ${job.title} position at ${job.company}. This will mark the job as applied and prepare your application materials.`,
       [
         { text: 'Cancel', style: 'cancel' },
         { 
-          text: 'Apply', 
+          text: 'Apply Now', 
           onPress: () => {
-            setJobs(jobs.map(job => 
-              job.id === jobId ? { ...job, applied: true } : job
+            setJobs(jobs.map(currentJob => 
+              currentJob.id === jobId ? { ...currentJob, applied: true } : currentJob
             ));
-            Alert.alert('Success', 'Application submitted successfully!');
-          }
+            
+            // Show success with next steps
+            Alert.alert(
+              'Application Submitted!',
+              `Your application for ${job.title} at ${job.company} has been submitted successfully. You can track your application status in the Applications section.`,
+              [
+                { text: 'View Applications', onPress: () => console.log('Navigate to applications') },
+                { text: 'OK' }
+              ]
+            );
+          },
+          style: 'default'
         },
       ]
     );
