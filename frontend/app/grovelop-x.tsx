@@ -166,6 +166,81 @@ export default function GrovelopXScreen() {
     return num.toString();
   };
 
+  const handleLikePost = (postId: string) => {
+    const isLiked = likedPosts.has(postId);
+    const newLikedPosts = new Set(likedPosts);
+    
+    if (isLiked) {
+      newLikedPosts.delete(postId);
+    } else {
+      newLikedPosts.add(postId);
+    }
+    
+    setLikedPosts(newLikedPosts);
+    
+    // Update post engagement count
+    setPosts(posts.map(post => 
+      post.id === postId 
+        ? { ...post, engagement: { ...post.engagement, likes: post.engagement.likes + (isLiked ? -1 : 1) } }
+        : post
+    ));
+  };
+
+  const handleRetweetPost = (postId: string) => {
+    const isRetweeted = retweetedPosts.has(postId);
+    const newRetweetedPosts = new Set(retweetedPosts);
+    
+    if (isRetweeted) {
+      newRetweetedPosts.delete(postId);
+    } else {
+      newRetweetedPosts.add(postId);
+    }
+    
+    setRetweetedPosts(newRetweetedPosts);
+    
+    // Update post engagement count
+    setPosts(posts.map(post => 
+      post.id === postId 
+        ? { ...post, engagement: { ...post.engagement, retweets: post.engagement.retweets + (isRetweeted ? -1 : 1) } }
+        : post
+    ));
+
+    // Show feedback
+    Alert.alert(
+      isRetweeted ? 'Retweet Removed' : 'Retweet Shared!',
+      isRetweeted ? 'Post removed from your profile.' : 'Post shared to your professional network.',
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handleBookmarkPost = (postId: string) => {
+    const isBookmarked = bookmarkedPosts.has(postId);
+    const newBookmarkedPosts = new Set(bookmarkedPosts);
+    
+    if (isBookmarked) {
+      newBookmarkedPosts.delete(postId);
+    } else {
+      newBookmarkedPosts.add(postId);
+    }
+    
+    setBookmarkedPosts(newBookmarkedPosts);
+
+    // Show feedback
+    Alert.alert(
+      isBookmarked ? 'Bookmark Removed' : 'Post Bookmarked!',
+      isBookmarked ? 'Post removed from your bookmarks.' : 'Post saved to your bookmarks for later reading.',
+      [{ text: 'OK' }]
+    );
+  };
+
+  const handleCommentPost = (postId: string) => {
+    Alert.alert(
+      'Add Comment',
+      'Comment feature coming soon! You\'ll be able to engage in professional discussions.',
+      [{ text: 'OK' }]
+    );
+  };
+
   const renderPost = ({ item: post }: { item: Post }) => (
     <View style={styles.postCard}>
       {/* Post Header */}
