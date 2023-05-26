@@ -1023,6 +1023,8 @@ export default function ActivityPadScreen() {
   const [questionResponses, setQuestionResponses] = useState<{ [key: string]: string }>({});
   const [completedQuestions, setCompletedQuestions] = useState<{ [key: string]: boolean }>({});
   const [savedPortfolioItems, setSavedPortfolioItems] = useState<PortfolioItem[]>(mockPortfolioItems);
+  const [userActivities, setUserActivities] = useState<Activity[]>(mockActivities);
+  const [currentActivityId, setCurrentActivityId] = useState<string>('2');
   const autoSaveInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Auto-save functionality
@@ -1181,6 +1183,9 @@ export default function ActivityPadScreen() {
       [questionId]: true
     }));
     
+    // Update activity progress and save to user activities
+    updateActivityProgress();
+    
     Alert.alert(
       'Question Completed!',
       'Your response has been saved to My Activities.',
@@ -1188,15 +1193,80 @@ export default function ActivityPadScreen() {
     );
   };
 
+  const updateActivityProgress = () => {
+    const currentActivity = userActivities.find(activity => activity.id === currentActivityId);
+    if (!currentActivity) return;
+
+    // Calculate total questions for the activity
+    const totalQuestions = currentActivity.phases?.reduce((total, phase) => {
+      return total + phase.steps.reduce((stepTotal, step) => {
+        return stepTotal + step.guidingQuestions.length;
+      }, 0);
+    }, 0) || 0;
+
+    // Count completed questions for this activity
+    const completedCount = Object.keys(completedQuestions).filter(questionId => {
+      // Check if this question belongs to the current activity
+      return questionId.includes(currentActivityId) && completedQuestions[questionId];
+    }).length;
+
+    const newProgress = totalQuestions > 0 ? Math.round((completedCount / totalQuestions) * 100) : 0;
+    
+    // Update the activity in userActivities
+    setUserActivities(prev => prev.map(activity => {
+      if (activity.id === currentActivityId) {
+        return {
+          ...activity,
+          progress: newProgress,
+          status: newProgress === 100 ? 'completed' : 'in_progress',
+          completedAt: newProgress === 100 ? new Date().toISOString() : undefined
+        };
+      }
+      return activity;
+    }));
+  };
+
+  const getCurrentActivity = (): Activity => {
+    return userActivities.find(activity => activity.id === currentActivityId) || mockCurrentActivity;
+  };
+
+  const handleStartActivity = (activityId: string) => {
+    setCurrentActivityId(activityId);
+    setActiveTab('activity-pad');
+  };
+
+  const handleContinueActivity = (activityId: string) => {
+    setCurrentActivityId(activityId);
+    setActiveTab('activity-pad');
+    
+    // Load existing responses for this activity
+    loadActivityResponses(activityId);
+  };
+
+  const loadActivityResponses = (activityId: string) => {
+    // In a real app, this would load from storage/backend
+    // For now, we'll simulate loading existing responses
+    const activity = userActivities.find(a => a.id === activityId);
+    if (activity) {
+      // Load any existing responses for this activity
+      // This would typically come from a database or local storage
+      console.log(`Loading responses for activity ${activityId}`);
+    }
+  };
+
 
   const renderMyActivities = () => (
     <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Completed Activities</Text>
-        {mockActivities
+        {userActivities
           .filter(activity => activity.status === 'completed')
           .map(activity => (
-            <View key={activity.id} style={styles.activityCard}>
+            <TouchableOpacity 
+              key={activity.id} 
+              style={styles.activityCard}
+              onPress={() => handleContinueActivity(activity.id)}
+            >
               <View style={styles.activityHeader}>
                 <View style={styles.activityInfo}>
                   <Text style={styles.activityTitle}>{activity.title.description}</Text>
@@ -1217,16 +1287,20 @@ export default function ActivityPadScreen() {
                   </View>
                 ))}
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>In Progress</Text>
-        {mockActivities
+        {userActivities
           .filter(activity => activity.status === 'in_progress')
           .map(activity => (
-            <View key={activity.id} style={styles.activityCard}>
+            <TouchableOpacity 
+              key={activity.id} 
+              style={styles.activityCard}
+              onPress={() => handleContinueActivity(activity.id)}
+            >
               <View style={styles.activityHeader}>
                 <View style={styles.activityInfo}>
                   <Text style={styles.activityTitle}>{activity.title.description}</Text>
@@ -1243,16 +1317,23 @@ export default function ActivityPadScreen() {
                 <Text style={styles.metaText}>Started: {activity.createdAt}</Text>
                 <Text style={styles.metaText}>Remaining: {activity.duration.total}</Text>
               </View>
-            </View>
+              <View style={styles.continueButtonContainer}>
+                <Text style={styles.continueButtonText}>Tap to continue →</Text>
+              </View>
+            </TouchableOpacity>
           ))}
       </View>
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Not Started</Text>
-        {mockActivities
+        {userActivities
           .filter(activity => activity.status === 'not_started')
           .map(activity => (
-            <View key={activity.id} style={styles.activityCard}>
+            <TouchableOpacity 
+              key={activity.id} 
+              style={styles.activityCard}
+              onPress={() => handleStartActivity(activity.id)}
+            >
               <View style={styles.activityHeader}>
                 <View style={styles.activityInfo}>
                   <Text style={styles.activityTitle}>{activity.title.description}</Text>
@@ -1266,74 +1347,77 @@ export default function ActivityPadScreen() {
                 <Text style={styles.metaText}>Estimated: {activity.duration.total}</Text>
                 <Text style={styles.metaText}>Phases: {activity.duration.phases}</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           ))}
       </View>
     </ScrollView>
   );
 
-  const renderActivityPad = () => (
-    <View style={styles.activityPadContainer}>
-      {/* Fixed Progress Bar */}
-      <View style={styles.fixedProgressBar}>
-        <View style={styles.progressContainer}>
-          <Text style={styles.fixedProgressText}>
-            Systems Analysis for Customer Retention Strategy
-          </Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${mockCurrentActivity.progress}%` }]} />
-          </View>
-          <Text style={styles.fixedProgressPercentage}>{mockCurrentActivity.progress}% Complete</Text>
-        </View>
-      </View>
-
-      <ScrollView style={[styles.tabContent, styles.scrollViewWithFixedBar]} showsVerticalScrollIndicator={false}>
-        <View style={styles.currentActivityCard}>
-        <View style={styles.activityHeader}>
-          <View style={styles.activityInfo}>
-            <Text style={styles.currentActivityTitle}>Systems Analysis for Customer Retention Strategy</Text>
-            <Text style={styles.currentActivityDescription}>{mockCurrentActivity.title.description}</Text>
-          </View>
-          <View style={styles.difficultyBadge}>
-            <Text style={styles.difficultyText}>Advanced</Text>
+  const renderActivityPad = () => {
+    const currentActivity = getCurrentActivity();
+    
+    return (
+      <View style={styles.activityPadContainer}>
+        {/* Fixed Progress Bar */}
+        <View style={styles.fixedProgressBar}>
+          <View style={styles.progressContainer}>
+            <Text style={styles.fixedProgressText}>
+              {currentActivity.title.description}
+            </Text>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${currentActivity.progress}%` }]} />
+            </View>
+            <Text style={styles.fixedProgressPercentage}>{currentActivity.progress}% Complete</Text>
           </View>
         </View>
 
-        <View style={styles.progressSection}>
-          <View style={styles.progressInfo}>
-            <Text style={styles.progressLabel}>Progress</Text>
-            <Text style={styles.progressPercentage}>{mockCurrentActivity.progress}%</Text>
+        <ScrollView style={[styles.tabContent, styles.scrollViewWithFixedBar]} showsVerticalScrollIndicator={false}>
+          <View style={styles.currentActivityCard}>
+          <View style={styles.activityHeader}>
+            <View style={styles.activityInfo}>
+              <Text style={styles.currentActivityTitle}>{currentActivity.title.description}</Text>
+              <Text style={styles.currentActivityDescription}>{currentActivity.title.description}</Text>
+            </View>
+            <View style={styles.difficultyBadge}>
+              <Text style={styles.difficultyText}>Advanced</Text>
+            </View>
           </View>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${mockCurrentActivity.progress}%` }]} />
-          </View>
-        </View>
 
-        <View style={styles.skillsContainer}>
-          <Text style={styles.skillsLabel}>Skills Being Developed:</Text>
-          <View style={styles.skillsRow}>
-            {mockCurrentActivity.title.skillFocus.map((skill, index) => (
-              <View key={index} style={styles.skillTag}>
-                <Text style={styles.skillText}>{skill}</Text>
-              </View>
-            ))}
+          <View style={styles.progressSection}>
+            <View style={styles.progressInfo}>
+              <Text style={styles.progressLabel}>Progress</Text>
+              <Text style={styles.progressPercentage}>{currentActivity.progress}%</Text>
+            </View>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressFill, { width: `${currentActivity.progress}%` }]} />
+            </View>
           </View>
-        </View>
 
-        <View style={styles.activityMeta}>
-          <View style={styles.metaItem}>
-            <Ionicons name="time-outline" size={16} color={Colors.text.secondary} />
-            <Text style={styles.metaText}>{mockCurrentActivity.duration.total}</Text>
+          <View style={styles.skillsContainer}>
+            <Text style={styles.skillsLabel}>Skills Being Developed:</Text>
+            <View style={styles.skillsRow}>
+              {currentActivity.title.skillFocus.map((skill, index) => (
+                <View key={index} style={styles.skillTag}>
+                  <Text style={styles.skillText}>{skill}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-          <View style={styles.metaItem}>
-            <Ionicons name="calendar-outline" size={16} color={Colors.text.secondary} />
-            <Text style={styles.metaText}>Started {mockCurrentActivity.createdAt}</Text>
-          </View>
-        </View>
 
-        <View style={styles.phasesSection}>
-          <Text style={styles.phasesTitle}>Activity Phases</Text>
-          {mockCurrentActivity.phases?.map((phase, phaseIndex) => (
+          <View style={styles.activityMeta}>
+            <View style={styles.metaItem}>
+              <Ionicons name="time-outline" size={16} color={Colors.text.secondary} />
+              <Text style={styles.metaText}>{currentActivity.duration.total}</Text>
+            </View>
+            <View style={styles.metaItem}>
+              <Ionicons name="calendar-outline" size={16} color={Colors.text.secondary} />
+              <Text style={styles.metaText}>Started {currentActivity.createdAt}</Text>
+            </View>
+          </View>
+
+          <View style={styles.phasesSection}>
+            <Text style={styles.phasesTitle}>Activity Phases</Text>
+            {currentActivity.phases?.map((phase, phaseIndex) => (
             <View key={phase.id} style={styles.phaseCard}>
               <TouchableOpacity 
                 style={styles.phaseHeader}
@@ -1392,7 +1476,7 @@ export default function ActivityPadScreen() {
                           <View style={styles.questionsSectionNew}>
                             <Text style={styles.sectionLabelNew}>Guiding Questions:</Text>
                             {step.guidingQuestions.map((question, questionIndex) => {
-                              const questionId = `${phase.id}-${step.id}-${questionIndex}`;
+                              const questionId = `${currentActivityId}-${phase.id}-${step.id}-${questionIndex}`;
                               const currentResponse = questionResponses[questionId] || '';
                               const isCompleted = completedQuestions[questionId];
                               
@@ -1435,10 +1519,10 @@ export default function ActivityPadScreen() {
           ))}
         </View>
 
-        {mockCurrentActivity.resources && mockCurrentActivity.resources.readingMaterials.length > 0 && (
+        {currentActivity.resources && currentActivity.resources.readingMaterials.length > 0 && (
           <View style={styles.resourcesSection}>
             <Text style={styles.resourcesTitle}>Resources</Text>
-            {mockCurrentActivity.resources.readingMaterials.map((resource) => (
+            {currentActivity.resources.readingMaterials.map((resource) => (
               <View key={resource.id} style={styles.resourceCard}>
                 <View style={styles.resourceHeader}>
                   <Text style={styles.resourceTitle}>{resource.title}</Text>
@@ -1458,10 +1542,10 @@ export default function ActivityPadScreen() {
           </View>
         )}
 
-        {mockCurrentActivity.followUpTasks && mockCurrentActivity.followUpTasks.length > 0 && (
+        {currentActivity.followUpTasks && currentActivity.followUpTasks.length > 0 && (
           <View style={styles.followUpSection}>
             <Text style={styles.followUpTitle}>Follow-up Tasks</Text>
-            {mockCurrentActivity.followUpTasks.map((task) => (
+            {currentActivity.followUpTasks.map((task) => (
               <View key={task.id} style={styles.followUpCard}>
                 <View style={styles.followUpHeader}>
                   <Text style={styles.followUpCategory}>{task.category}</Text>
@@ -1495,6 +1579,7 @@ export default function ActivityPadScreen() {
       </ScrollView>
     </View>
   );
+  };
 
   const renderPortfolioItems = () => (
     <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
@@ -1628,7 +1713,7 @@ export default function ActivityPadScreen() {
             <Text style={styles.contentSelectionTitle}>Response Review & Selection</Text>
             <Text style={styles.contentSelectionSubtitle}>Select responses to include in your portfolio piece:</Text>
             
-            {mockCurrentActivity.phases?.map((phase, phaseIndex) => {
+            {getCurrentActivity().phases?.map((phase, phaseIndex) => {
               // Map phase titles to match the exact requirements
               const phaseDisplayNames = [
                 'Foundation Analysis',
@@ -2592,9 +2677,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.neutral.gray300,
   },
   continueButtonText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.text.inverse,
+    fontSize: Typography.fontSize.sm,
+    color: Colors.primary.navyBlue,
+    fontWeight: Typography.fontWeight.medium,
   },
   // AI Generation styles
   aiGenerationOverlay: {
@@ -2900,5 +2985,9 @@ const styles = StyleSheet.create({
   },
   scrollViewWithFixedBar: {
     paddingTop: 80, // Account for fixed progress bar height
+  },
+  continueButtonContainer: {
+    marginTop: Layout.spacing.sm,
+    alignItems: 'center',
   },
 });
