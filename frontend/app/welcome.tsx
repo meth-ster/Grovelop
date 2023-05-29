@@ -228,19 +228,6 @@ export default function WelcomeScreen() {
               🎉 Start your 12-hour free trial and discover your career potential!
             </Text>
           </View>
-
-          {/* Direct Dashboard Access for Testing */}
-          <View style={styles.testSection}>
-            <TouchableOpacity
-              style={styles.testButton}
-              onPress={() => {
-                console.log('Direct dashboard access button clicked');
-                router.push('/(tabs)/home');
-              }}
-            >
-              <Text style={styles.testButtonText}>🧪 Test: Go to Dashboard Directly</Text>
-            </TouchableOpacity>
-          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
