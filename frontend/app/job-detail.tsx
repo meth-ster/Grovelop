@@ -15,41 +15,53 @@ import Typography from '../constants/Typography';
 import Layout from '../constants/Layout';
 import { JobListing } from '../types';
 
-// Mock job data for detail view
-const mockJobDetail: JobListing = {
+// Enhanced job data for detail view with all required components
+const mockJobDetail: JobListing & {
+  companyIntelligence: {
+    size: string;
+    culture: string;
+    recentNews: string;
+    values: string;
+  };
+  benefits: string[];
+  successProbability: number;
+} = {
   id: '1',
-  title: 'Senior Product Manager',
-  company: 'TechCorp Solutions',
-  location: 'San Francisco, CA',
+  title: 'Senior Data Analyst',
+  company: 'TechCorp',
+  location: 'San Francisco, CA (Remote friendly)',
   type: 'full-time',
-  salary: { min: 120000, max: 160000, currency: 'USD' },
-  description: `We are seeking an experienced Senior Product Manager to join our dynamic team and lead the development of our flagship SaaS platform. In this role, you will be responsible for defining product strategy, working closely with engineering and design teams, and ensuring that our products meet the evolving needs of our customers.
-
-Key Responsibilities:
-• Define and execute product roadmap aligned with business objectives
-• Collaborate with cross-functional teams including engineering, design, marketing, and sales
-• Conduct market research and competitive analysis
-• Gather and prioritize product requirements from stakeholders
-• Analyze product performance metrics and user feedback
-• Lead product launches and go-to-market strategies
-• Mentor junior product team members
-
-About TechCorp Solutions:
-We are a fast-growing SaaS company focused on providing innovative solutions for enterprise customers. Our culture values collaboration, innovation, and continuous learning. We offer competitive compensation, comprehensive benefits, and opportunities for professional growth.`,
+  salary: { min: 90000, max: 120000, currency: 'USD' },
+  description: `We are seeking an experienced Senior Data Analyst to join our analytics team and drive data-driven insights across our platform. You'll work with cutting-edge tools to analyze user behavior, market trends, and business performance.`,
   requirements: [
-    '5+ years of product management experience in B2B SaaS',
-    'Strong analytical and problem-solving skills',
-    'Excellent written and verbal communication skills',
-    'Experience with Agile development methodologies',
-    'Bachelor\'s degree in Business, Engineering, or related field',
-    'MBA preferred but not required'
+    '3+ years of data analysis experience',
+    'Proficiency in SQL and Python/R',
+    'Experience with data visualization tools (Tableau, Power BI)',
+    'Statistical analysis and modeling skills',
+    'Bachelor\'s degree in Data Science, Statistics, or related field',
+    'Experience with cloud platforms (AWS, GCP) preferred'
   ],
-  skills: ['Product Strategy', 'Data Analysis', 'Leadership', 'Agile', 'Market Research', 'User Experience'],
+  skills: ['Data Analysis', 'SQL', 'Python', 'Statistics', 'Tableau', 'Machine Learning'],
   postedAt: '2024-01-15',
   applicationDeadline: '2024-02-15',
-  matchScore: 92,
+  matchScore: 87,
+  successProbability: 87,
   saved: false,
   applied: false,
+  companyIntelligence: {
+    size: '500-1000 employees',
+    culture: 'Innovation-focused, data-driven decision making',
+    recentNews: 'Expanding analytics team by 40%',
+    values: 'Excellence, collaboration, continuous learning'
+  },
+  benefits: [
+    'Health, dental, and vision insurance',
+    'Flexible work arrangements',
+    'Professional development budget',
+    '401(k) with company matching',
+    'Unlimited PTO policy',
+    'Stock options'
+  ]
 };
 
 export default function JobDetailScreen() {
