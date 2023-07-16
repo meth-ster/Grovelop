@@ -192,6 +192,17 @@ export default function WelcomeScreen() {
                   {authMode === 'login' ? 'Sign In' : 'Create Account'}
                 </Text>
               </TouchableOpacity>
+
+              {/* Direct Dashboard Test Button */}
+              <TouchableOpacity
+                style={[styles.primaryButton, { backgroundColor: Colors.success, marginTop: Layout.spacing.md }]}
+                onPress={() => {
+                  console.log('Direct dashboard button clicked');
+                  router.push('/(tabs)/home');
+                }}
+              >
+                <Text style={styles.primaryButtonText}>🧪 Skip to Dashboard (Test)</Text>
+              </TouchableOpacity>
             </View>
 
             {/* Auth Mode Toggle */}
