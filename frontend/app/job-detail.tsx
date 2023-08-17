@@ -168,17 +168,29 @@ export default function JobDetailScreen() {
           </View>
         )}
 
-        {/* Quick Actions */}
-        <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.actionButton} onPress={handleSave}>
+        {/* Action Buttons as specified in PDF */}
+        <View style={styles.actionButtons}>
+          <TouchableOpacity style={styles.secondaryActionButton} onPress={handleSave}>
             <Ionicons name="bookmark-outline" size={20} color={Colors.primary.navyBlue} />
-            <Text style={styles.actionButtonText}>Save</Text>
+            <Text style={styles.secondaryActionText}>Save Job</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionButton, styles.primaryAction]} onPress={handleApply}>
-            <Ionicons name="send" size={20} color={Colors.text.inverse} />
-            <Text style={[styles.actionButtonText, styles.primaryActionText]}>Apply Now</Text>
+          <TouchableOpacity style={styles.secondaryActionButton} onPress={() => {
+            Alert.alert('Message Employer', 'Direct messaging feature coming soon!');
+          }}>
+            <Ionicons name="mail-outline" size={20} color={Colors.primary.navyBlue} />
+            <Text style={styles.secondaryActionText}>Message Employer</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity style={styles.primaryActionButton} onPress={() => {
+          router.push({
+            pathname: '/document-setup',
+            params: { jobId: job.id, jobTitle: job.title, company: job.company }
+          });
+        }}>
+          <Text style={styles.primaryActionButtonText}>Create Tailored Application</Text>
+          <Ionicons name="arrow-forward" size={20} color={Colors.text.inverse} />
+        </TouchableOpacity>
 
         {/* Job Description - Expandable */}
         <View style={styles.section}>
