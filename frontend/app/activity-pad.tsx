@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   TextInput,
   Dimensions,
   Image,
+  Alert,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -33,6 +35,73 @@ interface Activity {
   skills: string[];
   createdAt: string;
   completedAt?: string;
+  phases?: Phase[];
+  resources?: Resource[];
+  followUpTasks?: FollowUpTask[];
+}
+
+interface Phase {
+  id: string;
+  title: string;
+  duration: string;
+  steps: Step[];
+}
+
+interface Step {
+  id: string;
+  title: string;
+  duration: string;
+  focus: string;
+  readingMaterial?: ReadingMaterial;
+  guidingQuestions: string[];
+}
+
+interface ReadingMaterial {
+  title: string;
+  author: string;
+  url: string;
+  type: string;
+  verified: string;
+  keyQuote: string;
+}
+
+interface Resource {
+  id: string;
+  title: string;
+  author: string;
+  url: string;
+  type: string;
+  verified: string;
+  accessType: string;
+  description: string;
+  relevance: string;
+}
+
+interface FollowUpTask {
+  id: string;
+  category: string;
+  description: string;
+  estimatedDuration: string;
+  complexity: string;
+}
+
+interface ActivityResponse {
+  stepId: string;
+  questionIndex: number;
+  response: string;
+  wordCount: number;
+  timestamp: string;
+}
+
+interface PortfolioItemDraft {
+  id: string;
+  title: string;
+  description: string;
+  type: 'resume' | 'cover_letter' | 'portfolio' | 'certificate';
+  selectedResponses: string[];
+  generatedContent: string;
+  isGenerating: boolean;
+  createdAt: string;
 }
 
 interface PortfolioItem {
@@ -60,15 +129,250 @@ const mockActivities: Activity[] = [
   },
   {
     id: '2',
-    title: 'Data Analysis for Business Decisions',
-    description: 'Learn to analyze complex datasets and extract actionable insights for business strategy.',
+    title: 'Teacher Professional Development Program Design',
+    description: 'Design a comprehensive teacher professional development program tailored to innovative pedagogy and social-emotional learning integration.',
     type: 'project',
     difficulty: 'advanced',
     status: 'in_progress',
-    progress: 60,
-    estimatedTime: '8 hours',
-    skills: ['Data Analysis', 'Statistics', 'Business Intelligence'],
+    progress: 25,
+    estimatedTime: '3.5 hours',
+    skills: ['Educational Leadership and Policy', 'Advanced Pedagogy and Andragogy', 'Teacher Professional Development Design', 'Community Engagement and Partnership Building'],
     createdAt: '2024-01-22',
+    phases: [
+      {
+        id: 'phase-1',
+        title: 'Orientation and Selection',
+        duration: '30 minutes',
+        steps: [
+          {
+            id: 'step-1',
+            title: 'Choosing Your PD Focus',
+            duration: '30 minutes',
+            focus: 'Identify a specific area for teacher PD that aligns with your vision for educational innovation and teacher passion.',
+            readingMaterial: {
+              title: 'Teacher professional learning and development',
+              author: 'Helen Timperley',
+              url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
+              type: 'PDF',
+              verified: 'Yes',
+              keyQuote: 'Professional learning opportunities that have little impact on student outcomes typically focus on mastery of specific teaching skills without checking whether the use of those skills has the desired effect on students. (Timperley, 2008, p. 8)'
+            },
+            guidingQuestions: [
+              'What specific topic or skill (e.g., integrating arts into curriculum or fostering student purpose) will you choose as the object for your teacher PD program to enhance professionalism and passion?',
+              'How does this chosen focus connect to valued student outcomes like excellence and justice in education, drawing on the principle of focusing on student needs from pages 8-9 of the reading?',
+              'Why is this topic meaningful for your goal of leading teacher development in a way that expands your influence?',
+              'What initial assumptions do you have about how this PD could ignite teacher passion, based on your experience?'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'phase-2',
+        title: 'Core Design Elements',
+        duration: '1 hour',
+        steps: [
+          {
+            id: 'step-2',
+            title: 'Structuring Content and Activities',
+            duration: '30 minutes',
+            focus: 'Develop the foundational content and learning activities for your PD program using evidence-based strategies.',
+            readingMaterial: {
+              title: 'Effective Teacher Professional Development',
+              author: 'Linda Darling-Hammond, Maria E. Hyler, Madelyn Gardner',
+              url: 'https://learningpolicyinstitute.org/sites/default/files/product-files/Effective_Teacher_Professional_Development_BRIEF.pdf',
+              type: 'PDF',
+              verified: 'Yes',
+              keyQuote: 'We define effective PD as structured professional learning that results in changes to teacher practices and improvements in student learning outcomes. (Darling-Hammond et al., 2017, p. 1)'
+            },
+            guidingQuestions: [
+              'For your selected PD topic, what key teaching strategies will you emphasize to promote innovation and excellence, using content focus principles from pages 1-2 of the reading?',
+              'How will you incorporate active learning elements, like hands-on practice with real classroom examples, to build teacher skills and purpose in their role?',
+              'What models or examples from your vision (e.g., peer lesson planning) can you include to demonstrate high standards, drawing on modeling features from pages 3-4?',
+              'How does this structure ensure the PD aligns with truth-seeking through evidence-based practices for your initiative?'
+            ]
+          },
+          {
+            id: 'step-3',
+            title: 'Incorporating Collaboration',
+            duration: '30 minutes',
+            focus: 'Plan collaborative aspects to foster community and equity in teacher learning.',
+            readingMaterial: {
+              title: 'An Integrative Approach to Professional Development to Support College- and Career-Readiness Standards',
+              author: 'Katie Pak, Laura M. Desimone, Arianna Parsons',
+              url: 'https://files.eric.ed.gov/fulltext/EJ1265332.pdf',
+              type: 'PDF',
+              verified: 'Yes',
+              keyQuote: 'District leaders agreed that the state\'s new CCR standards called for significant shifts in teacher practice... (Pak et al., 2020, p. 8)'
+            },
+            guidingQuestions: [
+              'How will you design collective participation in your PD, such as including diverse teachers and leaders, to promote justice and fairness from pages 9-11 of the reading?',
+              'What collaborative activities, like group discussions on equity challenges, will you include to support your goal of improving teacher passion?',
+              'In what ways can this collaboration expand your influence as a leader in teacher development?',
+              'How will you ensure the activities challenge teachers\' assumptions for meaningful growth, aligned with purpose?'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'phase-3',
+        title: 'Implementation Planning',
+        duration: '1 hour',
+        steps: [
+          {
+            id: 'step-4',
+            title: 'Support and Feedback Mechanisms',
+            duration: '30 minutes',
+            focus: 'Outline coaching, feedback, and reflection to sustain teacher engagement.',
+            readingMaterial: {
+              title: 'Effective Teacher Professional Development',
+              author: 'Linda Darling-Hammond, Maria E. Hyler, Madelyn Gardner',
+              url: 'https://learningpolicyinstitute.org/sites/default/files/product-files/Effective_Teacher_Professional_Development_BRIEF.pdf',
+              type: 'PDF',
+              verified: 'Yes',
+              keyQuote: 'In the process of making their work public and critiquing others, teachers learn how to make implicit rules and expectations explicit... (Darling-Hammond et al., 2017, p. 5)'
+            },
+            guidingQuestions: [
+              'For your PD program, what coaching or expert support will you provide to help teachers apply new skills, using feedback principles from pages 4-5 of the reading?',
+              'How will you build in reflection opportunities, like post-session journals, to reinforce excellence and innovation in teaching?',
+              'What role will this play in achieving your vision of passionate, professional teachers under your leadership?',
+              'How can these mechanisms address equity for all participants in your initiative?'
+            ]
+          },
+          {
+            id: 'step-5',
+            title: 'Sustainability Strategies',
+            duration: '30 minutes',
+            focus: 'Ensure long-term impact through ongoing opportunities and leadership.',
+            readingMaterial: {
+              title: 'Teacher professional learning and development',
+              author: 'Helen Timperley',
+              url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
+              type: 'PDF',
+              verified: 'Yes',
+              keyQuote: 'Change appears to be promoted by a cyclical process in which teachers have their current assumptions challenged... (Timperley, 2008, p. 18)'
+            },
+            guidingQuestions: [
+              'How will you structure sustained duration for your PD, such as follow-up sessions over months, drawing on principles from pages 15 and 24 of the reading?',
+              'What leadership actions will you take to maintain momentum and align with your purpose of systemic influence?',
+              'In what ways will this sustainability foster justice by supporting ongoing teacher growth?',
+              'How does this connect to your desire for expanding influence in educational leadership?'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'phase-4',
+        title: 'Summative Integration',
+        duration: '1 hour',
+        steps: [
+          {
+            id: 'step-6',
+            title: 'Evaluation and Refinement',
+            duration: '30 minutes',
+            focus: 'Create assessment tools to measure PD effectiveness and refine for future use.',
+            readingMaterial: {
+              title: 'An Integrative Approach to Professional Development to Support College- and Career-Readiness Standards',
+              author: 'Katie Pak, Laura M. Desimone, Arianna Parsons',
+              url: 'https://files.eric.ed.gov/fulltext/EJ1265332.pdf',
+              type: 'PDF',
+              verified: 'Yes',
+              keyQuote: 'By including general teachers in district-wide PD sessions for SWDs and ELs, district leaders described \'trying to get all of our teachers better informed\'... (Pak et al., 2020, p. 9)'
+            },
+            guidingQuestions: [
+              'What evaluation methods, like surveys on teacher passion or classroom observations, will you use for your PD, informed by sustained coherence from pages 12-14 of the reading?',
+              'How will you measure alignment with values like excellence and justice in outcomes?',
+              'What refinements based on feedback will enhance your leadership role?',
+              'How does this evaluation tie back to your chosen focus for overall impact?'
+            ]
+          },
+          {
+            id: 'step-7',
+            title: 'Final PD Plan Assembly',
+            duration: '30 minutes',
+            focus: 'Compile all elements into an actionable PD blueprint for implementation.',
+            readingMaterial: {
+              title: 'Teacher professional learning and development',
+              author: 'Helen Timperley',
+              url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
+              type: 'PDF',
+              verified: 'Yes',
+              keyQuote: 'Professional learning opportunities that have little impact on student outcomes typically focus on mastery of specific teaching skills... (Timperley, 2008, p. 8)'
+            },
+            guidingQuestions: [
+              'How will you integrate all phases into a cohesive PD plan document for your topic, ensuring it promotes purpose and innovation?',
+              'What key actionable steps emerge from this design to advance your goal of teacher professionalism?',
+              'In what ways does this plan position you as a leader expanding influence in your current phase?',
+              'Reflect: How does the final product align with your values of truth and fairness?'
+            ]
+          }
+        ]
+      }
+    ],
+    resources: [
+      {
+        id: 'resource-1',
+        title: 'Teacher professional learning and development',
+        author: 'Helen Timperley',
+        url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
+        type: 'PDF',
+        verified: 'Yes',
+        accessType: 'Direct free download',
+        description: 'A synthesis of research on effective PD principles focused on student outcomes and teacher inquiry.',
+        relevance: 'Provides evidence-based principles for designing PD that aligns with purpose, excellence, and justice, supporting systemic teacher growth.'
+      },
+      {
+        id: 'resource-2',
+        title: 'Effective Teacher Professional Development',
+        author: 'Linda Darling-Hammond, Maria E. Hyler, Madelyn Gardner',
+        url: 'https://learningpolicyinstitute.org/sites/default/files/product-files/Effective_Teacher_Professional_Development_BRIEF.pdf',
+        type: 'PDF',
+        verified: 'Yes',
+        accessType: 'Direct free download',
+        description: 'Research brief outlining seven features of effective PD based on rigorous studies.',
+        relevance: 'Offers practical frameworks for content, collaboration, and sustainability, integrating innovation and equity for leadership in teacher development.'
+      },
+      {
+        id: 'resource-3',
+        title: 'An Integrative Approach to Professional Development to Support College- and Career-Readiness Standards',
+        author: 'Katie Pak, Laura M. Desimone, Arianna Parsons',
+        url: 'https://files.eric.ed.gov/fulltext/EJ1265332.pdf',
+        type: 'PDF',
+        verified: 'Yes',
+        accessType: 'Direct free download',
+        description: 'Study on revised PD models for standards implementation, emphasizing collaboration and coherence.',
+        relevance: 'Connects PD design to equity and excellence, aiding in creating inclusive programs that expand influence.'
+      }
+    ],
+    followUpTasks: [
+      {
+        id: 'followup-1',
+        category: 'Implementation',
+        description: 'Pilot a small-scale version of your PD plan with 3-5 colleagues, gathering initial feedback on engagement and impact.',
+        estimatedDuration: '2 hours',
+        complexity: 'Medium'
+      },
+      {
+        id: 'followup-2',
+        category: 'Refinement',
+        description: 'Revise your PD plan based on pilot insights, focusing on enhancing elements of justice and innovation.',
+        estimatedDuration: '1 hour',
+        complexity: 'Low'
+      },
+      {
+        id: 'followup-3',
+        category: 'Networking',
+        description: 'Share your PD plan with a mentor or educational leader for advice on scaling it within your organization.',
+        estimatedDuration: '30 minutes',
+        complexity: 'Medium'
+      },
+      {
+        id: 'followup-4',
+        category: 'Application',
+        description: 'Integrate one key principle from the activity into an existing teacher meeting to test real-world influence.',
+        estimatedDuration: '1 hour',
+        complexity: 'Low'
+      }
+    ]
   },
   {
     id: '3',
@@ -110,38 +414,371 @@ const mockPortfolioItems: PortfolioItem[] = [
 
 const mockCurrentActivity: Activity = {
   id: '2',
-  title: 'Data Analysis for Business Decisions',
-  description: 'Learn to analyze complex datasets and extract actionable insights for business strategy.',
+  title: 'Teacher Professional Development Program Design',
+  description: 'Design a comprehensive teacher professional development program tailored to innovative pedagogy and social-emotional learning integration.',
   type: 'project',
   difficulty: 'advanced',
   status: 'in_progress',
-  progress: 60,
-  estimatedTime: '8 hours',
-  skills: ['Data Analysis', 'Statistics', 'Business Intelligence'],
+  progress: 25,
+  estimatedTime: '3.5 hours',
+  skills: ['Educational Leadership and Policy', 'Advanced Pedagogy and Andragogy', 'Teacher Professional Development Design', 'Community Engagement and Partnership Building'],
   createdAt: '2024-01-22',
+  phases: [
+    {
+      id: 'phase-1',
+      title: 'Orientation and Selection',
+      duration: '30 minutes',
+      steps: [
+        {
+          id: 'step-1',
+          title: 'Choosing Your PD Focus',
+          duration: '30 minutes',
+          focus: 'Identify a specific area for teacher PD that aligns with your vision for educational innovation and teacher passion.',
+          readingMaterial: {
+            title: 'Teacher professional learning and development',
+            author: 'Helen Timperley',
+            url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
+            type: 'PDF',
+            verified: 'Yes',
+            keyQuote: 'Professional learning opportunities that have little impact on student outcomes typically focus on mastery of specific teaching skills without checking whether the use of those skills has the desired effect on students. (Timperley, 2008, p. 8)'
+          },
+          guidingQuestions: [
+            'What specific topic or skill (e.g., integrating arts into curriculum or fostering student purpose) will you choose as the object for your teacher PD program to enhance professionalism and passion?',
+            'How does this chosen focus connect to valued student outcomes like excellence and justice in education, drawing on the principle of focusing on student needs from pages 8-9 of the reading?',
+            'Why is this topic meaningful for your goal of leading teacher development in a way that expands your influence?',
+            'What initial assumptions do you have about how this PD could ignite teacher passion, based on your experience?'
+          ]
+        }
+      ]
+    },
+    {
+      id: 'phase-2',
+      title: 'Core Design Elements',
+      duration: '1 hour',
+      steps: [
+        {
+          id: 'step-2',
+          title: 'Structuring Content and Activities',
+          duration: '30 minutes',
+          focus: 'Develop the foundational content and learning activities for your PD program using evidence-based strategies.',
+          readingMaterial: {
+            title: 'Effective Teacher Professional Development',
+            author: 'Linda Darling-Hammond, Maria E. Hyler, Madelyn Gardner',
+            url: 'https://learningpolicyinstitute.org/sites/default/files/product-files/Effective_Teacher_Professional_Development_BRIEF.pdf',
+            type: 'PDF',
+            verified: 'Yes',
+            keyQuote: 'We define effective PD as structured professional learning that results in changes to teacher practices and improvements in student learning outcomes. (Darling-Hammond et al., 2017, p. 1)'
+          },
+          guidingQuestions: [
+            'For your selected PD topic, what key teaching strategies will you emphasize to promote innovation and excellence, using content focus principles from pages 1-2 of the reading?',
+            'How will you incorporate active learning elements, like hands-on practice with real classroom examples, to build teacher skills and purpose in their role?',
+            'What models or examples from your vision (e.g., peer lesson planning) can you include to demonstrate high standards, drawing on modeling features from pages 3-4?',
+            'How does this structure ensure the PD aligns with truth-seeking through evidence-based practices for your initiative?'
+          ]
+        },
+        {
+          id: 'step-3',
+          title: 'Incorporating Collaboration',
+          duration: '30 minutes',
+          focus: 'Plan collaborative aspects to foster community and equity in teacher learning.',
+          readingMaterial: {
+            title: 'An Integrative Approach to Professional Development to Support College- and Career-Readiness Standards',
+            author: 'Katie Pak, Laura M. Desimone, Arianna Parsons',
+            url: 'https://files.eric.ed.gov/fulltext/EJ1265332.pdf',
+            type: 'PDF',
+            verified: 'Yes',
+            keyQuote: 'District leaders agreed that the state\'s new CCR standards called for significant shifts in teacher practice... (Pak et al., 2020, p. 8)'
+          },
+          guidingQuestions: [
+            'How will you design collective participation in your PD, such as including diverse teachers and leaders, to promote justice and fairness from pages 9-11 of the reading?',
+            'What collaborative activities, like group discussions on equity challenges, will you include to support your goal of improving teacher passion?',
+            'In what ways can this collaboration expand your influence as a leader in teacher development?',
+            'How will you ensure the activities challenge teachers\' assumptions for meaningful growth, aligned with purpose?'
+          ]
+        }
+      ]
+    },
+    {
+      id: 'phase-3',
+      title: 'Implementation Planning',
+      duration: '1 hour',
+      steps: [
+        {
+          id: 'step-4',
+          title: 'Support and Feedback Mechanisms',
+          duration: '30 minutes',
+          focus: 'Outline coaching, feedback, and reflection to sustain teacher engagement.',
+          readingMaterial: {
+            title: 'Effective Teacher Professional Development',
+            author: 'Linda Darling-Hammond, Maria E. Hyler, Madelyn Gardner',
+            url: 'https://learningpolicyinstitute.org/sites/default/files/product-files/Effective_Teacher_Professional_Development_BRIEF.pdf',
+            type: 'PDF',
+            verified: 'Yes',
+            keyQuote: 'In the process of making their work public and critiquing others, teachers learn how to make implicit rules and expectations explicit... (Darling-Hammond et al., 2017, p. 5)'
+          },
+          guidingQuestions: [
+            'For your PD program, what coaching or expert support will you provide to help teachers apply new skills, using feedback principles from pages 4-5 of the reading?',
+            'How will you build in reflection opportunities, like post-session journals, to reinforce excellence and innovation in teaching?',
+            'What role will this play in achieving your vision of passionate, professional teachers under your leadership?',
+            'How can these mechanisms address equity for all participants in your initiative?'
+          ]
+        },
+        {
+          id: 'step-5',
+          title: 'Sustainability Strategies',
+          duration: '30 minutes',
+          focus: 'Ensure long-term impact through ongoing opportunities and leadership.',
+          readingMaterial: {
+            title: 'Teacher professional learning and development',
+            author: 'Helen Timperley',
+            url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
+            type: 'PDF',
+            verified: 'Yes',
+            keyQuote: 'Change appears to be promoted by a cyclical process in which teachers have their current assumptions challenged... (Timperley, 2008, p. 18)'
+          },
+          guidingQuestions: [
+            'How will you structure sustained duration for your PD, such as follow-up sessions over months, drawing on principles from pages 15 and 24 of the reading?',
+            'What leadership actions will you take to maintain momentum and align with your purpose of systemic influence?',
+            'In what ways will this sustainability foster justice by supporting ongoing teacher growth?',
+            'How does this connect to your desire for expanding influence in educational leadership?'
+          ]
+        }
+      ]
+    },
+    {
+      id: 'phase-4',
+      title: 'Summative Integration',
+      duration: '1 hour',
+      steps: [
+        {
+          id: 'step-6',
+          title: 'Evaluation and Refinement',
+          duration: '30 minutes',
+          focus: 'Create assessment tools to measure PD effectiveness and refine for future use.',
+          readingMaterial: {
+            title: 'An Integrative Approach to Professional Development to Support College- and Career-Readiness Standards',
+            author: 'Katie Pak, Laura M. Desimone, Arianna Parsons',
+            url: 'https://files.eric.ed.gov/fulltext/EJ1265332.pdf',
+            type: 'PDF',
+            verified: 'Yes',
+            keyQuote: 'By including general teachers in district-wide PD sessions for SWDs and ELs, district leaders described \'trying to get all of our teachers better informed\'... (Pak et al., 2020, p. 9)'
+          },
+          guidingQuestions: [
+            'What evaluation methods, like surveys on teacher passion or classroom observations, will you use for your PD, informed by sustained coherence from pages 12-14 of the reading?',
+            'How will you measure alignment with values like excellence and justice in outcomes?',
+            'What refinements based on feedback will enhance your leadership role?',
+            'How does this evaluation tie back to your chosen focus for overall impact?'
+          ]
+        },
+        {
+          id: 'step-7',
+          title: 'Final PD Plan Assembly',
+          duration: '30 minutes',
+          focus: 'Compile all elements into an actionable PD blueprint for implementation.',
+          readingMaterial: {
+            title: 'Teacher professional learning and development',
+            author: 'Helen Timperley',
+            url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
+            type: 'PDF',
+            verified: 'Yes',
+            keyQuote: 'Professional learning opportunities that have little impact on student outcomes typically focus on mastery of specific teaching skills... (Timperley, 2008, p. 8)'
+          },
+          guidingQuestions: [
+            'How will you integrate all phases into a cohesive PD plan document for your topic, ensuring it promotes purpose and innovation?',
+            'What key actionable steps emerge from this design to advance your goal of teacher professionalism?',
+            'In what ways does this plan position you as a leader expanding influence in your current phase?',
+            'Reflect: How does the final product align with your values of truth and fairness?'
+          ]
+        }
+      ]
+    }
+  ],
+  resources: [
+    {
+      id: 'resource-1',
+      title: 'Teacher professional learning and development',
+      author: 'Helen Timperley',
+      url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
+      type: 'PDF',
+      verified: 'Yes',
+      accessType: 'Direct free download',
+      description: 'A synthesis of research on effective PD principles focused on student outcomes and teacher inquiry.',
+      relevance: 'Provides evidence-based principles for designing PD that aligns with purpose, excellence, and justice, supporting systemic teacher growth.'
+    },
+    {
+      id: 'resource-2',
+      title: 'Effective Teacher Professional Development',
+      author: 'Linda Darling-Hammond, Maria E. Hyler, Madelyn Gardner',
+      url: 'https://learningpolicyinstitute.org/sites/default/files/product-files/Effective_Teacher_Professional_Development_BRIEF.pdf',
+      type: 'PDF',
+      verified: 'Yes',
+      accessType: 'Direct free download',
+      description: 'Research brief outlining seven features of effective PD based on rigorous studies.',
+      relevance: 'Offers practical frameworks for content, collaboration, and sustainability, integrating innovation and equity for leadership in teacher development.'
+    },
+    {
+      id: 'resource-3',
+      title: 'An Integrative Approach to Professional Development to Support College- and Career-Readiness Standards',
+      author: 'Katie Pak, Laura M. Desimone, Arianna Parsons',
+      url: 'https://files.eric.ed.gov/fulltext/EJ1265332.pdf',
+      type: 'PDF',
+      verified: 'Yes',
+      accessType: 'Direct free download',
+      description: 'Study on revised PD models for standards implementation, emphasizing collaboration and coherence.',
+      relevance: 'Connects PD design to equity and excellence, aiding in creating inclusive programs that expand influence.'
+    }
+  ],
+  followUpTasks: [
+    {
+      id: 'followup-1',
+      category: 'Implementation',
+      description: 'Pilot a small-scale version of your PD plan with 3-5 colleagues, gathering initial feedback on engagement and impact.',
+      estimatedDuration: '2 hours',
+      complexity: 'Medium'
+    },
+    {
+      id: 'followup-2',
+      category: 'Refinement',
+      description: 'Revise your PD plan based on pilot insights, focusing on enhancing elements of justice and innovation.',
+      estimatedDuration: '1 hour',
+      complexity: 'Low'
+    },
+    {
+      id: 'followup-3',
+      category: 'Networking',
+      description: 'Share your PD plan with a mentor or educational leader for advice on scaling it within your organization.',
+      estimatedDuration: '30 minutes',
+      complexity: 'Medium'
+    },
+    {
+      id: 'followup-4',
+      category: 'Application',
+      description: 'Integrate one key principle from the activity into an existing teacher meeting to test real-world influence.',
+      estimatedDuration: '1 hour',
+      complexity: 'Low'
+    }
+  ]
 };
 
 export default function ActivityPadScreen() {
   const router = useRouter();
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<TabType>('activity-pad');
+  const [activityResponses, setActivityResponses] = useState<ActivityResponse[]>([]);
+  const [showContentSelection, setShowContentSelection] = useState(false);
+  const [showAIGeneration, setShowAIGeneration] = useState(false);
+  const [showPortfolioEditor, setShowPortfolioEditor] = useState(false);
+  const [selectedResponses, setSelectedResponses] = useState<string[]>([]);
+  const [portfolioDraft, setPortfolioDraft] = useState<PortfolioItemDraft | null>(null);
+  const [aiProgress, setAiProgress] = useState(0);
+  const autoSaveInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const renderTabButton = (tab: TabType, label: string, icon: keyof typeof Ionicons.glyphMap) => (
-    <TouchableOpacity
-      key={tab}
-      style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
-      onPress={() => setActiveTab(tab)}
-    >
-      <Ionicons 
-        name={icon} 
-        size={20} 
-        color={activeTab === tab ? Colors.text.inverse : Colors.text.secondary} 
-      />
-      <Text style={[styles.tabButtonText, activeTab === tab && styles.activeTabButtonText]}>
-        {label}
-      </Text>
-    </TouchableOpacity>
-  );
+  // Auto-save functionality
+  useEffect(() => {
+    autoSaveInterval.current = setInterval(() => {
+      if (activityResponses.length > 0) {
+        // Auto-save responses to incomplete activities
+        console.log('Auto-saving activity responses...');
+        // In a real app, this would save to a backend or local storage
+      }
+    }, 30000); // 30 seconds
+
+    return () => {
+      if (autoSaveInterval.current) {
+        clearInterval(autoSaveInterval.current);
+      }
+    };
+  }, [activityResponses]);
+
+  const updateResponse = (stepId: string, questionIndex: number, response: string) => {
+    const wordCount = response.trim().split(/\s+/).length;
+    const newResponse: ActivityResponse = {
+      stepId,
+      questionIndex,
+      response,
+      wordCount,
+      timestamp: new Date().toISOString(),
+    };
+
+    setActivityResponses(prev => {
+      const existingIndex = prev.findIndex(r => r.stepId === stepId && r.questionIndex === questionIndex);
+      if (existingIndex >= 0) {
+        const updated = [...prev];
+        updated[existingIndex] = newResponse;
+        return updated;
+      }
+      return [...prev, newResponse];
+    });
+  };
+
+  const getResponseForQuestion = (stepId: string, questionIndex: number): string => {
+    const response = activityResponses.find(r => r.stepId === stepId && r.questionIndex === questionIndex);
+    return response?.response || '';
+  };
+
+  const getAllResponses = (): ActivityResponse[] => {
+    return activityResponses;
+  };
+
+  const handleCreatePortfolioItem = () => {
+    const responses = getAllResponses();
+    if (responses.length === 0) {
+      Alert.alert('No Responses', 'Please complete some activity questions before creating a portfolio item.');
+      return;
+    }
+    setSelectedResponses(responses.map(r => r.stepId + '-' + r.questionIndex));
+    setShowContentSelection(true);
+  };
+
+  const handleContentSelectionContinue = () => {
+    setShowContentSelection(false);
+    setShowAIGeneration(true);
+    simulateAIGeneration();
+  };
+
+  const simulateAIGeneration = () => {
+    setAiProgress(0);
+    const steps = [
+      { progress: 20, text: 'Collecting your activity responses' },
+      { progress: 40, text: 'Analyzing content themes and flow' },
+      { progress: 60, text: 'Organizing into coherent structure' },
+      { progress: 80, text: 'Formatting for professional presentation' },
+      { progress: 100, text: 'Generating executive summary' }
+    ];
+
+    let currentStep = 0;
+    const interval = setInterval(() => {
+      if (currentStep < steps.length) {
+        setAiProgress(steps[currentStep].progress);
+        currentStep++;
+      } else {
+        clearInterval(interval);
+        setShowAIGeneration(false);
+        setShowPortfolioEditor(true);
+        // Generate mock portfolio content
+        setPortfolioDraft({
+          id: 'draft-' + Date.now(),
+          title: 'Teacher Professional Development Program Design',
+          description: 'A comprehensive PD program design based on evidence-based practices',
+          type: 'portfolio',
+          selectedResponses: selectedResponses,
+          generatedContent: 'Generated portfolio content based on your responses...',
+          isGenerating: false,
+          createdAt: new Date().toISOString()
+        });
+      }
+    }, 1000);
+  };
+
+  const handleSaveToPortfolio = () => {
+    if (portfolioDraft) {
+      // In a real app, this would save to the portfolio items
+      Alert.alert('Success', 'Portfolio item saved successfully!');
+      setShowPortfolioEditor(false);
+      setPortfolioDraft(null);
+    }
+  };
+
 
   const renderMyActivities = () => (
     <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
@@ -273,43 +910,118 @@ export default function ActivityPadScreen() {
           </View>
         </View>
 
-        <View style={styles.tasksSection}>
-          <Text style={styles.tasksTitle}>Current Tasks</Text>
-          <View style={styles.taskItem}>
-            <View style={styles.taskHeader}>
-              <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
-              <Text style={styles.taskTitle}>Task 1: Data Collection</Text>
+        <View style={styles.phasesSection}>
+          <Text style={styles.phasesTitle}>Activity Phases</Text>
+          {mockCurrentActivity.phases?.map((phase, phaseIndex) => (
+            <View key={phase.id} style={styles.phaseCard}>
+              <View style={styles.phaseHeader}>
+                <Text style={styles.phaseTitle}>{phase.title}</Text>
+                <Text style={styles.phaseDuration}>{phase.duration}</Text>
+              </View>
+              {phase.steps.map((step, stepIndex) => (
+                <View key={step.id} style={styles.stepItem}>
+                  <View style={styles.stepHeader}>
+                    <Ionicons 
+                      name={stepIndex === 0 ? "checkmark-circle" : "ellipse-outline"} 
+                      size={20} 
+                      color={stepIndex === 0 ? Colors.success : Colors.text.secondary} 
+                    />
+                    <Text style={styles.stepTitle}>{step.title}</Text>
+                    <Text style={styles.stepDuration}>{step.duration}</Text>
+                  </View>
+                  <Text style={styles.stepFocus}>{step.focus}</Text>
+                  {step.readingMaterial && (
+                    <View style={styles.readingMaterial}>
+                      <Text style={styles.readingTitle}>📚 {step.readingMaterial.title}</Text>
+                      <Text style={styles.readingAuthor}>by {step.readingMaterial.author}</Text>
+                      <Text style={styles.readingQuote}>"{step.readingMaterial.keyQuote}"</Text>
+                    </View>
+                  )}
+                  <View style={styles.guidingQuestions}>
+                    <Text style={styles.guidingQuestionsTitle}>Guiding Questions:</Text>
+                    {step.guidingQuestions.map((question, qIndex) => {
+                      const responseKey = step.id + '-' + qIndex;
+                      const currentResponse = getResponseForQuestion(step.id, qIndex);
+                      const wordCount = currentResponse.trim().split(/\s+/).length;
+                      
+                      return (
+                        <View key={qIndex} style={styles.questionContainer}>
+                          <Text style={styles.guidingQuestion}>
+                            • {question}
+                          </Text>
+                          <TextInput
+                            style={styles.responseInput}
+                            placeholder="Share your thoughts and insights here..."
+                            value={currentResponse}
+                            onChangeText={(text) => updateResponse(step.id, qIndex, text)}
+                            multiline
+                            textAlignVertical="top"
+                            placeholderTextColor={Colors.text.tertiary}
+                          />
+                          <View style={styles.responseMeta}>
+                            <Text style={styles.wordCount}>{wordCount} words</Text>
+                            {wordCount > 0 && (
+                              <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
+                            )}
+                          </View>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </View>
+              ))}
             </View>
-            <Text style={styles.taskDescription}>Gather relevant datasets for analysis</Text>
-          </View>
-          <View style={styles.taskItem}>
-            <View style={styles.taskHeader}>
-              <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
-              <Text style={styles.taskTitle}>Task 2: Data Cleaning</Text>
-            </View>
-            <Text style={styles.taskDescription}>Clean and prepare data for analysis</Text>
-          </View>
-          <View style={styles.taskItem}>
-            <View style={styles.taskHeader}>
-              <Ionicons name="ellipse-outline" size={20} color={Colors.text.secondary} />
-              <Text style={styles.taskTitle}>Task 3: Statistical Analysis</Text>
-            </View>
-            <Text style={styles.taskDescription}>Perform statistical analysis on the dataset</Text>
-          </View>
-          <View style={styles.taskItem}>
-            <View style={styles.taskHeader}>
-              <Ionicons name="ellipse-outline" size={20} color={Colors.text.secondary} />
-              <Text style={styles.taskTitle}>Task 4: Visualization</Text>
-            </View>
-            <Text style={styles.taskDescription}>Create visualizations to present findings</Text>
-          </View>
+          ))}
         </View>
+
+        {mockCurrentActivity.resources && mockCurrentActivity.resources.length > 0 && (
+          <View style={styles.resourcesSection}>
+            <Text style={styles.resourcesTitle}>Resources</Text>
+            {mockCurrentActivity.resources.map((resource) => (
+              <View key={resource.id} style={styles.resourceCard}>
+                <View style={styles.resourceHeader}>
+                  <Text style={styles.resourceTitle}>{resource.title}</Text>
+                  <View style={styles.resourceTypeBadge}>
+                    <Text style={styles.resourceTypeText}>{resource.type}</Text>
+                  </View>
+                </View>
+                <Text style={styles.resourceAuthor}>by {resource.author}</Text>
+                <Text style={styles.resourceDescription}>{resource.description}</Text>
+                <Text style={styles.resourceRelevance}>{resource.relevance}</Text>
+                <TouchableOpacity style={styles.resourceLink}>
+                  <Ionicons name="link-outline" size={16} color={Colors.primary.navyBlue} />
+                  <Text style={styles.resourceLinkText}>Access Resource</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {mockCurrentActivity.followUpTasks && mockCurrentActivity.followUpTasks.length > 0 && (
+          <View style={styles.followUpSection}>
+            <Text style={styles.followUpTitle}>Follow-up Tasks</Text>
+            {mockCurrentActivity.followUpTasks.map((task) => (
+              <View key={task.id} style={styles.followUpCard}>
+                <View style={styles.followUpHeader}>
+                  <Text style={styles.followUpCategory}>{task.category}</Text>
+                  <View style={styles.followUpMeta}>
+                    <Text style={styles.followUpDuration}>{task.estimatedDuration}</Text>
+                    <View style={[styles.complexityBadge, { backgroundColor: task.complexity === 'Low' ? Colors.success : task.complexity === 'Medium' ? Colors.primary.goldenYellow : Colors.primary.warmOrange }]}>
+                      <Text style={styles.complexityText}>{task.complexity}</Text>
+                    </View>
+                  </View>
+                </View>
+                <Text style={styles.followUpDescription}>{task.description}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
         <View style={styles.workArea}>
           <Text style={styles.workAreaTitle}>Your Work Area</Text>
           <TextInput
             style={styles.workInput}
-            placeholder="Start working on your current task..."
+            placeholder="Start designing your teacher professional development program. Consider your chosen focus area, target outcomes, and implementation strategies..."
             multiline
             placeholderTextColor={Colors.text.tertiary}
           />
@@ -321,6 +1033,20 @@ export default function ActivityPadScreen() {
               <Text style={styles.submitButtonText}>Submit Task</Text>
             </TouchableOpacity>
           </View>
+        </View>
+
+        <View style={styles.portfolioCreationSection}>
+          <Text style={styles.portfolioCreationTitle}>Create Portfolio Item</Text>
+          <Text style={styles.portfolioCreationDescription}>
+            Transform your activity responses into a professional portfolio piece that you can attach to job applications.
+          </Text>
+          <TouchableOpacity 
+            style={styles.createPortfolioButton}
+            onPress={handleCreatePortfolioItem}
+          >
+            <Ionicons name="create-outline" size={24} color={Colors.text.inverse} />
+            <Text style={styles.createPortfolioButtonText}>Create Portfolio Item</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </ScrollView>
@@ -381,15 +1107,291 @@ export default function ActivityPadScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <View style={styles.tabContainer}>
-        {renderTabButton('my-activities', 'My Activities', 'list-outline')}
-        {renderTabButton('activity-pad', 'ActivityPad', 'construct-outline')}
-        {renderTabButton('portfolio-items', 'Portfolio Items', 'folder-outline')}
-      </View>
-
       {activeTab === 'my-activities' && renderMyActivities()}
       {activeTab === 'activity-pad' && renderActivityPad()}
       {activeTab === 'portfolio-items' && renderPortfolioItems()}
+
+      {/* Bottom Tabs */}
+      <View style={styles.bottomTabsContainer}>
+        <TouchableOpacity
+          style={[styles.bottomTab, activeTab === 'my-activities' && styles.activeBottomTab]}
+          onPress={() => setActiveTab('my-activities')}
+        >
+          <Ionicons 
+            name="list-outline" 
+            size={24} 
+            color={activeTab === 'my-activities' ? Colors.primary.navyBlue : Colors.text.secondary} 
+          />
+          <Text style={[
+            styles.bottomTabText, 
+            activeTab === 'my-activities' && styles.activeBottomTabText
+          ]}>
+            My Activities
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.bottomTab, activeTab === 'activity-pad' && styles.activeBottomTab]}
+          onPress={() => setActiveTab('activity-pad')}
+        >
+          <Ionicons 
+            name="construct-outline" 
+            size={24} 
+            color={activeTab === 'activity-pad' ? Colors.primary.navyBlue : Colors.text.secondary} 
+          />
+          <Text style={[
+            styles.bottomTabText, 
+            activeTab === 'activity-pad' && styles.activeBottomTabText
+          ]}>
+            ActivityPad
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.bottomTab, activeTab === 'portfolio-items' && styles.activeBottomTab]}
+          onPress={() => setActiveTab('portfolio-items')}
+        >
+          <Ionicons 
+            name="folder-outline" 
+            size={24} 
+            color={activeTab === 'portfolio-items' ? Colors.primary.navyBlue : Colors.text.secondary} 
+          />
+          <Text style={[
+            styles.bottomTabText, 
+            activeTab === 'portfolio-items' && styles.activeBottomTabText
+          ]}>
+            Portfolio Items
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Content Selection Modal */}
+      <Modal
+        visible={showContentSelection}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowContentSelection(false)}>
+              <Ionicons name="close" size={24} color={Colors.text.primary} />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Content Selection Interface</Text>
+            <View style={{ width: 24 }} />
+          </View>
+          
+          <ScrollView style={styles.contentSelectionContainer}>
+            <Text style={styles.contentSelectionTitle}>Response Review & Selection</Text>
+            <Text style={styles.contentSelectionSubtitle}>Select responses to include in your portfolio piece:</Text>
+            
+            {mockCurrentActivity.phases?.map((phase, phaseIndex) => {
+              // Map phase titles to match the exact requirements
+              const phaseDisplayNames = [
+                'Foundation Analysis',
+                'Data Framework', 
+                'Implementation',
+                'Summative Integration'
+              ];
+              
+              return (
+                <View key={phase.id} style={styles.phaseSelectionGroup}>
+                  <Text style={styles.phaseSelectionTitle}>Phase {phaseIndex + 1}: {phaseDisplayNames[phaseIndex] || phase.title}</Text>
+                  {phase.steps.map((step, stepIndex) => (
+                    <View key={step.id} style={styles.stepSelectionGroup}>
+                      {step.guidingQuestions.map((question, qIndex) => {
+                        const responseKey = step.id + '-' + qIndex;
+                        const response = getResponseForQuestion(step.id, qIndex);
+                        const wordCount = response.trim().split(/\s+/).length;
+                        const isSelected = selectedResponses.includes(responseKey);
+                        
+                        if (wordCount === 0) return null;
+                        
+                        // Determine if response is too brief (less than 200 words)
+                        const isTooBrief = wordCount < 200;
+                        
+                        return (
+                          <TouchableOpacity
+                            key={qIndex}
+                            style={[styles.responseSelectionItem, isSelected && styles.responseSelectionItemSelected]}
+                            onPress={() => {
+                              if (isSelected) {
+                                setSelectedResponses(prev => prev.filter(r => r !== responseKey));
+                              } else {
+                                setSelectedResponses(prev => [...prev, responseKey]);
+                              }
+                            }}
+                          >
+                            <View style={styles.responseSelectionHeader}>
+                              <Ionicons 
+                                name={isSelected ? "checkbox" : "checkbox-outline"} 
+                                size={20} 
+                                color={isSelected ? Colors.primary.navyBlue : Colors.text.secondary} 
+                              />
+                              <Text style={styles.responseSelectionQuestion}>
+                                Question {qIndex + 1}: {question.substring(0, 50)}...
+                              </Text>
+                            </View>
+                            <Text style={styles.responseSelectionPreview}>
+                              {response.substring(0, 100)}...
+                            </Text>
+                            <Text style={[styles.responseSelectionWordCount, isTooBrief && styles.tooBriefText]}>
+                              ({wordCount} words{isTooBrief ? ' - too brief' : ''})
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  ))}
+                </View>
+              );
+            })}
+          </ScrollView>
+          
+          <View style={styles.modalActions}>
+            <TouchableOpacity 
+              style={[styles.continueButton, selectedResponses.length === 0 && styles.continueButtonDisabled]}
+              onPress={handleContentSelectionContinue}
+              disabled={selectedResponses.length === 0}
+            >
+              <Text style={styles.continueButtonText}>Continue</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
+
+      {/* AI Generation Modal */}
+      <Modal
+        visible={showAIGeneration}
+        animationType="fade"
+        transparent={true}
+      >
+        <View style={styles.aiGenerationOverlay}>
+          <View style={styles.aiGenerationContainer}>
+            <Text style={styles.aiGenerationTitle}>Arranging Your Responses...</Text>
+            
+            <View style={styles.aiProgressContainer}>
+              <View style={styles.aiProgressBar}>
+                <View style={[styles.aiProgressFill, { width: `${aiProgress}%` }]} />
+              </View>
+              <Text style={styles.aiProgressText}>{aiProgress}%</Text>
+            </View>
+            
+            <View style={styles.aiStepsContainer}>
+              <View style={[styles.aiStep, aiProgress >= 20 && styles.aiStepCompleted]}>
+                <Ionicons name="checkmark-circle" size={20} color={aiProgress >= 20 ? Colors.success : Colors.text.secondary} />
+                <Text style={[styles.aiStepText, aiProgress >= 20 && styles.aiStepTextCompleted]}>
+                  Collecting your activity responses ({getAllResponses().length} responses)
+                </Text>
+              </View>
+              
+              <View style={[styles.aiStep, aiProgress >= 40 && styles.aiStepCompleted]}>
+                <Ionicons name="checkmark-circle" size={20} color={aiProgress >= 40 ? Colors.success : Colors.text.secondary} />
+                <Text style={[styles.aiStepText, aiProgress >= 40 && styles.aiStepTextCompleted]}>
+                  Analyzing content themes and flow
+                </Text>
+              </View>
+              
+              <View style={[styles.aiStep, aiProgress >= 60 && styles.aiStepCompleted]}>
+                <Ionicons 
+                  name={aiProgress >= 60 ? "checkmark-circle" : "ellipse-outline"} 
+                  size={20} 
+                  color={aiProgress >= 60 ? Colors.success : Colors.text.secondary} 
+                />
+                <Text style={[styles.aiStepText, aiProgress >= 60 && styles.aiStepTextCompleted]}>
+                  Organizing into coherent structure
+                </Text>
+              </View>
+              
+              <View style={[styles.aiStep, aiProgress >= 80 && styles.aiStepCompleted]}>
+                <Ionicons 
+                  name={aiProgress >= 80 ? "checkmark-circle" : "ellipse-outline"} 
+                  size={20} 
+                  color={aiProgress >= 80 ? Colors.success : Colors.text.secondary} 
+                />
+                <Text style={[styles.aiStepText, aiProgress >= 80 && styles.aiStepTextCompleted]}>
+                  Formatting for professional presentation
+                </Text>
+              </View>
+              
+              <View style={[styles.aiStep, aiProgress >= 100 && styles.aiStepCompleted]}>
+                <Ionicons 
+                  name={aiProgress >= 100 ? "checkmark-circle" : "ellipse-outline"} 
+                  size={20} 
+                  color={aiProgress >= 100 ? Colors.success : Colors.text.secondary} 
+                />
+                <Text style={[styles.aiStepText, aiProgress >= 100 && styles.aiStepTextCompleted]}>
+                  Generating executive summary
+                </Text>
+              </View>
+            </View>
+            
+            <Text style={styles.aiEstimatedTime}>Estimated completion: 45 seconds</Text>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Portfolio Editor Modal */}
+      <Modal
+        visible={showPortfolioEditor}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <TouchableOpacity onPress={() => setShowPortfolioEditor(false)}>
+              <Ionicons name="close" size={24} color={Colors.text.primary} />
+            </TouchableOpacity>
+            <Text style={styles.modalTitle}>Edit Portfolio Item</Text>
+            <View style={{ width: 24 }} />
+          </View>
+          
+          <ScrollView style={styles.portfolioEditorContainer}>
+            <View style={styles.portfolioEditorField}>
+              <Text style={styles.portfolioEditorLabel}>Title</Text>
+              <TextInput
+                style={styles.portfolioEditorInput}
+                value={portfolioDraft?.title || ''}
+                onChangeText={(text) => setPortfolioDraft(prev => prev ? { ...prev, title: text } : null)}
+                placeholder="Enter portfolio item title"
+              />
+            </View>
+            
+            <View style={styles.portfolioEditorField}>
+              <Text style={styles.portfolioEditorLabel}>Description</Text>
+              <TextInput
+                style={[styles.portfolioEditorInput, styles.portfolioEditorTextArea]}
+                value={portfolioDraft?.description || ''}
+                onChangeText={(text) => setPortfolioDraft(prev => prev ? { ...prev, description: text } : null)}
+                placeholder="Enter portfolio item description"
+                multiline
+                textAlignVertical="top"
+              />
+            </View>
+            
+            <View style={styles.portfolioEditorField}>
+              <Text style={styles.portfolioEditorLabel}>Generated Content</Text>
+              <TextInput
+                style={[styles.portfolioEditorInput, styles.portfolioEditorTextArea]}
+                value={portfolioDraft?.generatedContent || ''}
+                onChangeText={(text) => setPortfolioDraft(prev => prev ? { ...prev, generatedContent: text } : null)}
+                placeholder="Generated content will appear here"
+                multiline
+                textAlignVertical="top"
+              />
+            </View>
+          </ScrollView>
+          
+          <View style={styles.modalActions}>
+            <TouchableOpacity 
+              style={styles.saveToPortfolioButton}
+              onPress={handleSaveToPortfolio}
+            >
+              <Ionicons name="save-outline" size={20} color={Colors.text.inverse} />
+              <Text style={styles.saveToPortfolioButtonText}>Save to Portfolio Items</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -413,39 +1415,44 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
   },
-  tabContainer: {
+  bottomTabsContainer: {
     flexDirection: 'row',
-    backgroundColor: Colors.background.secondary,
+    backgroundColor: Colors.background.primary,
+    borderTopWidth: 1,
+    borderTopColor: Colors.neutral.gray200,
+    paddingTop: Layout.spacing.sm,
+    paddingBottom: Layout.spacing.sm,
     paddingHorizontal: Layout.spacing.sm,
-    paddingVertical: Layout.spacing.xs,
   },
-  tabButton: {
+  bottomTab: {
     flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: Layout.spacing.sm,
-    paddingHorizontal: Layout.spacing.md,
-    borderRadius: Layout.borderRadius.sm,
+    paddingHorizontal: Layout.spacing.xs,
     gap: Layout.spacing.xs,
   },
-  activeTabButton: {
-    backgroundColor: Colors.primary.navyBlue,
+  activeBottomTab: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.sm,
   },
-  tabButtonText: {
-    fontSize: Typography.fontSize.sm,
+  bottomTabText: {
+    fontSize: Typography.fontSize.xs,
     fontWeight: Typography.fontWeight.medium,
     color: Colors.text.secondary,
+    textAlign: 'center',
   },
-  activeTabButtonText: {
-    color: Colors.text.inverse,
+  activeBottomTabText: {
+    color: Colors.primary.navyBlue,
+    fontWeight: Typography.fontWeight.semibold,
   },
   tabContent: {
     flex: 1,
     paddingHorizontal: Layout.spacing.lg,
   },
   section: {
-    marginBottom: Layout.spacing.xl,
+    // marginBottom: Layout.spacing.md,
+    marginTop: Layout.spacing.md,
   },
   sectionTitle: {
     fontSize: Typography.fontSize.lg,
@@ -531,8 +1538,9 @@ const styles = StyleSheet.create({
   skillTag: {
     backgroundColor: Colors.primary.goldenYellow,
     paddingHorizontal: Layout.spacing.sm,
-    paddingVertical: Layout.spacing.xs,
+    paddingVertical: Layout.spacing.sm,
     borderRadius: Layout.borderRadius.sm,
+    marginTop: Layout.spacing.sm,
   },
   skillText: {
     fontSize: Typography.fontSize.xs,
@@ -760,5 +1768,497 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.medium,
     color: Colors.primary.navyBlue,
+  },
+  phasesSection: {
+    marginBottom: Layout.spacing.lg,
+  },
+  phasesTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.md,
+  },
+  phaseCard: {
+    backgroundColor: Colors.background.primary,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.md,
+    marginBottom: Layout.spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray200,
+  },
+  phaseHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.sm,
+  },
+  phaseTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    flex: 1,
+  },
+  phaseDuration: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    backgroundColor: Colors.primary.goldenYellow,
+    paddingHorizontal: Layout.spacing.sm,
+    paddingVertical: Layout.spacing.xs,
+    borderRadius: Layout.borderRadius.sm,
+  },
+  stepItem: {
+    marginBottom: Layout.spacing.md,
+    paddingLeft: Layout.spacing.md,
+  },
+  stepHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.xs,
+    gap: Layout.spacing.sm,
+  },
+  stepTitle: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.primary,
+    flex: 1,
+  },
+  stepDuration: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.tertiary,
+  },
+  stepFocus: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.sm,
+    fontStyle: 'italic',
+  },
+  readingMaterial: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.sm,
+    padding: Layout.spacing.sm,
+    marginBottom: Layout.spacing.sm,
+  },
+  readingTitle: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.xs,
+  },
+  readingAuthor: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.xs,
+  },
+  readingQuote: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.secondary,
+    fontStyle: 'italic',
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.xs,
+  },
+  guidingQuestions: {
+    marginTop: Layout.spacing.sm,
+  },
+  guidingQuestionsTitle: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.xs,
+  },
+  guidingQuestion: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.xs,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.xs,
+  },
+  resourcesSection: {
+    marginBottom: Layout.spacing.lg,
+  },
+  resourcesTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.md,
+  },
+  resourceCard: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.md,
+    marginBottom: Layout.spacing.sm,
+  },
+  resourceHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: Layout.spacing.xs,
+  },
+  resourceTitle: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    flex: 1,
+    marginRight: Layout.spacing.sm,
+  },
+  resourceTypeBadge: {
+    backgroundColor: Colors.primary.goldenYellow,
+    paddingHorizontal: Layout.spacing.sm,
+    paddingVertical: Layout.spacing.xs,
+    borderRadius: Layout.borderRadius.sm,
+  },
+  resourceTypeText: {
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+  },
+  resourceAuthor: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.xs,
+  },
+  resourceDescription: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.xs,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+  },
+  resourceRelevance: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.tertiary,
+    fontStyle: 'italic',
+    marginBottom: Layout.spacing.sm,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.xs,
+  },
+  resourceLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.spacing.xs,
+  },
+  resourceLinkText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.primary.navyBlue,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  followUpSection: {
+    marginBottom: Layout.spacing.lg,
+  },
+  followUpTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.md,
+  },
+  followUpCard: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.md,
+    marginBottom: Layout.spacing.sm,
+  },
+  followUpHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.sm,
+  },
+  followUpCategory: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.primary.navyBlue,
+  },
+  followUpMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.spacing.sm,
+  },
+  followUpDuration: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.secondary,
+  },
+  complexityBadge: {
+    paddingHorizontal: Layout.spacing.sm,
+    paddingVertical: Layout.spacing.xs,
+    borderRadius: Layout.borderRadius.sm,
+  },
+  complexityText: {
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+  },
+  followUpDescription: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+  },
+  // New styles for text inputs and portfolio creation
+  questionContainer: {
+    marginBottom: Layout.spacing.md,
+  },
+  responseInput: {
+    backgroundColor: Colors.background.primary,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.md,
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.primary,
+    minHeight: 80,
+    textAlignVertical: 'top',
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray200,
+    marginTop: Layout.spacing.sm,
+  },
+  responseMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: Layout.spacing.xs,
+  },
+  wordCount: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.tertiary,
+  },
+  portfolioCreationSection: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.lg,
+    marginVertical: Layout.spacing.lg,
+    borderWidth: 1,
+    borderColor: Colors.primary.navyBlue,
+  },
+  portfolioCreationTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.sm,
+  },
+  portfolioCreationDescription: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.lg,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+  },
+  createPortfolioButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary.navyBlue,
+    borderRadius: Layout.borderRadius.md,
+    paddingVertical: Layout.spacing.md,
+    gap: Layout.spacing.sm,
+  },
+  createPortfolioButtonText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.inverse,
+  },
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: Colors.background.primary,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Layout.spacing.lg,
+    paddingVertical: Layout.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.neutral.gray200,
+  },
+  modalTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+  },
+  modalActions: {
+    paddingHorizontal: Layout.spacing.lg,
+    paddingVertical: Layout.spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.neutral.gray200,
+  },
+  // Content Selection styles
+  contentSelectionContainer: {
+    flex: 1,
+    paddingHorizontal: Layout.spacing.lg,
+  },
+  contentSelectionTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.sm,
+  },
+  contentSelectionSubtitle: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.lg,
+  },
+  phaseSelectionGroup: {
+    marginBottom: Layout.spacing.lg,
+  },
+  phaseSelectionTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.sm,
+  },
+  stepSelectionGroup: {
+    marginLeft: Layout.spacing.md,
+  },
+  responseSelectionItem: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.md,
+    marginBottom: Layout.spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray200,
+  },
+  responseSelectionItemSelected: {
+    borderColor: Colors.primary.navyBlue,
+    backgroundColor: Colors.primary.navyBlue + '10',
+  },
+  responseSelectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.sm,
+    gap: Layout.spacing.sm,
+  },
+  responseSelectionQuestion: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.primary,
+    flex: 1,
+  },
+  responseSelectionPreview: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.xs,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.xs,
+  },
+  responseSelectionWordCount: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.tertiary,
+  },
+  tooBriefText: {
+    color: Colors.warning,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  continueButton: {
+    backgroundColor: Colors.primary.navyBlue,
+    borderRadius: Layout.borderRadius.md,
+    paddingVertical: Layout.spacing.md,
+    alignItems: 'center',
+  },
+  continueButtonDisabled: {
+    backgroundColor: Colors.neutral.gray300,
+  },
+  continueButtonText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.inverse,
+  },
+  // AI Generation styles
+  aiGenerationOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  aiGenerationContainer: {
+    backgroundColor: Colors.background.primary,
+    borderRadius: Layout.borderRadius.lg,
+    padding: Layout.spacing.xl,
+    marginHorizontal: Layout.spacing.lg,
+    minWidth: 300,
+  },
+  aiGenerationTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    textAlign: 'center',
+    marginBottom: Layout.spacing.lg,
+  },
+  aiProgressContainer: {
+    marginBottom: Layout.spacing.lg,
+  },
+  aiProgressBar: {
+    height: 8,
+    backgroundColor: Colors.neutral.gray200,
+    borderRadius: Layout.borderRadius.sm,
+    marginBottom: Layout.spacing.sm,
+  },
+  aiProgressFill: {
+    height: '100%',
+    backgroundColor: Colors.primary.navyBlue,
+    borderRadius: Layout.borderRadius.sm,
+  },
+  aiProgressText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.primary.navyBlue,
+    textAlign: 'center',
+  },
+  aiStepsContainer: {
+    marginBottom: Layout.spacing.lg,
+  },
+  aiStep: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.sm,
+    gap: Layout.spacing.sm,
+  },
+  aiStepCompleted: {
+    opacity: 1,
+  },
+  aiStepText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    flex: 1,
+  },
+  aiStepTextCompleted: {
+    color: Colors.text.primary,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  aiEstimatedTime: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.tertiary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  // Portfolio Editor styles
+  portfolioEditorContainer: {
+    flex: 1,
+    paddingHorizontal: Layout.spacing.lg,
+  },
+  portfolioEditorField: {
+    marginBottom: Layout.spacing.lg,
+  },
+  portfolioEditorLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.sm,
+  },
+  portfolioEditorInput: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.md,
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.primary,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray200,
+  },
+  portfolioEditorTextArea: {
+    minHeight: 120,
+    textAlignVertical: 'top',
+  },
+  saveToPortfolioButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary.navyBlue,
+    borderRadius: Layout.borderRadius.md,
+    paddingVertical: Layout.spacing.md,
+    gap: Layout.spacing.sm,
+  },
+  saveToPortfolioButtonText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.inverse,
   },
 });
