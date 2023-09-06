@@ -258,11 +258,10 @@ export default function AssessmentScreen() {
         archetype: mockArchetype,
       });
 
-      Alert.alert(
-        'Assessment Complete!',
-        'Your career profile has been analyzed. Let\'s explore your personalized dashboard.',
-        [{ text: 'Continue', onPress: () => router.replace('/(tabs)/home') }]
-      );
+      // Direct navigation instead of Alert (which may not work well in web preview)
+      setTimeout(() => {
+        router.replace('/(tabs)/home');
+      }, 1000);
     } catch (error) {
       Alert.alert('Error', 'Failed to submit assessment. Please try again.');
     } finally {
