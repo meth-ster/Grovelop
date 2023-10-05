@@ -227,7 +227,7 @@ export default function JobDetailScreen() {
 
         {/* Company Intelligence */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Company Intelligence</Text>
+          <Text style={styles.sectionTitle}>Company Information</Text>
           <View style={styles.companyIntelligence}>
             <View style={styles.intelligenceItem}>
               <View style={styles.intelligenceIcon}>
@@ -325,6 +325,9 @@ export default function JobDetailScreen() {
 
       {/* Bottom Actions */}
       <View style={styles.bottomActions}>
+        <TouchableOpacity style={styles.secondaryActionButton} onPress={handleSave}>
+          <Text style={styles.primaryActionButtonText}>Save Job</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.secondaryActionButton} onPress={() => {
           router.push({
             pathname: '/document-setup',
@@ -333,9 +336,6 @@ export default function JobDetailScreen() {
         }}>
           <Text style={styles.secondaryActionText}>Create Tailored Application</Text>
         </TouchableOpacity>
-          <TouchableOpacity style={styles.secondaryActionButton} onPress={handleSave}>
-            <Text style={styles.primaryActionButtonText}>Save Job</Text>
-          </TouchableOpacity>
       </View>
     </SafeAreaView>
   );

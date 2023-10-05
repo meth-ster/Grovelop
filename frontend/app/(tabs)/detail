@@ -1,0 +1,348 @@
+"Title": {
+ "description": "{{ACTIVITY_DESCRIPTION}}",
+ "skillFocus": [
+ "{{SKILL_FOCUS_1}}",
+ "{{SKILL_FOCUS_2}}",
+ "{{SKILL_FOCUS_3}}"
+ ],
+ 
+ },
+ "objectives": [
+ {
+ "category": "{{OBJECTIVE_1_CATEGORY}}",
+ "outcome": "{{OBJECTIVE_1_OUTCOME}}"
+ },
+ {
+ "category": "{{OBJECTIVE_2_CATEGORY}}", 
+ "outcome": "{{OBJECTIVE_2_OUTCOME}}"
+ },
+ {
+ "category": "{{OBJECTIVE_3_CATEGORY}}",
+ "outcome": "{{OBJECTIVE_3_OUTCOME}}"
+ }
+ ],
+ "duration": {
+ "total": "{{TOTAL_DURATION}}",
+ "totalHours": "{{TOTAL_HOURS}}",
+ "phases": "{{NUMBER_OF_PHASES}}",
+ "breakdown": [
+ {
+ "phase": 1,
+ "duration": "{{PHASE_1_DURATION}}",
+ "hours": "{{PHASE_1_HOURS}}"
+ },
+ {
+ "phase": 2, 
+ "duration": "{{PHASE_2_DURATION}}",
+ "hours": "{{PHASE_2_HOURS}}"
+ },
+ {
+ "phase": 3,
+ "duration": "{{PHASE_3_DURATION}}", 
+ "hours": "{{PHASE_3_HOURS}}"
+ },
+ {
+ "phase": 4,
+ "duration": "{{PHASE_4_DURATION}}",
+ "hours": "{{PHASE_4_HOURS}}"
+ }
+ ]
+ },
+ "phases": [
+ {
+ "id": "phase-1",
+ "title": "{{PHASE_1_TITLE}}",
+ "duration": "{{PHASE_1_FULL_DURATION}}",
+ "steps": [
+ {
+ "id": "step-1",
+ "title": "{{STEP_1_TITLE}}", 
+ "duration": "{{STEP_1_DURATION}}",
+ "focus": "{{STEP_1_FOCUS}}",
+ "readingMaterial": {
+ "title": "{{STEP_1_READING_TITLE}}",
+ "author": "{{STEP_1_READING_AUTHOR}}",
+ "url": "{{STEP_1_READING_URL}}",
+ "type": "{{STEP_1_READING_TYPE}}",
+ "verified": "{{STEP_1_READING_VERIFIED}}",
+ "keyQuote": "{{STEP_1_KEY_QUOTE}}"
+ },
+ "guidingQuestions": [
+ "{{STEP_1_QUESTION_1}}",
+ "{{STEP_1_QUESTION_2}}",
+ "{{STEP_1_QUESTION_3}}",
+ "{{STEP_1_QUESTION_4}}"
+ ]
+ },
+ {
+ "id": "step-2",
+ "title": "{{STEP_2_TITLE}}",
+ "duration": "{{STEP_2_DURATION}}", 
+ "focus": "{{STEP_2_FOCUS}}",
+ "readingMaterial": {
+ "title": "{{STEP_2_READING_TITLE}}",
+ "author": "{{STEP_2_READING_AUTHOR}}",
+ "url": "{{STEP_2_READING_URL}}",
+ "type": "{{STEP_2_READING_TYPE}}",
+ "verified": "{{STEP_2_READING_VERIFIED}}",
+ "keyQuote": "{{STEP_2_KEY_QUOTE}}"
+ },
+ "guidingQuestions": [
+ "{{STEP_2_QUESTION_1}}",
+ "{{STEP_2_QUESTION_2}}",
+ "{{STEP_2_QUESTION_3}}",
+ "{{STEP_2_QUESTION_4}}"
+ ]
+ }
+ ]
+ },
+ {
+ "id": "phase-2",
+ "title": "{{PHASE_2_TITLE}}",
+ "duration": "{{PHASE_2_FULL_DURATION}}",
+ "steps": [
+ {
+ "id": "step-3",
+ "title": "{{STEP_3_TITLE}}",
+ "duration": "{{STEP_3_DURATION}}",
+ "focus": "{{STEP_3_FOCUS}}",
+ "readingMaterial": {
+ "title": "{{STEP_3_READING_TITLE}}",
+ "author": "{{STEP_3_READING_AUTHOR}}",
+ "url": "{{STEP_3_READING_URL}}",
+ "type": "{{STEP_3_READING_TYPE}}",
+ "verified": "{{STEP_3_READING_VERIFIED}}",
+ "keyQuote": "{{STEP_3_KEY_QUOTE}}"
+ },
+ "guidingQuestions": [
+ "{{STEP_3_QUESTION_1}}",
+ "{{STEP_3_QUESTION_2}}",
+ "{{STEP_3_QUESTION_3}}",
+ "{{STEP_3_QUESTION_4}}"
+ ]
+ },
+ {
+ "id": "step-4", 
+ "title": "{{STEP_4_TITLE}}",
+ "duration": "{{STEP_4_DURATION}}",
+ "focus": "{{STEP_4_FOCUS}}",
+ "readingMaterial": {
+ "title": "{{STEP_4_READING_TITLE}}",
+ "author": "{{STEP_4_READING_AUTHOR}}",
+ "url": "{{STEP_4_READING_URL}}",
+ "type": "{{STEP_4_READING_TYPE}}",
+ "verified": "{{STEP_4_READING_VERIFIED}}",
+ "keyQuote": "{{STEP_4_KEY_QUOTE}}"
+ },
+ "guidingQuestions": [
+ "{{STEP_4_QUESTION_1}}",
+ "{{STEP_4_QUESTION_2}}",
+ "{{STEP_4_QUESTION_3}}",
+ "{{STEP_4_QUESTION_4}}"
+ ]
+ }
+ ]
+ },
+ {
+ "id": "phase-3",
+ "title": "{{PHASE_3_TITLE}}", 
+ "duration": "{{PHASE_3_FULL_DURATION}}",
+ "steps": [
+ {
+ "id": "step-5",
+ "title": "{{STEP_5_TITLE}}",
+ "duration": "{{STEP_5_DURATION}}",
+ "focus": "{{STEP_5_FOCUS}}",
+ "readingMaterial": {
+ "title": "{{STEP_5_READING_TITLE}}",
+ "author": "{{STEP_5_READING_AUTHOR}}",
+ "url": "{{STEP_5_READING_URL}}",
+ "type": "{{STEP_5_READING_TYPE}}",
+ "verified": "{{STEP_5_READING_VERIFIED}}",
+ "keyQuote": "{{STEP_5_KEY_QUOTE}}"
+ },
+ "guidingQuestions": [
+ "{{STEP_5_QUESTION_1}}",
+ "{{STEP_5_QUESTION_2}}",
+ "{{STEP_5_QUESTION_3}}",
+ "{{STEP_5_QUESTION_4}}"
+ ]
+ },
+ {
+ "id": "step-6",
+ "title": "{{STEP_6_TITLE}}",
+ "duration": "{{STEP_6_DURATION}}",
+ "focus": "{{STEP_6_FOCUS}}",
+ "readingMaterial": {
+ "title": "{{STEP_6_READING_TITLE}}",
+ "author": "{{STEP_6_READING_AUTHOR}}",
+ "url": "{{STEP_6_READING_URL}}",
+ "type": "{{STEP_6_READING_TYPE}}",
+ "verified": "{{STEP_6_READING_VERIFIED}}",
+ "keyQuote": "{{STEP_6_KEY_QUOTE}}"
+ },
+ "guidingQuestions": [
+ "{{STEP_6_QUESTION_1}}",
+ "{{STEP_6_QUESTION_2}}",
+ "{{STEP_6_QUESTION_3}}",
+ "{{STEP_6_QUESTION_4}}"
+ ]
+ }
+ ]
+ },
+ {
+ "id": "phase-4",
+ "title": "{{PHASE_4_TITLE}}",
+ "duration": "{{PHASE_4_FULL_DURATION}}", 
+ "steps": [
+ {
+ "id": "step-7",
+ "title": "{{STEP_7_TITLE}}",
+ "duration": "{{STEP_7_DURATION}}",
+ "focus": "{{STEP_7_FOCUS}}",
+ "readingMaterial": {
+ "title": "{{STEP_7_READING_TITLE}}",
+ "author": "{{STEP_7_READING_AUTHOR}}",
+ "url": "{{STEP_7_READING_URL}}",
+ "type": "{{STEP_7_READING_TYPE}}",
+ "verified": "{{STEP_7_READING_VERIFIED}}",
+ "keyQuote": "{{STEP_7_KEY_QUOTE}}"
+ },
+ "guidingQuestions": [
+ "{{STEP_7_QUESTION_1}}",
+ "{{STEP_7_QUESTION_2}}",
+ "{{STEP_7_QUESTION_3}}",
+ "{{STEP_7_QUESTION_4}}"
+ ]
+ },
+ {
+ "id": "step-8",
+ "title": "{{STEP_8_TITLE}}",
+ "duration": "{{STEP_8_DURATION}}",
+ "focus": "{{STEP_8_FOCUS}}",
+ "readingMaterial": {
+ "title": "{{STEP_8_READING_TITLE}}",
+ "author": "{{STEP_8_READING_AUTHOR}}",
+ "url": "{{STEP_8_READING_URL}}",
+ "type": "{{STEP_8_READING_TYPE}}",
+ "verified": "{{STEP_8_READING_VERIFIED}}",
+ "keyQuote": "{{STEP_8_KEY_QUOTE}}"
+ },
+ "guidingQuestions": [
+ "{{STEP_8_QUESTION_1}}",
+ "{{STEP_8_QUESTION_2}}",
+ "{{STEP_8_QUESTION_3}}",
+ "{{STEP_8_QUESTION_4}}"
+ ]
+ }
+ ]
+ }
+ ],
+ "resources": {
+ "readingMaterials": [
+ {
+ "id": "resource-1",
+ "title": "{{RESOURCE_1_TITLE}}",
+ "author": "{{RESOURCE_1_AUTHOR}}",
+ "url": "{{RESOURCE_1_URL}}",
+ "type": "{{RESOURCE_1_TYPE}}",
+ "verified": "{{RESOURCE_1_VERIFIED}}",
+ "accessType": "{{RESOURCE_1_ACCESS_TYPE}}",
+ "description": "{{RESOURCE_1_DESCRIPTION}}",
+ "relevance": "{{RESOURCE_1_RELEVANCE}}"
+ },
+ {
+ "id": "resource-2",
+ "title": "{{RESOURCE_2_TITLE}}",
+ "author": "{{RESOURCE_2_AUTHOR}}",
+ "url": "{{RESOURCE_2_URL}}",
+ "type": "{{RESOURCE_2_TYPE}}",
+ "verified": "{{RESOURCE_2_VERIFIED}}",
+ "accessType": "{{RESOURCE_2_ACCESS_TYPE}}",
+ "description": "{{RESOURCE_2_DESCRIPTION}}",
+ "relevance": "{{RESOURCE_2_RELEVANCE}}"
+ },
+ {
+ "id": "resource-3",
+ "title": "{{RESOURCE_3_TITLE}}",
+ "author": "{{RESOURCE_3_AUTHOR}}", 
+ "url": "{{RESOURCE_3_URL}}",
+ "type": "{{RESOURCE_3_TYPE}}",
+ "verified": "{{RESOURCE_3_VERIFIED}}",
+ "accessType": "{{RESOURCE_3_ACCESS_TYPE}}",
+ "description": "{{RESOURCE_3_DESCRIPTION}}",
+ "relevance": "{{RESOURCE_3_RELEVANCE}}"
+ },
+ {
+ "id": "resource-4",
+ "title": "{{RESOURCE_4_TITLE}}",
+ "author": "{{RESOURCE_4_AUTHOR}}",
+ "url": "{{RESOURCE_4_URL}}",
+ "type": "{{RESOURCE_4_TYPE}}",
+ "verified": "{{RESOURCE_4_VERIFIED}}",
+ "accessType": "{{RESOURCE_4_ACCESS_TYPE}}",
+ "description": "{{RESOURCE_4_DESCRIPTION}}",
+ "relevance": "{{RESOURCE_4_RELEVANCE}}"
+ },
+ {
+ "id": "resource-5",
+ "title": "{{RESOURCE_5_TITLE}}",
+ "author": "{{RESOURCE_5_AUTHOR}}",
+ "url": "{{RESOURCE_5_URL}}",
+ "type": "{{RESOURCE_5_TYPE}}",
+ "verified": "{{RESOURCE_5_VERIFIED}}",
+ "accessType": "{{RESOURCE_5_ACCESS_TYPE}}",
+ "description": "{{RESOURCE_5_DESCRIPTION}}",
+ "relevance": "{{RESOURCE_5_RELEVANCE}}"
+ },
+ {
+ "id": "resource-6",
+ "title": "{{RESOURCE_6_TITLE}}",
+ "author": "{{RESOURCE_6_AUTHOR}}",
+ "url": "{{RESOURCE_6_URL}}",
+ "type": "{{RESOURCE_6_TYPE}}",
+ "verified": "{{RESOURCE_6_VERIFIED}}",
+ "accessType": "{{RESOURCE_6_ACCESS_TYPE}}",
+ "description": "{{RESOURCE_6_DESCRIPTION}}",
+ "relevance": "{{RESOURCE_6_RELEVANCE}}"
+ }
+ ],
+ "additionalTools": [
+ "{{ADDITIONAL_TOOL_1}}",
+ "{{ADDITIONAL_TOOL_2}}", 
+ "{{ADDITIONAL_TOOL_3}}",
+ "{{ADDITIONAL_TOOL_4}}",
+ "{{ADDITIONAL_TOOL_5}}"
+ ]
+ },
+ "followUpTasks": [
+ {
+ "id": "followup-1",
+ "category": "{{FOLLOWUP_1_CATEGORY}}",
+ "description": "{{FOLLOWUP_1_DESCRIPTION}}",
+ "estimatedDuration": "{{FOLLOWUP_1_DURATION}}",
+ "complexity": "{{FOLLOWUP_1_COMPLEXITY}}"
+ },
+ {
+ "id": "followup-2", 
+ "category": "{{FOLLOWUP_2_CATEGORY}}",
+ "description": "{{FOLLOWUP_2_DESCRIPTION}}",
+ "estimatedDuration": "{{FOLLOWUP_2_DURATION}}",
+ "complexity": "{{FOLLOWUP_2_COMPLEXITY}}"
+ },
+ {
+ "id": "followup-3",
+ "category": "{{FOLLOWUP_3_CATEGORY}}", 
+ "description": "{{FOLLOWUP_3_DESCRIPTION}}",
+ "estimatedDuration": "{{FOLLOWUP_3_DURATION}}",
+ "complexity": "{{FOLLOWUP_3_COMPLEXITY}}"
+ },
+ {
+ "id": "followup-4",
+ "category": "{{FOLLOWUP_4_CATEGORY}}",
+ "description": "{{FOLLOWUP_4_DESCRIPTION}}",
+ "estimatedDuration": "{{FOLLOWUP_4_DURATION}}",
+ "complexity": "{{FOLLOWUP_4_COMPLEXITY}}"
+ }
+ ]
+}

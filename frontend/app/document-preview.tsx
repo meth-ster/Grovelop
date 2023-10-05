@@ -109,19 +109,21 @@ export default function DocumentPreviewScreen() {
   const [documents, setDocuments] = useState(mockGeneratedDocuments);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
+  const [currentView, setCurrentView] = useState<'resume' | 'cover_letter'>('resume');
 
   const activeDocument = documents.find(doc => doc.type === activeTab);
 
   const handleEdit = () => {
-    if (activeDocument) {
-      setEditContent(activeDocument.content);
+    const currentDocument = documents.find(doc => doc.type === currentView);
+    if (currentDocument) {
+      setEditContent(currentDocument.content);
       setIsEditing(true);
     }
   };
 
   const handleSaveEdit = () => {
     const updatedDocuments = documents.map(doc => 
-      doc.type === activeTab 
+      doc.type === currentView 
         ? { ...doc, content: editContent, lastEdited: new Date().toISOString() }
         : doc
     );
@@ -165,6 +167,14 @@ export default function DocumentPreviewScreen() {
     });
   };
 
+  const handleViewCoverLetter = () => {
+    setCurrentView('cover_letter');
+  };
+
+  const handleBackToResume = () => {
+    setCurrentView('resume');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -172,7 +182,9 @@ export default function DocumentPreviewScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Document Preview</Text>
+        <Text style={styles.headerTitle}>
+          {currentView === 'resume' ? 'Resume/CV Preview' : 'Cover Letter Preview'}
+        </Text>
         <TouchableOpacity onPress={handleRegenerateSection}>
           <Ionicons name="refresh" size={24} color={Colors.primary.goldenYellow} />
         </TouchableOpacity>
@@ -186,35 +198,81 @@ export default function DocumentPreviewScreen() {
 
       {/* Document Content */}
       <View style={styles.documentContainer}>
-        <ScrollView style={styles.previewContainer} showsVerticalScrollIndicator={false}>
-          {/* Resume Section */}
-          <View style={styles.documentSection}>
-            <Text style={styles.documentSectionTitle}>Resume/CV</Text>
-            <View style={styles.documentPreview}>
-              <Text style={styles.documentContent}>
-                {documents.find(doc => doc.type === 'resume')?.content}
+        {isEditing ? (
+          <View style={styles.editMode}>
+            <View style={styles.documentSectionHeader}>
+              <Text style={styles.documentSectionTitle}>
+                Edit {currentView === 'resume' ? 'Resume/CV' : 'Cover Letter'}
               </Text>
             </View>
+            <TextInput
+              style={styles.editTextInput}
+              value={editContent}
+              onChangeText={setEditContent}
+              multiline
+              textAlignVertical="top"
+              placeholder="Enter your document content here..."
+              placeholderTextColor={Colors.text.tertiary}
+            />
           </View>
-          
-          {/* Cover Letter Section */}
-          <View style={styles.documentSection}>
-            <Text style={styles.documentSectionTitle}>Cover Letter</Text>
-            <View style={styles.documentPreview}>
-              <Text style={styles.documentContent}>
-                {documents.find(doc => doc.type === 'cover_letter')?.content}
-              </Text>
+        ) : (
+          <ScrollView style={styles.previewContainer} showsVerticalScrollIndicator={false}>
+            <View style={styles.documentSection}>
+              <View style={styles.documentSectionHeader}>
+                <Text style={styles.documentSectionTitle}>
+                  {currentView === 'resume' ? 'Resume/CV' : 'Cover Letter'}
+                </Text>
+                <TouchableOpacity style={styles.sectionEditButton} onPress={handleEdit}>
+                  <Ionicons name="create" size={18} color={Colors.primary.navyBlue} />
+                  <Text style={styles.sectionEditButtonText}>Edit</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.documentPreview}>
+                <Text style={styles.documentContent}>
+                  {documents.find(doc => doc.type === currentView)?.content}
+                </Text>
+              </View>
             </View>
-          </View>
-        </ScrollView>
+          </ScrollView>
+        )}
       </View>
 
       {/* Action Buttons */}
       <View style={styles.actionBar}>
-        <TouchableOpacity style={styles.exportButton} onPress={handleExportDocuments}>
-          <Text style={styles.exportButtonText}>Export & Apply</Text>
-          <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
-        </TouchableOpacity>
+        {!isEditing ? (
+          <>
+            <TouchableOpacity 
+              style={styles.navigationButton} 
+              onPress={currentView === 'resume' ? handleViewCoverLetter : handleBackToResume}
+            >
+              {currentView === 'resume' ? (
+                <>
+                  <Text style={styles.navigationButtonText}>See Cover Letter</Text>
+                  <Ionicons name="arrow-forward" size={20} color={Colors.primary.navyBlue} />
+                </>
+              ) : (
+                <>
+                  <Ionicons name="arrow-back" size={20} color={Colors.primary.navyBlue} />
+                  <Text style={styles.navigationButtonText}>Back to Resume</Text>
+                </>
+              )}
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.exportButton} onPress={handleExportDocuments}>
+              <Text style={styles.exportButtonText}>Export & Apply</Text>
+              <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleCancelEdit}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSaveEdit}>
+              <Text style={styles.saveButtonText}>Save Changes</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
       {/* Document Info */}
@@ -223,13 +281,13 @@ export default function DocumentPreviewScreen() {
           <View style={styles.infoItem}>
             <Ionicons name="time" size={16} color={Colors.text.secondary} />
             <Text style={styles.infoText}>
-              Last edited: {new Date(activeDocument?.lastEdited || '').toLocaleDateString()}
+              Last edited: {new Date(documents.find(doc => doc.type === currentView)?.lastEdited || '').toLocaleDateString()}
             </Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="document" size={16} color={Colors.text.secondary} />
             <Text style={styles.infoText}>
-              {activeDocument?.content.split(' ').length} words
+              {documents.find(doc => doc.type === currentView)?.content.split(' ').length} words
             </Text>
           </View>
         </View>
@@ -320,7 +378,8 @@ const styles = StyleSheet.create({
   },
   editMode: {
     flex: 1,
-    margin: Layout.spacing.lg,
+    paddingHorizontal: Layout.spacing.lg,
+    paddingBottom: Layout.spacing.lg,
   },
   editHeader: {
     flexDirection: 'row',
@@ -382,6 +441,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: Colors.neutral.gray200,
     gap: Layout.spacing.md,
+    alignItems: 'center',
   },
   editButton: {
     flex: 1,
@@ -400,8 +460,39 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.primary.navyBlue,
   },
+  cancelButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors.error,
+    borderRadius: Layout.borderRadius.md,
+    paddingVertical: Layout.spacing.md,
+    marginRight: Layout.spacing.sm,
+  },
+  cancelButtonText: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.error,
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  saveButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.success,
+    borderRadius: Layout.borderRadius.md,
+    paddingVertical: Layout.spacing.md,
+  },
+  saveButtonText: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.inverse,
+    fontWeight: Typography.fontWeight.semibold,
+  },
   exportButton: {
-    flex: 2,
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -414,6 +505,24 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.text.primary,
+  },
+  navigationButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors.primary.navyBlue,
+    borderRadius: Layout.borderRadius.md,
+    paddingVertical: Layout.spacing.md,
+    gap: Layout.spacing.sm,
+    marginRight: Layout.spacing.sm,
+  },
+  navigationButtonText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.primary.navyBlue,
   },
   nextButton: {
     flexDirection: 'row',
@@ -434,15 +543,36 @@ const styles = StyleSheet.create({
     marginBottom: Layout.spacing.sm,
     marginTop: Layout.spacing.md,
   },
+  documentSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Layout.spacing.lg,
+    marginBottom: Layout.spacing.md,
+    borderBottomWidth: 2,
+    borderBottomColor: Colors.primary.goldenYellow,
+    paddingBottom: Layout.spacing.sm,
+  },
   documentSectionTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.text.primary,
-    marginBottom: Layout.spacing.md,
-    paddingHorizontal: Layout.spacing.lg,
-    borderBottomWidth: 2,
-    borderBottomColor: Colors.primary.goldenYellow,
-    paddingBottom: Layout.spacing.sm,
+  },
+  sectionEditButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background.secondary,
+    paddingHorizontal: Layout.spacing.sm,
+    paddingVertical: Layout.spacing.xs,
+    borderRadius: Layout.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.primary.navyBlue,
+    gap: Layout.spacing.xs,
+  },
+  sectionEditButtonText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.primary.navyBlue,
   },
   documentInfo: {
     flexDirection: 'row',

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   RefreshControl,
   Image,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -336,16 +337,13 @@ export default function GrovelopXScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
         <View style={styles.headerTitle}>
           <Text style={styles.headerText}>Grovelop</Text>
           <Text style={styles.headerSubtext}>/X</Text>
         </View>
-        <TouchableOpacity>
-          <Ionicons name="settings-outline" size={24} color={Colors.text.primary} />
-        </TouchableOpacity>
       </View>
 
       {/* Category Filters */}
@@ -386,7 +384,6 @@ export default function GrovelopXScreen() {
           data={filteredPosts}
           renderItem={renderPost}
           keyExtractor={(item) => item.id}
-          estimatedItemSize={200}
           showsVerticalScrollIndicator={false}
           refreshControl={
             <RefreshControl
@@ -420,15 +417,24 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: Layout.spacing.lg,
     paddingVertical: Layout.spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: Colors.neutral.gray200,
+    position: 'relative',
   },
   headerTitle: {
     flexDirection: 'row',
     alignItems: 'baseline',
+  },
+  backButton: {
+    position: 'absolute',
+    left: Layout.spacing.lg,
+    width: Layout.touchTarget.small,
+    height: Layout.touchTarget.small,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerText: {
     fontSize: Typography.fontSize['2xl'],
