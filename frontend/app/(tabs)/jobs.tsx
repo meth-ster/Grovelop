@@ -303,7 +303,7 @@ export default function JobsScreen() {
             onPress={() => handleSaveJob(job.id)}
           >
             <Ionicons 
-              name={job.saved ? "bookmark" : "bookmark-outline"} 
+              name={job.saved ? "heart" : "heart-outline"} 
               size={20} 
               color={job.saved ? Colors.primary.goldenYellow : Colors.text.secondary} 
             />
@@ -339,7 +339,7 @@ export default function JobsScreen() {
       </View>
 
       {/* Actions */}
-      <View style={styles.jobCardActions}>
+      {/* <View style={styles.jobCardActions}>
         <TouchableOpacity 
           style={styles.viewButton}
           onPress={() => {
@@ -367,7 +367,7 @@ export default function JobsScreen() {
             {job.applied ? 'Applied' : 'Apply Now'}
           </Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 

@@ -37,6 +37,10 @@ export interface Question {
   text: string;
   description?: string;
   options?: QuestionOption[];
+  // New fields for richer question types
+  fields?: Array<{ id: string; label: string; placeholder?: string }>; // for multi_text
+  sliders?: Array<{ id: string; label: string; min?: number; max?: number }>; // for multi_slider
+  categories?: Array<{ id: string; label: string; max?: number; options: QuestionOption[] }>; // for categorized_multi_select
   required: boolean;
   category: string;
   order: number;
@@ -48,7 +52,11 @@ export type QuestionType =
   | 'text_input' 
   | 'slider' 
   | 'ranking' 
-  | 'open_text';
+  | 'open_text'
+  | 'multi_text' // multiple labeled text inputs
+  | 'multi_slider' // multiple labeled sliders
+  | 'categorized_multi_select' // grouped multi-select with per-group max
+  | 'select_with_inputs'; // checkbox options that reveal text inputs
 
 export interface QuestionOption {
   id: string;

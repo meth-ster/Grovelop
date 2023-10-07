@@ -99,8 +99,8 @@ export default function HomeScreen() {
       id: 'grovelop-logo',
       title: '',
       icon: 'logo',
-      color: Colors.text.inverse,
-      backgroundColor: Colors.primary.navyBlue,
+      color: Colors.neutral.white,
+      backgroundColor: Colors.neutral.white,
       action: () => {
         // Maybe show app info or achievements
       },
@@ -188,9 +188,9 @@ export default function HomeScreen() {
               }
             </Text> */}
           </View>
-          <TouchableOpacity style={styles.notificationButton}>
+          {/* <TouchableOpacity style={styles.notificationButton}>
             <Ionicons name="notifications-outline" size={24} color={Colors.text.primary} />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Daily Insight Card */}
@@ -210,14 +210,13 @@ export default function HomeScreen() {
 
         {/* Main Grid */}
         <View style={styles.gridContainer}>
-          <Text style={styles.sectionTitle}>Your Career Dashboard</Text>
           <View style={styles.grid}>
             {gridItems.map(renderGridItem)}
           </View>
         </View>
 
         {/* Recent Activity */}
-        <View style={styles.recentSection}>
+        {/* <View style={styles.recentSection}>
           <Text style={styles.sectionTitle}>Recent Activity</Text>
           <View style={styles.activityList}>
             <View style={styles.activityItem}>
@@ -248,7 +247,7 @@ export default function HomeScreen() {
               </View>
             </View>
           </View>
-        </View>
+        </View> */}
       </ScrollView>
     </SafeAreaView>
   );

@@ -12,7 +12,7 @@ import {
   Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/useAuthStore';
 import Colors from '../constants/Colors';
@@ -23,6 +23,7 @@ type AuthMode = 'login' | 'register';
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ authMode?: string }>();
   const { login, register, loginWithGoogle, loginWithApple, isAuthenticated, user, isLoading } = useAuthStore();
   
   const [authMode, setAuthMode] = useState<AuthMode>('login');
@@ -30,6 +31,15 @@ export default function WelcomeScreen() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle navigation after authentication
+  useEffect(() => {
+    if (params?.authMode === 'register') {
+      setAuthMode('register');
+    } else if (params?.authMode === 'login') {
+      setAuthMode('login');
+    }
+  }, [params?.authMode]);
 
   // Handle navigation after authentication
   useEffect(() => {
