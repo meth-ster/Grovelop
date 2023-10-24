@@ -142,7 +142,10 @@ export default function GrovelopXScreen() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [posts] = useState(mockPosts);
+  const [posts, setPosts] = useState(mockPosts);
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [retweetedPosts, setRetweetedPosts] = useState<Set<string>>(new Set());
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set());
 
   const filteredPosts = activeCategory === 'all' 
     ? posts 
