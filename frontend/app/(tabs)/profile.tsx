@@ -19,6 +19,8 @@ import { ArchetypeType } from '../../types';
 export default function ProfileScreen() {
   const { user, updateUser, logout } = useAuthStore();
   const [isEditMode, setIsEditMode] = useState(false);
+  const [editedName, setEditedName] = useState(user?.name || '');
+  const [editedEmail, setEditedEmail] = useState(user?.email || '');
 
   const handleLogout = () => {
     Alert.alert(
