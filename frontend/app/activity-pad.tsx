@@ -1022,6 +1022,7 @@ export default function ActivityPadScreen() {
   const [expandedSteps, setExpandedSteps] = useState<{ [key: string]: boolean }>({});
   const [questionResponses, setQuestionResponses] = useState<{ [key: string]: string }>({});
   const [completedQuestions, setCompletedQuestions] = useState<{ [key: string]: boolean }>({});
+  const [savedPortfolioItems, setSavedPortfolioItems] = useState<PortfolioItem[]>(mockPortfolioItems);
   const autoSaveInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Auto-save functionality
@@ -1128,7 +1129,19 @@ export default function ActivityPadScreen() {
 
   const handleSaveToPortfolio = () => {
     if (portfolioDraft) {
-      // In a real app, this would save to the portfolio items
+      // Create a new portfolio item from the draft
+      const newPortfolioItem: PortfolioItem = {
+        id: portfolioDraft.id,
+        title: portfolioDraft.title,
+        description: portfolioDraft.description,
+        type: portfolioDraft.type,
+        createdAt: portfolioDraft.createdAt,
+        fileUrl: undefined // No file URL for now
+      };
+      
+      // Add to saved portfolio items
+      setSavedPortfolioItems(prev => [newPortfolioItem, ...prev]);
+      
       Alert.alert('Success', 'Portfolio item saved successfully!');
       setShowPortfolioEditor(false);
       setPortfolioDraft(null);
@@ -1487,7 +1500,7 @@ export default function ActivityPadScreen() {
     <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Your Portfolio Items</Text>
-        {mockPortfolioItems.map(item => (
+        {savedPortfolioItems.map(item => (
           <View key={item.id} style={styles.portfolioCard}>
             <View style={styles.portfolioHeader}>
               <View style={styles.portfolioInfo}>
@@ -2658,6 +2671,7 @@ const styles = StyleSheet.create({
   },
   portfolioEditorField: {
     marginBottom: Layout.spacing.lg,
+    marginTop: Layout.spacing.md,
   },
   portfolioEditorLabel: {
     fontSize: Typography.fontSize.sm,
