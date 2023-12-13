@@ -12,11 +12,6 @@ export default function Index() {
     if (!isLoading) {
       console.log('Index routing - isAuthenticated:', isAuthenticated, 'user:', user?.name, 'assessmentCompleted:', user?.assessmentCompleted);
       
-      // TEMPORARY: Direct to dashboard for testing
-      console.log('Bypassing authentication - going directly to dashboard for testing');
-      router.replace('/(tabs)/home');
-      
-      /* Original logic - commented out for testing
       if (!isAuthenticated) {
         console.log('Not authenticated, redirecting to welcome');
         router.replace('/welcome');
@@ -27,7 +22,6 @@ export default function Index() {
         console.log('Authenticated and assessment completed, redirecting to home');
         router.replace('/(tabs)/home');
       }
-      */
     }
   }, [isAuthenticated, isLoading, user?.assessmentCompleted, router]);
 
