@@ -469,7 +469,16 @@ export default function AssessmentScreen() {
         </Text>
         
         <TouchableOpacity 
-          onPress={() => Alert.alert('Exit Assessment', 'Are you sure you want to exit?')}
+          onPress={() => {
+            Alert.alert(
+              'Exit Assessment', 
+              'Are you sure you want to exit? Your progress will be lost.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Exit', onPress: () => router.back(), style: 'destructive' }
+              ]
+            );
+          }}
           style={styles.navButton}
         >
           <Ionicons name="close" size={24} color={Colors.text.primary} />
