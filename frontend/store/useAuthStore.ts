@@ -1,8 +1,11 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../types';
+import { api } from '../services/mockApi';
+import { AlertService } from '../services/alertService';
+import { router } from 'expo-router';
 
-// Get backend URL from environment
+// Get backend URL from environment (for future real API integration)
 const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 interface AuthState {
@@ -29,20 +32,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Login failed');
-      }
-
-      const data = await response.json();
+      // Use mock API for development/testing
+      const data = await api.login(email, password);
       const { access_token, user } = data;
       
       // Store token and user data
@@ -56,9 +47,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false,
         token: access_token
       });
+      
+      // Show success message
+      AlertService.success(`Welcome back, ${user.name}!`);
     } catch (error) {
       console.error('Login error:', error);
       set({ isLoading: false });
+      
+      // Show error message
+      const errorMessage = error instanceof Error ? error.message : 'Login failed. Please try again.';
+      AlertService.authError(errorMessage);
       throw error;
     }
   },
@@ -72,6 +70,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         id: 'google_' + Date.now(),
         email: 'user@gmail.com',
         name: 'Google User',
+        password: 'password123',
         profilePicture: 'https://via.placeholder.com/100',
         assessmentCompleted: false,
         createdAt: new Date().toISOString(),
@@ -86,9 +85,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: true, 
         isLoading: false 
       });
+      
+      // Show success message
+      AlertService.success(`Welcome, ${mockUser.name}!`);
     } catch (error) {
       console.error('Google login error:', error);
       set({ isLoading: false });
+      AlertService.error('Google login failed. Please try again.');
       throw error;
     }
   },
@@ -102,6 +105,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         id: 'apple_' + Date.now(),
         email: 'user@icloud.com',
         name: 'Apple User',
+        password: 'password123',
         assessmentCompleted: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -115,9 +119,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isAuthenticated: true, 
         isLoading: false 
       });
+      
+      // Show success message
+      AlertService.success(`Welcome, ${mockUser.name}!`);
     } catch (error) {
       console.error('Apple login error:', error);
       set({ isLoading: false });
+      AlertService.error('Apple login failed. Please try again.');
       throw error;
     }
   },
@@ -126,20 +134,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password, name }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Registration failed');
-      }
-
-      const data = await response.json();
+      // Use mock API for development/testing
+      const data = await api.register(email, password, name);
       const { access_token, user } = data;
       
       // Store token and user data
@@ -153,27 +149,40 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         isLoading: false,
         token: access_token
       });
+      
+      // Show success message
+      AlertService.success(`Account created successfully! Welcome, ${user.name}!`);
     } catch (error) {
       console.error('Registration error:', error);
       set({ isLoading: false });
+      
+      // Show error message
+      const errorMessage = error instanceof Error ? error.message : 'Registration failed. Please try again.';
+      AlertService.error(errorMessage);
       throw error;
     }
   },
 
   logout: async () => {
     try {
+      console.log('Logging out...');
       await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
       await AsyncStorage.removeItem('isAuthenticated');
-      
+
+      router.replace('/welcome');
       set({ 
         user: null, 
         isAuthenticated: false, 
         isLoading: false,
         token: null
       });
+      
+      // Show success message
+      AlertService.success('You have been logged out. Please Sign In again.');
     } catch (error) {
       console.error('Logout error:', error);
+      AlertService.error('Logout failed. Please try again.');
     }
   },
 
@@ -219,16 +228,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const currentUser = get().user;
       if (!currentUser) return;
       
-      const updatedUser = {
-        ...currentUser,
-        ...userData,
-        updatedAt: new Date().toISOString(),
-      };
+      // Use mock API for development/testing
+      const updatedUser = await api.updateUser(currentUser.id, userData);
       
       await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
       set({ user: updatedUser });
+      
+      // Show success message
+      AlertService.success('Profile updated successfully!');
     } catch (error) {
       console.error('Update user error:', error);
+      AlertService.error('Failed to update profile. Please try again.');
       throw error;
     }
   },

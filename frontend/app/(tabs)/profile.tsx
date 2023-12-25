@@ -12,26 +12,22 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/useAuthStore';
+import { AlertService } from '../../services/alertService';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import Layout from '../../constants/Layout';
 import { ArchetypeType } from '../../types';
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
   const { user, updateUser, logout } = useAuthStore();
+  const router = useRouter();
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedName, setEditedName] = useState(user?.name || '');
   const [editedEmail, setEditedEmail] = useState(user?.email || '');
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Out', onPress: logout, style: 'destructive' },
-      ]
-    );
+  const handleLogout = async () => {
+    await logout();
   };
 
   const getArchetypeColor = (archetype: ArchetypeType) => {
@@ -89,10 +85,10 @@ export default function ProfileScreen() {
                       name: editedName,
                       email: editedEmail,
                     });
-                    Alert.alert('Success', 'Profile updated successfully!');
+                    AlertService.success('Profile updated successfully!');
                     setIsEditMode(false);
                   } catch (error) {
-                    Alert.alert('Error', 'Failed to update profile. Please try again.');
+                    AlertService.error('Failed to update profile. Please try again.');
                   }
                 } else {
                   // Enter edit mode
@@ -129,26 +125,30 @@ export default function ProfileScreen() {
               <TouchableOpacity 
                 style={styles.editImageButton}
                 onPress={() => {
-                  Alert.alert(
-                    'Update Profile Picture',
-                    'Choose how you want to update your profile picture:',
-                    [
-                      { 
-                        text: 'Take Photo', 
-                        onPress: () => Alert.alert('Camera', 'Camera feature coming soon! You\'ll be able to take a new profile photo.') 
-                      },
-                      { 
-                        text: 'Choose from Gallery', 
-                        onPress: () => Alert.alert('Gallery', 'Gallery selection coming soon! You\'ll be able to choose from your photos.') 
-                      },
-                      { 
-                        text: 'Remove Photo', 
-                        onPress: () => Alert.alert('Photo Removed', 'Profile picture has been removed.'),
-                        style: 'destructive'
-                      },
-                      { text: 'Cancel', style: 'cancel' }
-                    ]
-                  );
+                  AlertService.confirm({
+                    title: 'Update Profile Picture',
+                    message: 'Choose how you want to update your profile picture:',
+                    confirmText: 'Take Photo',
+                    cancelText: 'Cancel',
+                    onConfirm: () => {
+                      AlertService.info('Camera feature coming soon! You\'ll be able to take a new profile photo.');
+                    },
+                    onCancel: () => {
+                      // Show additional options
+                      AlertService.confirm({
+                        title: 'Choose Option',
+                        message: 'What would you like to do?',
+                        confirmText: 'Choose from Gallery',
+                        cancelText: 'Remove Photo',
+                        onConfirm: () => {
+                          AlertService.info('Gallery selection coming soon! You\'ll be able to choose from your photos.');
+                        },
+                        onCancel: () => {
+                          AlertService.success('Profile picture has been removed.');
+                        },
+                      });
+                    },
+                  });
                 }}
               >
                 <Ionicons name="camera" size={16} color={Colors.text.inverse} />

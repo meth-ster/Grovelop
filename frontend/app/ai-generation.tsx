@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   Animated,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -42,27 +43,27 @@ export default function AIGenerationScreen() {
     {
       step: 'analyzing',
       progress: 20,
-      message: 'Analyzing job requirements and your profile...',
+      message: 'Analyzing your profile and strengths',
     },
     {
       step: 'generating_resume',
       progress: 50,
-      message: 'Generating tailored resume content...',
+      message: 'Integrating completed activity portfolio',
     },
     {
       step: 'generating_cover_letter',
       progress: 80,
-      message: 'Crafting personalized cover letter...',
+      message: 'Crafting compelling achievement statements',
     },
     {
       step: 'finalizing',
       progress: 95,
-      message: 'Finalizing documents and formatting...',
+      message: 'Generating employer-specific cover letter',
     },
     {
       step: 'complete',
       progress: 100,
-      message: 'Documents generated successfully!',
+      message: 'Formatting professional document layout',
     },
   ];
 
@@ -184,62 +185,99 @@ export default function AIGenerationScreen() {
 
         {!isGenerating ? (
           <>
-            {/* Generation Settings Summary */}
-            <View style={styles.settingsSummary}>
-              <Text style={styles.summaryTitle}>Generation Settings</Text>
-              <View style={styles.settingsGrid}>
-                <View style={styles.settingItem}>
-                  <Ionicons name="person" size={16} color={Colors.primary.navyBlue} />
-                  <Text style={styles.settingText}>Experience Level: {params.experienceLevel}</Text>
-                </View>
-                <View style={styles.settingItem}>
-                  <Ionicons name="globe" size={16} color={Colors.primary.navyBlue} />
-                  <Text style={styles.settingText}>Format: {params.geographicFormat}</Text>
-                </View>
-                <View style={styles.settingItem}>
-                  <Ionicons name="chatbubble" size={16} color={Colors.primary.navyBlue} />
-                  <Text style={styles.settingText}>Tone: {params.tone}</Text>
-                </View>
-                <View style={styles.settingItem}>
-                  <Ionicons name="library" size={16} color={Colors.primary.navyBlue} />
-                  <Text style={styles.settingText}>
-                    Activities: {selectedActivities ? JSON.parse(selectedActivities as string).length : 0} selected
-                  </Text>
+            {/* Generation Configuration */}
+            <View style={styles.configurationContainer}>
+              <Text style={styles.configTitle}>Generation Configuration</Text>
+              <Text style={styles.configSubtitle}>Document Generation Settings</Text>
+              
+              {/* Tone & Style */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Tone & Style:</Text>
+                <View style={styles.optionButtons}>
+                  <TouchableOpacity style={[styles.optionButton, params.tone === 'conservative' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.tone === 'conservative' && styles.selectedOptionText]}>Conservative/Traditional</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.optionButton, params.tone === 'professional' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.tone === 'professional' && styles.selectedOptionText]}>Professional/Modern</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.optionButton, params.tone === 'creative' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.tone === 'creative' && styles.selectedOptionText]}>Creative/Dynamic</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.optionButton, params.tone === 'executive' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.tone === 'executive' && styles.selectedOptionText]}>Executive/Leadership</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-            </View>
 
-            {/* AI Features */}
-            <View style={styles.aiFeatures}>
-              <Text style={styles.featuresTitle}>AI-Powered Features</Text>
-              <View style={styles.featuresList}>
-                <View style={styles.featureItem}>
-                  <Ionicons name="scan" size={20} color={Colors.primary.goldenYellow} />
-                  <View style={styles.featureContent}>
-                    <Text style={styles.featureTitle}>Smart Content Analysis</Text>
-                    <Text style={styles.featureDescription}>
-                      Analyzes job requirements and matches them with your activities
-                    </Text>
-                  </View>
+              {/* Experience Level */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Experience Level:</Text>
+                <View style={styles.optionButtons}>
+                  <TouchableOpacity style={[styles.optionButton, params.experienceLevel === 'entry' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.experienceLevel === 'entry' && styles.selectedOptionText]}>Entry Level (0-2 years)</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.optionButton, params.experienceLevel === 'mid' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.experienceLevel === 'mid' && styles.selectedOptionText]}>Mid-Level (3-7 years)</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.optionButton, params.experienceLevel === 'senior' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.experienceLevel === 'senior' && styles.selectedOptionText]}>Senior Level (8+ years)</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.optionButton, params.experienceLevel === 'executive' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.experienceLevel === 'executive' && styles.selectedOptionText]}>Executive Level (10+ years)</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.featureItem}>
-                  <Ionicons name="create" size={20} color={Colors.primary.goldenYellow} />
-                  <View style={styles.featureContent}>
-                    <Text style={styles.featureTitle}>Tailored Content Generation</Text>
-                    <Text style={styles.featureDescription}>
-                      Creates custom content highlighting your relevant experience
-                    </Text>
-                  </View>
+              </View>
+
+              {/* Geographic Format */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Geographic Format:</Text>
+                <View style={styles.optionButtons}>
+                  <TouchableOpacity style={[styles.optionButton, params.geographicFormat === 'US' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.geographicFormat === 'US' && styles.selectedOptionText]}>US Resume Style</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.optionButton, params.geographicFormat === 'EU' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.geographicFormat === 'EU' && styles.selectedOptionText]}>European CV Style</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.optionButton, params.geographicFormat === 'Academic' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.geographicFormat === 'Academic' && styles.selectedOptionText]}>Academic CV Style</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.optionButton, params.geographicFormat === 'International' && styles.selectedOption]}>
+                    <Text style={[styles.optionText, params.geographicFormat === 'International' && styles.selectedOptionText]}>International Format</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.featureItem}>
-                  <Ionicons name="trophy" size={20} color={Colors.primary.goldenYellow} />
-                  <View style={styles.featureContent}>
-                    <Text style={styles.featureTitle}>Achievement Optimization</Text>
-                    <Text style={styles.featureDescription}>
-                      Emphasizes accomplishments that matter most for this role
-                    </Text>
-                  </View>
-                </View>
+              </View>
+
+              {/* Education */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Education:</Text>
+                <Text style={styles.configValue}>${'{educationFromUserProfile}'}</Text>
+              </View>
+
+              {/* Previous Work Experience */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Previous Work Experience:</Text>
+                <Text style={styles.configValue}>${'{workExperienceFromUserProfile}'}</Text>
+              </View>
+
+              {/* References */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>References and their contacts:</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Enter references and contact information"
+                  placeholderTextColor={Colors.text.tertiary}
+                  multiline
+                  numberOfLines={3}
+                />
+              </View>
+
+              {/* Attachments */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Attach transcripts / Letters of recommendations / University diplomas:</Text>
+                <TouchableOpacity style={styles.attachmentButton}>
+                  <Ionicons name="attach" size={20} color={Colors.primary.navyBlue} />
+                  <Text style={styles.attachmentText}>Add Attachments</Text>
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -262,7 +300,7 @@ export default function AIGenerationScreen() {
                 <Ionicons name="sparkles" size={48} color={Colors.primary.goldenYellow} />
               </Animated.View>
               
-              <Text style={styles.progressTitle}>Generating Your Documents</Text>
+              <Text style={styles.progressTitle}>Creating Your Professional Documents...</Text>
               <Text style={styles.progressMessage}>{generationState.message}</Text>
               
               {/* Progress Bar */}
@@ -279,6 +317,7 @@ export default function AIGenerationScreen() {
               </View>
               
               <Text style={styles.progressPercentage}>{generationState.progress}%</Text>
+              <Text style={styles.estimatedTime}>Estimated completion: 45 seconds</Text>
             </View>
 
             {/* Generation Steps */}
@@ -473,6 +512,11 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeight.bold,
     color: Colors.primary.navyBlue,
   },
+  estimatedTime: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    marginTop: Layout.spacing.sm,
+  },
   stepsContainer: {
     paddingHorizontal: Layout.spacing.lg,
     marginTop: Layout.spacing.xl,
@@ -525,5 +569,89 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     color: Colors.error,
     fontWeight: Typography.fontWeight.medium,
+  },
+  configurationContainer: {
+    backgroundColor: Colors.background.secondary,
+    marginHorizontal: Layout.spacing.lg,
+    padding: Layout.spacing.lg,
+    borderRadius: Layout.borderRadius.md,
+    marginBottom: Layout.spacing.lg,
+  },
+  configTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.xs,
+  },
+  configSubtitle: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.lg,
+  },
+  configSection: {
+    marginBottom: Layout.spacing.lg,
+  },
+  configLabel: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.sm,
+  },
+  configValue: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    fontStyle: 'italic',
+    backgroundColor: Colors.background.primary,
+    padding: Layout.spacing.sm,
+    borderRadius: Layout.borderRadius.sm,
+  },
+  optionButtons: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Layout.spacing.sm,
+  },
+  optionButton: {
+    backgroundColor: Colors.background.primary,
+    paddingHorizontal: Layout.spacing.md,
+    paddingVertical: Layout.spacing.sm,
+    borderRadius: Layout.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray300,
+  },
+  selectedOption: {
+    backgroundColor: Colors.primary.goldenYellow,
+    borderColor: Colors.primary.navyBlue,
+  },
+  optionText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.primary,
+  },
+  selectedOptionText: {
+    fontWeight: Typography.fontWeight.semibold,
+  },
+  textInput: {
+    backgroundColor: Colors.background.primary,
+    borderRadius: Layout.borderRadius.sm,
+    padding: Layout.spacing.sm,
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.primary,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray300,
+    textAlignVertical: 'top',
+  },
+  attachmentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background.primary,
+    padding: Layout.spacing.sm,
+    borderRadius: Layout.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray300,
+    borderStyle: 'dashed',
+  },
+  attachmentText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.primary.navyBlue,
+    marginLeft: Layout.spacing.sm,
   },
 });

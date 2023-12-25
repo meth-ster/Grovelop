@@ -6,7 +6,12 @@ import Colors from '../constants/Colors';
 
 export default function Index() {
   const router = useRouter();
-  const { isAuthenticated, isLoading, user } = useAuthStore();
+  const { isAuthenticated, isLoading, user, loadUser } = useAuthStore();
+
+  useEffect(() => {
+    // Load user from AsyncStorage when app starts
+    loadUser();
+  }, [loadUser]);
 
   useEffect(() => {
     if (!isLoading) {

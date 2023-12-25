@@ -183,8 +183,8 @@ export default function DocumentPreviewScreen() {
         <Text style={styles.contextText}>Application for {jobTitle} at {company}</Text>
       </View>
 
-      {/* Document Tabs */}
-      {documentType === 'both' && (
+      {/* Document Tabs - Only show if both documents */}
+      {documentType === 'resume_cover_activity' && (
         <View style={styles.tabContainer}>
           {documents.map((doc) => (
             <TouchableOpacity
@@ -252,10 +252,20 @@ export default function DocumentPreviewScreen() {
               <Text style={styles.editButtonText}>Edit</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.exportButton} onPress={handleExportDocuments}>
-              <Text style={styles.exportButtonText}>Export & Apply</Text>
-              <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
-            </TouchableOpacity>
+            {activeTab === 'resume' && documentType === 'resume_cover_activity' ? (
+              <TouchableOpacity 
+                style={styles.nextButton} 
+                onPress={() => setActiveTab('cover_letter')}
+              >
+                <Text style={styles.nextButtonText}>Next: Go to Cover Letter</Text>
+                <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity style={styles.exportButton} onPress={handleExportDocuments}>
+                <Text style={styles.exportButtonText}>Export & Apply</Text>
+                <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
+              </TouchableOpacity>
+            )}
           </>
         )}
       </View>
@@ -456,6 +466,21 @@ const styles = StyleSheet.create({
   exportButtonText: {
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary,
+  },
+  nextButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary.goldenYellow,
+    borderRadius: Layout.borderRadius.md,
+    paddingVertical: Layout.spacing.lg,
+    paddingHorizontal: Layout.spacing.lg,
+    gap: Layout.spacing.sm,
+  },
+  nextButtonText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
   },
   documentInfo: {

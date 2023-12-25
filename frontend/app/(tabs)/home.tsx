@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/useAuthStore';
+import { AlertTest } from '../../components/AlertTest';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import Layout from '../../constants/Layout';
@@ -255,6 +256,12 @@ export default function HomeScreen() {
               </View>
             </View>
           </View>
+        </View>
+
+        {/* Alert Test Section - Remove this after testing */}
+        <View style={styles.recentSection}>
+          <Text style={styles.sectionTitle}>Alert Test (Development Only)</Text>
+          <AlertTest />
         </View>
       </ScrollView>
     </SafeAreaView>
