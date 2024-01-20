@@ -25,19 +25,34 @@ type TabType = 'my-activities' | 'activity-pad' | 'portfolio-items';
 
 interface Activity {
   id: string;
-  title: string;
-  description: string;
-  type: 'skill_building' | 'project' | 'reflection';
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  title: {
+    description: string;
+    skillFocus: string[];
+  };
+  objectives: Array<{
+    category: string;
+    outcome: string;
+  }>;
+  duration: {
+    total: string;
+    totalHours: number;
+    phases: number;
+    breakdown: Array<{
+      phase: number;
+      duration: string;
+      hours: number;
+    }>;
+  };
+  phases: Phase[];
+  resources: {
+    readingMaterials: Resource[];
+    additionalTools: string[];
+  };
+  followUpTasks: FollowUpTask[];
   status: 'completed' | 'in_progress' | 'not_started';
   progress: number;
-  estimatedTime: string;
-  skills: string[];
   createdAt: string;
   completedAt?: string;
-  phases?: Phase[];
-  resources?: Resource[];
-  followUpTasks?: FollowUpTask[];
 }
 
 interface Phase {
@@ -116,27 +131,292 @@ interface PortfolioItem {
 const mockActivities: Activity[] = [
   {
     id: '1',
-    title: 'Strategic Communication in Leadership',
-    description: 'Develop your ability to communicate strategic vision and inspire teams through clear, compelling messaging.',
-    type: 'skill_building',
-    difficulty: 'intermediate',
+    title: {
+      description: 'Develop your ability to communicate strategic vision and inspire teams through clear, compelling messaging.',
+      skillFocus: ['Communication', 'Leadership', 'Strategic Thinking']
+    },
+    objectives: [
+      {
+        category: 'Communication Skills',
+        outcome: 'Develop clear and compelling strategic messaging'
+      },
+      {
+        category: 'Leadership',
+        outcome: 'Build trust and align teams around shared vision'
+      },
+      {
+        category: 'Strategic Thinking',
+        outcome: 'Connect day-to-day work to bigger goals'
+      }
+    ],
+    duration: {
+      total: '6 hours',
+      totalHours: 6,
+      phases: 4,
+      breakdown: [
+        { phase: 1, duration: '1.5 hours', hours: 1.5 },
+        { phase: 2, duration: '2 hours', hours: 2 },
+        { phase: 3, duration: '2 hours', hours: 2 },
+        { phase: 4, duration: '30 minutes', hours: 0.5 }
+      ]
+    },
+    phases: [
+      {
+        id: 'phase-1',
+        title: 'Foundation',
+        duration: '1.5 hours',
+        steps: [
+          {
+            id: 'step-1',
+            title: 'Systems Thinking Fundamentals',
+            duration: '45 min',
+            focus: 'Understanding interconnected business systems',
+            readingMaterial: {
+              title: 'Introduction to Systems Thinking',
+              author: 'Peter Senge',
+              url: 'https://example.com/systems-thinking',
+              type: 'Book',
+              verified: 'Yes',
+              keyQuote: 'Systems thinking is a discipline for seeing wholes rather than parts.'
+            },
+            guidingQuestions: [
+              'How do different departments in your organization interact with customer retention?',
+              'What are the key feedback loops in your customer journey?',
+              'How do external factors influence your retention rates?',
+              'What system-wide changes could improve customer loyalty?'
+            ]
+          },
+          {
+            id: 'step-2',
+            title: 'Data Analysis Principles',
+            duration: '45 min',
+            focus: 'Framework for customer data interpretation',
+            readingMaterial: {
+              title: 'Analytics for Business Decision Making',
+              author: 'Harvard Business Review',
+              url: 'https://example.com/analytics-guide',
+              type: 'Article',
+              verified: 'Yes',
+              keyQuote: 'Data without context is just numbers; data with context becomes insight.'
+            },
+            guidingQuestions: [
+              'What key metrics do you currently track for customer retention?',
+              'How do you distinguish between correlation and causation in your data?',
+              'What data sources are most reliable for retention analysis?',
+              'How do you validate the accuracy of your retention metrics?'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'phase-2',
+        title: 'Analysis Framework',
+        duration: '2 hours',
+        steps: [
+          {
+            id: 'step-3',
+            title: 'Framework Development',
+            duration: '60 min',
+            focus: 'Building systematic analysis approaches',
+            readingMaterial: {
+              title: 'Strategic Analysis Methods',
+              author: 'McKinsey & Company',
+              url: 'https://example.com/strategic-analysis',
+              type: 'Report',
+              verified: 'Yes',
+              keyQuote: 'A good framework provides structure without constraining creativity.'
+            },
+            guidingQuestions: [
+              'What framework will you use to analyze customer retention patterns?',
+              'How will you segment your customer base for analysis?',
+              'What time periods are most relevant for your retention analysis?',
+              'How will you prioritize different retention factors?'
+            ]
+          },
+          {
+            id: 'step-4',
+            title: 'Data Integration',
+            duration: '60 min',
+            focus: 'Connecting multiple data sources',
+            readingMaterial: {
+              title: 'Data Integration Best Practices',
+              author: 'MIT Technology Review',
+              url: 'https://example.com/data-integration',
+              type: 'Research Paper',
+              verified: 'Yes',
+              keyQuote: 'The value of data increases exponentially when properly integrated.'
+            },
+            guidingQuestions: [
+              'What data sources will you integrate for comprehensive analysis?',
+              'How will you ensure data quality across different systems?',
+              'What tools will you use to connect disparate data sources?',
+              'How will you handle data privacy and security requirements?'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'phase-3',
+        title: 'Data Implementation',
+        duration: '2 hours',
+        steps: [
+          {
+            id: 'step-5',
+            title: 'Data Collection',
+            duration: '60 min',
+            focus: 'Gathering relevant retention data',
+            readingMaterial: {
+              title: 'Customer Data Collection Strategies',
+              author: 'Forrester Research',
+              url: 'https://example.com/data-collection',
+              type: 'White Paper',
+              verified: 'Yes',
+              keyQuote: 'Quality data collection is the foundation of meaningful analysis.'
+            },
+            guidingQuestions: [
+              'What specific data points will you collect for retention analysis?',
+              'How will you ensure data accuracy during collection?',
+              'What sampling methods will you use for large datasets?',
+              'How will you handle missing or incomplete data?'
+            ]
+          },
+          {
+            id: 'step-6',
+            title: 'Analysis Execution',
+            duration: '60 min',
+            focus: 'Applying analytical methods to real data',
+            readingMaterial: {
+              title: 'Advanced Analytics Techniques',
+              author: 'Stanford Business School',
+              url: 'https://example.com/advanced-analytics',
+              type: 'Academic Paper',
+              verified: 'Yes',
+              keyQuote: 'The best analysis combines statistical rigor with business intuition.'
+            },
+            guidingQuestions: [
+              'What analytical methods will you apply to your retention data?',
+              'How will you identify key patterns and trends?',
+              'What statistical tests will you use to validate your findings?',
+              'How will you present your analysis results clearly?'
+            ]
+          }
+        ]
+      },
+      {
+        id: 'phase-4',
+        title: 'Strategic Synthesis',
+        duration: '30 minutes',
+        steps: [
+          {
+            id: 'step-7',
+            title: 'Synthesis & Recommendations',
+            duration: '30 min',
+            focus: 'Synthesizing findings into actionable strategies',
+            readingMaterial: {
+              title: 'Strategic Communication of Insights',
+              author: 'Deloitte Insights',
+              url: 'https://example.com/strategic-communication',
+              type: 'Industry Report',
+              verified: 'Yes',
+              keyQuote: 'Insights without action are just interesting observations.'
+            },
+            guidingQuestions: [
+              'What are your key findings from the retention analysis?',
+              'What specific recommendations will you make to improve retention?',
+              'How will you prioritize your recommendations by impact?',
+              'What implementation timeline do you propose for your strategies?'
+            ]
+          }
+        ]
+      }
+    ],
+    resources: {
+      readingMaterials: [
+        {
+          id: 'resource-1',
+          title: 'The Fifth Discipline',
+          author: 'Peter Senge',
+          url: 'https://example.com/fifth-discipline',
+          type: 'Book',
+          verified: 'Yes',
+          accessType: 'Free',
+          description: 'Comprehensive guide to systems thinking in organizations',
+          relevance: 'Essential for understanding systems thinking principles'
+        },
+        {
+          id: 'resource-2',
+          title: 'Customer Analytics for Dummies',
+          author: 'Jeff Sauro',
+          url: 'https://example.com/customer-analytics',
+          type: 'Book',
+          verified: 'Yes',
+          accessType: 'Paid',
+          description: 'Practical guide to customer data analysis',
+          relevance: 'Great for beginners in customer analytics'
+        }
+      ],
+      additionalTools: [
+        'Excel/Google Sheets for data analysis',
+        'Tableau for data visualization',
+        'Customer survey tools',
+        'CRM system integration',
+        'Statistical analysis software'
+      ]
+    },
+    followUpTasks: [
+      {
+        id: 'followup-1',
+        category: 'Implementation',
+        description: 'Implement recommended retention strategies',
+        estimatedDuration: '2 weeks',
+        complexity: 'Medium'
+      },
+      {
+        id: 'followup-2',
+        category: 'Monitoring',
+        description: 'Set up ongoing retention monitoring',
+        estimatedDuration: '1 week',
+        complexity: 'Low'
+      }
+    ],
     status: 'completed',
     progress: 100,
-    estimatedTime: '6 hours',
-    skills: ['Communication', 'Leadership', 'Strategic Thinking'],
     createdAt: '2024-01-15',
     completedAt: '2024-01-20',
   },
   {
     id: '2',
-    title: 'Teacher Professional Development Program Design',
-    description: 'Design a comprehensive teacher professional development program tailored to innovative pedagogy and social-emotional learning integration.',
-    type: 'project',
-    difficulty: 'advanced',
+    title: {
+      description: 'Design a comprehensive teacher professional development program tailored to innovative pedagogy and social-emotional learning integration.',
+      skillFocus: ['Educational Leadership and Policy', 'Advanced Pedagogy and Andragogy', 'Teacher Professional Development Design', 'Community Engagement and Partnership Building']
+    },
+    objectives: [
+      {
+        category: 'Educational Leadership',
+        outcome: 'Develop comprehensive PD program design skills'
+      },
+      {
+        category: 'Pedagogy',
+        outcome: 'Integrate innovative teaching methods'
+      },
+      {
+        category: 'Community Engagement',
+        outcome: 'Build partnerships for educational impact'
+      }
+    ],
+    duration: {
+      total: '3.5 hours',
+      totalHours: 3.5,
+      phases: 4,
+      breakdown: [
+        { phase: 1, duration: '30 minutes', hours: 0.5 },
+        { phase: 2, duration: '1 hour', hours: 1 },
+        { phase: 3, duration: '1 hour', hours: 1 },
+        { phase: 4, duration: '1 hour', hours: 1 }
+      ]
+    },
     status: 'in_progress',
     progress: 25,
-    estimatedTime: '3.5 hours',
-    skills: ['Educational Leadership and Policy', 'Advanced Pedagogy and Andragogy', 'Teacher Professional Development Design', 'Community Engagement and Partnership Building'],
     createdAt: '2024-01-22',
     phases: [
       {
@@ -308,41 +588,49 @@ const mockActivities: Activity[] = [
         ]
       }
     ],
-    resources: [
-      {
-        id: 'resource-1',
-        title: 'Teacher professional learning and development',
-        author: 'Helen Timperley',
-        url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
-        type: 'PDF',
-        verified: 'Yes',
-        accessType: 'Direct free download',
-        description: 'A synthesis of research on effective PD principles focused on student outcomes and teacher inquiry.',
-        relevance: 'Provides evidence-based principles for designing PD that aligns with purpose, excellence, and justice, supporting systemic teacher growth.'
-      },
-      {
-        id: 'resource-2',
-        title: 'Effective Teacher Professional Development',
-        author: 'Linda Darling-Hammond, Maria E. Hyler, Madelyn Gardner',
-        url: 'https://learningpolicyinstitute.org/sites/default/files/product-files/Effective_Teacher_Professional_Development_BRIEF.pdf',
-        type: 'PDF',
-        verified: 'Yes',
-        accessType: 'Direct free download',
-        description: 'Research brief outlining seven features of effective PD based on rigorous studies.',
-        relevance: 'Offers practical frameworks for content, collaboration, and sustainability, integrating innovation and equity for leadership in teacher development.'
-      },
-      {
-        id: 'resource-3',
-        title: 'An Integrative Approach to Professional Development to Support College- and Career-Readiness Standards',
-        author: 'Katie Pak, Laura M. Desimone, Arianna Parsons',
-        url: 'https://files.eric.ed.gov/fulltext/EJ1265332.pdf',
-        type: 'PDF',
-        verified: 'Yes',
-        accessType: 'Direct free download',
-        description: 'Study on revised PD models for standards implementation, emphasizing collaboration and coherence.',
-        relevance: 'Connects PD design to equity and excellence, aiding in creating inclusive programs that expand influence.'
-      }
-    ],
+    resources: {
+      readingMaterials: [
+        {
+          id: 'resource-1',
+          title: 'Teacher professional learning and development',
+          author: 'Helen Timperley',
+          url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
+          type: 'PDF',
+          verified: 'Yes',
+          accessType: 'Direct free download',
+          description: 'A synthesis of research on effective PD principles focused on student outcomes and teacher inquiry.',
+          relevance: 'Provides evidence-based principles for designing PD that aligns with purpose, excellence, and justice, supporting systemic teacher growth.'
+        },
+        {
+          id: 'resource-2',
+          title: 'Effective Teacher Professional Development',
+          author: 'Linda Darling-Hammond, Maria E. Hyler, Madelyn Gardner',
+          url: 'https://learningpolicyinstitute.org/sites/default/files/product-files/Effective_Teacher_Professional_Development_BRIEF.pdf',
+          type: 'PDF',
+          verified: 'Yes',
+          accessType: 'Direct free download',
+          description: 'Research brief outlining seven features of effective PD based on rigorous studies.',
+          relevance: 'Offers practical frameworks for content, collaboration, and sustainability, integrating innovation and equity for leadership in teacher development.'
+        },
+        {
+          id: 'resource-3',
+          title: 'An Integrative Approach to Professional Development to Support College- and Career-Readiness Standards',
+          author: 'Katie Pak, Laura M. Desimone, Arianna Parsons',
+          url: 'https://files.eric.ed.gov/fulltext/EJ1265332.pdf',
+          type: 'PDF',
+          verified: 'Yes',
+          accessType: 'Direct free download',
+          description: 'Study on revised PD models for standards implementation, emphasizing collaboration and coherence.',
+          relevance: 'Connects PD design to equity and excellence, aiding in creating inclusive programs that expand influence.'
+        }
+      ],
+      additionalTools: [
+        'Educational planning software',
+        'Survey and assessment tools',
+        'Collaboration platforms',
+        'Professional development tracking systems'
+      ]
+    },
     followUpTasks: [
       {
         id: 'followup-1',
@@ -376,14 +664,42 @@ const mockActivities: Activity[] = [
   },
   {
     id: '3',
-    title: 'Team Collaboration Workshop',
-    description: 'Enhance your ability to work effectively in diverse teams and manage group dynamics.',
-    type: 'skill_building',
-    difficulty: 'beginner',
+    title: {
+      description: 'Enhance your ability to work effectively in diverse teams and manage group dynamics.',
+      skillFocus: ['Teamwork', 'Communication', 'Conflict Resolution']
+    },
+    objectives: [
+      {
+        category: 'Teamwork',
+        outcome: 'Develop effective collaboration skills'
+      },
+      {
+        category: 'Communication',
+        outcome: 'Improve team communication strategies'
+      },
+      {
+        category: 'Conflict Resolution',
+        outcome: 'Learn to manage group dynamics'
+      }
+    ],
+    duration: {
+      total: '4 hours',
+      totalHours: 4,
+      phases: 3,
+      breakdown: [
+        { phase: 1, duration: '1.5 hours', hours: 1.5 },
+        { phase: 2, duration: '1.5 hours', hours: 1.5 },
+        { phase: 3, duration: '1 hour', hours: 1 }
+      ]
+    },
+    phases: [],
+    resources: {
+      readingMaterials: [],
+      additionalTools: []
+    },
+    followUpTasks: [],
     status: 'not_started',
     progress: 0,
-    estimatedTime: '4 hours',
-    skills: ['Teamwork', 'Communication', 'Conflict Resolution'],
     createdAt: '2024-01-25',
   },
 ];
@@ -414,14 +730,37 @@ const mockPortfolioItems: PortfolioItem[] = [
 
 const mockCurrentActivity: Activity = {
   id: '2',
-  title: 'Teacher Professional Development Program Design',
-  description: 'Design a comprehensive teacher professional development program tailored to innovative pedagogy and social-emotional learning integration.',
-  type: 'project',
-  difficulty: 'advanced',
+  title: {
+    description: 'Design a comprehensive teacher professional development program tailored to innovative pedagogy and social-emotional learning integration.',
+    skillFocus: ['Educational Leadership and Policy', 'Advanced Pedagogy and Andragogy', 'Teacher Professional Development Design', 'Community Engagement and Partnership Building']
+  },
+  objectives: [
+    {
+      category: 'Educational Leadership',
+      outcome: 'Develop comprehensive PD program design skills'
+    },
+    {
+      category: 'Pedagogy',
+      outcome: 'Integrate innovative teaching methods'
+    },
+    {
+      category: 'Community Engagement',
+      outcome: 'Build partnerships for educational impact'
+    }
+  ],
+  duration: {
+    total: '3.5 hours',
+    totalHours: 3.5,
+    phases: 4,
+    breakdown: [
+      { phase: 1, duration: '30 minutes', hours: 0.5 },
+      { phase: 2, duration: '1 hour', hours: 1 },
+      { phase: 3, duration: '1 hour', hours: 1 },
+      { phase: 4, duration: '1 hour', hours: 1 }
+    ]
+  },
   status: 'in_progress',
   progress: 25,
-  estimatedTime: '3.5 hours',
-  skills: ['Educational Leadership and Policy', 'Advanced Pedagogy and Andragogy', 'Teacher Professional Development Design', 'Community Engagement and Partnership Building'],
   createdAt: '2024-01-22',
   phases: [
     {
@@ -593,41 +932,49 @@ const mockCurrentActivity: Activity = {
       ]
     }
   ],
-  resources: [
-    {
-      id: 'resource-1',
-      title: 'Teacher professional learning and development',
-      author: 'Helen Timperley',
-      url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
-      type: 'PDF',
-      verified: 'Yes',
-      accessType: 'Direct free download',
-      description: 'A synthesis of research on effective PD principles focused on student outcomes and teacher inquiry.',
-      relevance: 'Provides evidence-based principles for designing PD that aligns with purpose, excellence, and justice, supporting systemic teacher growth.'
-    },
-    {
-      id: 'resource-2',
-      title: 'Effective Teacher Professional Development',
-      author: 'Linda Darling-Hammond, Maria E. Hyler, Madelyn Gardner',
-      url: 'https://learningpolicyinstitute.org/sites/default/files/product-files/Effective_Teacher_Professional_Development_BRIEF.pdf',
-      type: 'PDF',
-      verified: 'Yes',
-      accessType: 'Direct free download',
-      description: 'Research brief outlining seven features of effective PD based on rigorous studies.',
-      relevance: 'Offers practical frameworks for content, collaboration, and sustainability, integrating innovation and equity for leadership in teacher development.'
-    },
-    {
-      id: 'resource-3',
-      title: 'An Integrative Approach to Professional Development to Support College- and Career-Readiness Standards',
-      author: 'Katie Pak, Laura M. Desimone, Arianna Parsons',
-      url: 'https://files.eric.ed.gov/fulltext/EJ1265332.pdf',
-      type: 'PDF',
-      verified: 'Yes',
-      accessType: 'Direct free download',
-      description: 'Study on revised PD models for standards implementation, emphasizing collaboration and coherence.',
-      relevance: 'Connects PD design to equity and excellence, aiding in creating inclusive programs that expand influence.'
-    }
-  ],
+  resources: {
+    readingMaterials: [
+      {
+        id: 'resource-1',
+        title: 'Teacher professional learning and development',
+        author: 'Helen Timperley',
+        url: 'http://www.iaoed.org/downloads/EdPractices_18.pdf',
+        type: 'PDF',
+        verified: 'Yes',
+        accessType: 'Direct free download',
+        description: 'A synthesis of research on effective PD principles focused on student outcomes and teacher inquiry.',
+        relevance: 'Provides evidence-based principles for designing PD that aligns with purpose, excellence, and justice, supporting systemic teacher growth.'
+      },
+      {
+        id: 'resource-2',
+        title: 'Effective Teacher Professional Development',
+        author: 'Linda Darling-Hammond, Maria E. Hyler, Madelyn Gardner',
+        url: 'https://learningpolicyinstitute.org/sites/default/files/product-files/Effective_Teacher_Professional_Development_BRIEF.pdf',
+        type: 'PDF',
+        verified: 'Yes',
+        accessType: 'Direct free download',
+        description: 'Research brief outlining seven features of effective PD based on rigorous studies.',
+        relevance: 'Offers practical frameworks for content, collaboration, and sustainability, integrating innovation and equity for leadership in teacher development.'
+      },
+      {
+        id: 'resource-3',
+        title: 'An Integrative Approach to Professional Development to Support College- and Career-Readiness Standards',
+        author: 'Katie Pak, Laura M. Desimone, Arianna Parsons',
+        url: 'https://files.eric.ed.gov/fulltext/EJ1265332.pdf',
+        type: 'PDF',
+        verified: 'Yes',
+        accessType: 'Direct free download',
+        description: 'Study on revised PD models for standards implementation, emphasizing collaboration and coherence.',
+        relevance: 'Connects PD design to equity and excellence, aiding in creating inclusive programs that expand influence.'
+      }
+    ],
+    additionalTools: [
+      'Educational planning software',
+      'Survey and assessment tools',
+      'Collaboration platforms',
+      'Professional development tracking systems'
+    ]
+  },
   followUpTasks: [
     {
       id: 'followup-1',
@@ -671,6 +1018,10 @@ export default function ActivityPadScreen() {
   const [selectedResponses, setSelectedResponses] = useState<string[]>([]);
   const [portfolioDraft, setPortfolioDraft] = useState<PortfolioItemDraft | null>(null);
   const [aiProgress, setAiProgress] = useState(0);
+  const [expandedPhases, setExpandedPhases] = useState<{ [key: string]: boolean }>({});
+  const [expandedSteps, setExpandedSteps] = useState<{ [key: string]: boolean }>({});
+  const [questionResponses, setQuestionResponses] = useState<{ [key: string]: string }>({});
+  const [completedQuestions, setCompletedQuestions] = useState<{ [key: string]: boolean }>({});
   const autoSaveInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Auto-save functionality
@@ -712,8 +1063,8 @@ export default function ActivityPadScreen() {
   };
 
   const getResponseForQuestion = (stepId: string, questionIndex: number): string => {
-    const response = activityResponses.find(r => r.stepId === stepId && r.questionIndex === questionIndex);
-    return response?.response || '';
+    const questionId = `${stepId}-${questionIndex}`;
+    return questionResponses[questionId] || '';
   };
 
   const getAllResponses = (): ActivityResponse[] => {
@@ -721,12 +1072,17 @@ export default function ActivityPadScreen() {
   };
 
   const handleCreatePortfolioItem = () => {
-    const responses = getAllResponses();
-    if (responses.length === 0) {
+    // Check if there are any responses in the new questionResponses structure
+    const hasResponses = Object.keys(questionResponses).some(key => questionResponses[key]?.trim().length > 0);
+    
+    if (!hasResponses) {
       Alert.alert('No Responses', 'Please complete some activity questions before creating a portfolio item.');
       return;
     }
-    setSelectedResponses(responses.map(r => r.stepId + '-' + r.questionIndex));
+    
+    // Get all question IDs that have responses
+    const responseKeys = Object.keys(questionResponses).filter(key => questionResponses[key]?.trim().length > 0);
+    setSelectedResponses(responseKeys);
     setShowContentSelection(true);
   };
 
@@ -779,6 +1135,46 @@ export default function ActivityPadScreen() {
     }
   };
 
+  const togglePhaseExpansion = (phaseId: string) => {
+    setExpandedPhases(prev => ({
+      ...prev,
+      [phaseId]: !prev[phaseId]
+    }));
+  };
+
+  const toggleStepExpansion = (stepId: string) => {
+    setExpandedSteps(prev => ({
+      ...prev,
+      [stepId]: !prev[stepId]
+    }));
+  };
+
+  const handleQuestionResponse = (questionId: string, response: string) => {
+    setQuestionResponses(prev => ({
+      ...prev,
+      [questionId]: response
+    }));
+  };
+
+  const handleCompleteQuestion = (questionId: string) => {
+    const response = questionResponses[questionId];
+    if (!response?.trim()) {
+      Alert.alert('Incomplete', 'Please provide a response before completing this question.');
+      return;
+    }
+    
+    setCompletedQuestions(prev => ({
+      ...prev,
+      [questionId]: true
+    }));
+    
+    Alert.alert(
+      'Question Completed!',
+      'Your response has been saved to My Activities.',
+      [{ text: 'Continue', onPress: () => {} }]
+    );
+  };
+
 
   const renderMyActivities = () => (
     <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
@@ -790,8 +1186,8 @@ export default function ActivityPadScreen() {
             <View key={activity.id} style={styles.activityCard}>
               <View style={styles.activityHeader}>
                 <View style={styles.activityInfo}>
-                  <Text style={styles.activityTitle}>{activity.title}</Text>
-                  <Text style={styles.activityDescription}>{activity.description}</Text>
+                  <Text style={styles.activityTitle}>{activity.title.description}</Text>
+                  <Text style={styles.activityDescription}>Skills: {activity.title.skillFocus.join(', ')}</Text>
                 </View>
                 <View style={styles.completedBadge}>
                   <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
@@ -799,10 +1195,10 @@ export default function ActivityPadScreen() {
               </View>
               <View style={styles.activityMeta}>
                 <Text style={styles.metaText}>Completed: {activity.completedAt}</Text>
-                <Text style={styles.metaText}>Duration: {activity.estimatedTime}</Text>
+                <Text style={styles.metaText}>Duration: {activity.duration.total}</Text>
               </View>
               <View style={styles.skillsContainer}>
-                {activity.skills.map((skill, index) => (
+                {activity.title.skillFocus.map((skill, index) => (
                   <View key={index} style={styles.skillTag}>
                     <Text style={styles.skillText}>{skill}</Text>
                   </View>
@@ -820,8 +1216,8 @@ export default function ActivityPadScreen() {
             <View key={activity.id} style={styles.activityCard}>
               <View style={styles.activityHeader}>
                 <View style={styles.activityInfo}>
-                  <Text style={styles.activityTitle}>{activity.title}</Text>
-                  <Text style={styles.activityDescription}>{activity.description}</Text>
+                  <Text style={styles.activityTitle}>{activity.title.description}</Text>
+                  <Text style={styles.activityDescription}>Skills: {activity.title.skillFocus.join(', ')}</Text>
                 </View>
                 <View style={styles.progressBadge}>
                   <Text style={styles.progressText}>{activity.progress}%</Text>
@@ -832,7 +1228,7 @@ export default function ActivityPadScreen() {
               </View>
               <View style={styles.activityMeta}>
                 <Text style={styles.metaText}>Started: {activity.createdAt}</Text>
-                <Text style={styles.metaText}>Remaining: {activity.estimatedTime}</Text>
+                <Text style={styles.metaText}>Remaining: {activity.duration.total}</Text>
               </View>
             </View>
           ))}
@@ -846,16 +1242,16 @@ export default function ActivityPadScreen() {
             <View key={activity.id} style={styles.activityCard}>
               <View style={styles.activityHeader}>
                 <View style={styles.activityInfo}>
-                  <Text style={styles.activityTitle}>{activity.title}</Text>
-                  <Text style={styles.activityDescription}>{activity.description}</Text>
+                  <Text style={styles.activityTitle}>{activity.title.description}</Text>
+                  <Text style={styles.activityDescription}>Skills: {activity.title.skillFocus.join(', ')}</Text>
                 </View>
                 <TouchableOpacity style={styles.startButton}>
                   <Text style={styles.startButtonText}>Start</Text>
                 </TouchableOpacity>
               </View>
               <View style={styles.activityMeta}>
-                <Text style={styles.metaText}>Estimated: {activity.estimatedTime}</Text>
-                <Text style={styles.metaText}>Difficulty: {activity.difficulty}</Text>
+                <Text style={styles.metaText}>Estimated: {activity.duration.total}</Text>
+                <Text style={styles.metaText}>Phases: {activity.duration.phases}</Text>
               </View>
             </View>
           ))}
@@ -864,17 +1260,29 @@ export default function ActivityPadScreen() {
   );
 
   const renderActivityPad = () => (
-    <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-      <View style={styles.currentActivityCard}>
+    <View style={styles.activityPadContainer}>
+      {/* Fixed Progress Bar */}
+      <View style={styles.fixedProgressBar}>
+        <View style={styles.progressContainer}>
+          <Text style={styles.fixedProgressText}>
+            Systems Analysis for Customer Retention Strategy
+          </Text>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: `${mockCurrentActivity.progress}%` }]} />
+          </View>
+          <Text style={styles.fixedProgressPercentage}>{mockCurrentActivity.progress}% Complete</Text>
+        </View>
+      </View>
+
+      <ScrollView style={[styles.tabContent, styles.scrollViewWithFixedBar]} showsVerticalScrollIndicator={false}>
+        <View style={styles.currentActivityCard}>
         <View style={styles.activityHeader}>
           <View style={styles.activityInfo}>
-            <Text style={styles.currentActivityTitle}>{mockCurrentActivity.title}</Text>
-            <Text style={styles.currentActivityDescription}>{mockCurrentActivity.description}</Text>
+            <Text style={styles.currentActivityTitle}>Systems Analysis for Customer Retention Strategy</Text>
+            <Text style={styles.currentActivityDescription}>{mockCurrentActivity.title.description}</Text>
           </View>
           <View style={styles.difficultyBadge}>
-            <Text style={styles.difficultyText}>
-              {mockCurrentActivity.difficulty.charAt(0).toUpperCase() + mockCurrentActivity.difficulty.slice(1)}
-            </Text>
+            <Text style={styles.difficultyText}>Advanced</Text>
           </View>
         </View>
 
@@ -891,7 +1299,7 @@ export default function ActivityPadScreen() {
         <View style={styles.skillsContainer}>
           <Text style={styles.skillsLabel}>Skills Being Developed:</Text>
           <View style={styles.skillsRow}>
-            {mockCurrentActivity.skills.map((skill, index) => (
+            {mockCurrentActivity.title.skillFocus.map((skill, index) => (
               <View key={index} style={styles.skillTag}>
                 <Text style={styles.skillText}>{skill}</Text>
               </View>
@@ -902,7 +1310,7 @@ export default function ActivityPadScreen() {
         <View style={styles.activityMeta}>
           <View style={styles.metaItem}>
             <Ionicons name="time-outline" size={16} color={Colors.text.secondary} />
-            <Text style={styles.metaText}>{mockCurrentActivity.estimatedTime}</Text>
+            <Text style={styles.metaText}>{mockCurrentActivity.duration.total}</Text>
           </View>
           <View style={styles.metaItem}>
             <Ionicons name="calendar-outline" size={16} color={Colors.text.secondary} />
@@ -914,70 +1322,110 @@ export default function ActivityPadScreen() {
           <Text style={styles.phasesTitle}>Activity Phases</Text>
           {mockCurrentActivity.phases?.map((phase, phaseIndex) => (
             <View key={phase.id} style={styles.phaseCard}>
-              <View style={styles.phaseHeader}>
-                <Text style={styles.phaseTitle}>{phase.title}</Text>
-                <Text style={styles.phaseDuration}>{phase.duration}</Text>
-              </View>
-              {phase.steps.map((step, stepIndex) => (
-                <View key={step.id} style={styles.stepItem}>
-                  <View style={styles.stepHeader}>
-                    <Ionicons 
-                      name={stepIndex === 0 ? "checkmark-circle" : "ellipse-outline"} 
-                      size={20} 
-                      color={stepIndex === 0 ? Colors.success : Colors.text.secondary} 
-                    />
-                    <Text style={styles.stepTitle}>{step.title}</Text>
-                    <Text style={styles.stepDuration}>{step.duration}</Text>
-                  </View>
-                  <Text style={styles.stepFocus}>{step.focus}</Text>
-                  {step.readingMaterial && (
-                    <View style={styles.readingMaterial}>
-                      <Text style={styles.readingTitle}>📚 {step.readingMaterial.title}</Text>
-                      <Text style={styles.readingAuthor}>by {step.readingMaterial.author}</Text>
-                      <Text style={styles.readingQuote}>"{step.readingMaterial.keyQuote}"</Text>
-                    </View>
-                  )}
-                  <View style={styles.guidingQuestions}>
-                    <Text style={styles.guidingQuestionsTitle}>Guiding Questions:</Text>
-                    {step.guidingQuestions.map((question, qIndex) => {
-                      const responseKey = step.id + '-' + qIndex;
-                      const currentResponse = getResponseForQuestion(step.id, qIndex);
-                      const wordCount = currentResponse.trim().split(/\s+/).length;
-                      
-                      return (
-                        <View key={qIndex} style={styles.questionContainer}>
-                          <Text style={styles.guidingQuestion}>
-                            • {question}
-                          </Text>
-                          <TextInput
-                            style={styles.responseInput}
-                            placeholder="Share your thoughts and insights here..."
-                            value={currentResponse}
-                            onChangeText={(text) => updateResponse(step.id, qIndex, text)}
-                            multiline
-                            textAlignVertical="top"
-                            placeholderTextColor={Colors.text.tertiary}
-                          />
-                          <View style={styles.responseMeta}>
-                            <Text style={styles.wordCount}>{wordCount} words</Text>
-                            {wordCount > 0 && (
-                              <Ionicons name="checkmark-circle" size={16} color={Colors.success} />
-                            )}
-                          </View>
-                        </View>
-                      );
-                    })}
+              <TouchableOpacity 
+                style={styles.phaseHeader}
+                onPress={() => togglePhaseExpansion(phase.id)}
+              >
+                <View style={styles.phaseHeaderContent}>
+                  <Text style={styles.phaseNumber}>{phaseIndex + 1}</Text>
+                  <View style={styles.phaseInfo}>
+                    <Text style={styles.phaseTitle}>{phase.title}</Text>
+                    <Text style={styles.phaseDuration}>{phase.duration} • {phase.steps.length} steps</Text>
                   </View>
                 </View>
-              ))}
+                <Ionicons 
+                  name={expandedPhases[phase.id] ? "chevron-up" : "chevron-down"} 
+                  size={20} 
+                  color={Colors.text.secondary} 
+                />
+              </TouchableOpacity>
+              
+              {expandedPhases[phase.id] && (
+                <View style={styles.phaseDetails}>
+                  {phase.steps.map((step, stepIndex) => (
+                    <View key={step.id} style={styles.stepCard}>
+                      <TouchableOpacity 
+                        style={[styles.stepHeaderNew, expandedSteps[step.id] && styles.expandedStepHeader]}
+                        onPress={() => toggleStepExpansion(step.id)}
+                      >
+                        <View style={styles.stepHeaderContent}>
+                          <Text style={styles.stepNumber}>{stepIndex + 1}</Text>
+                          <View style={styles.stepInfo}>
+                            <Text style={styles.stepTitle}>{step.title}</Text>
+                            <Text style={styles.stepDuration}>{step.duration}</Text>
+                          </View>
+                        </View>
+                        <Ionicons 
+                          name={expandedSteps[step.id] ? "chevron-up" : "chevron-down"} 
+                          size={16} 
+                          color={Colors.text.secondary} 
+                        />
+                      </TouchableOpacity>
+                      
+                      {expandedSteps[step.id] && (
+                        <View style={styles.stepDetailsNew}>
+                          <View style={styles.readingSectionNew}>
+                            <Text style={styles.sectionLabelNew}>Reading Material:</Text>
+                            <Text style={styles.readingTitleNew}>"{step.readingMaterial?.title}"</Text>
+                            <Text style={styles.readingAuthorNew}>by {step.readingMaterial?.author}</Text>
+                            <Text style={styles.readingQuoteNew}>"{step.readingMaterial?.keyQuote}"</Text>
+                          </View>
+                          
+                          <View style={styles.focusSectionNew}>
+                            <Text style={styles.sectionLabelNew}>Focus:</Text>
+                            <Text style={styles.focusText}>{step.focus}</Text>
+                          </View>
+                          
+                          <View style={styles.questionsSectionNew}>
+                            <Text style={styles.sectionLabelNew}>Guiding Questions:</Text>
+                            {step.guidingQuestions.map((question, questionIndex) => {
+                              const questionId = `${phase.id}-${step.id}-${questionIndex}`;
+                              const currentResponse = questionResponses[questionId] || '';
+                              const isCompleted = completedQuestions[questionId];
+                              
+                              return (
+                                <View key={questionIndex} style={styles.questionItem}>
+                                  <Text style={styles.questionNumber}>{questionIndex + 1}.</Text>
+                                  <Text style={styles.questionText}>{question}</Text>
+                                  
+                                  <View style={styles.responseSection}>
+                                    <Text style={styles.responseLabel}>Your Response:</Text>
+                                    <TextInput
+                                      style={styles.responseInput}
+                                      placeholder="Type your response here..."
+                                      value={currentResponse}
+                                      onChangeText={(text) => handleQuestionResponse(questionId, text)}
+                                      multiline
+                                      placeholderTextColor={Colors.text.tertiary}
+                                    />
+                                    
+                                    <TouchableOpacity 
+                                      style={[styles.completeButton, isCompleted && styles.completedButton]} 
+                                      onPress={() => handleCompleteQuestion(questionId)}
+                                    >
+                                      <Text style={styles.completeButtonText}>
+                                        {isCompleted ? '✓ Completed' : 'Complete Question'}
+                                      </Text>
+                                    </TouchableOpacity>
+                                  </View>
+                                </View>
+                              );
+                            })}
+                          </View>
+                        </View>
+                      )}
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
           ))}
         </View>
 
-        {mockCurrentActivity.resources && mockCurrentActivity.resources.length > 0 && (
+        {mockCurrentActivity.resources && mockCurrentActivity.resources.readingMaterials.length > 0 && (
           <View style={styles.resourcesSection}>
             <Text style={styles.resourcesTitle}>Resources</Text>
-            {mockCurrentActivity.resources.map((resource) => (
+            {mockCurrentActivity.resources.readingMaterials.map((resource) => (
               <View key={resource.id} style={styles.resourceCard}>
                 <View style={styles.resourceHeader}>
                   <Text style={styles.resourceTitle}>{resource.title}</Text>
@@ -1017,24 +1465,6 @@ export default function ActivityPadScreen() {
           </View>
         )}
 
-        <View style={styles.workArea}>
-          <Text style={styles.workAreaTitle}>Your Work Area</Text>
-          <TextInput
-            style={styles.workInput}
-            placeholder="Start designing your teacher professional development program. Consider your chosen focus area, target outcomes, and implementation strategies..."
-            multiline
-            placeholderTextColor={Colors.text.tertiary}
-          />
-          <View style={styles.workActions}>
-            <TouchableOpacity style={styles.saveButton}>
-              <Text style={styles.saveButtonText}>Save Progress</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.submitButton}>
-              <Text style={styles.submitButtonText}>Submit Task</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         <View style={styles.portfolioCreationSection}>
           <Text style={styles.portfolioCreationTitle}>Create Portfolio Item</Text>
           <Text style={styles.portfolioCreationDescription}>
@@ -1049,7 +1479,8 @@ export default function ActivityPadScreen() {
           </TouchableOpacity>
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 
   const renderPortfolioItems = () => (
@@ -1199,7 +1630,7 @@ export default function ActivityPadScreen() {
                   {phase.steps.map((step, stepIndex) => (
                     <View key={step.id} style={styles.stepSelectionGroup}>
                       {step.guidingQuestions.map((question, qIndex) => {
-                        const responseKey = step.id + '-' + qIndex;
+                        const responseKey = `${phase.id}-${step.id}-${qIndex}`;
                         const response = getResponseForQuestion(step.id, qIndex);
                         const wordCount = response.trim().split(/\s+/).length;
                         const isSelected = selectedResponses.includes(responseKey);
@@ -1781,8 +2212,8 @@ const styles = StyleSheet.create({
   phaseCard: {
     backgroundColor: Colors.background.primary,
     borderRadius: Layout.borderRadius.md,
-    padding: Layout.spacing.md,
-    marginBottom: Layout.spacing.md,
+    padding: Layout.spacing.sm,
+    marginBottom: Layout.spacing.sm,
     borderWidth: 1,
     borderColor: Colors.neutral.gray200,
   },
@@ -1801,7 +2232,6 @@ const styles = StyleSheet.create({
   phaseDuration: {
     fontSize: Typography.fontSize.sm,
     color: Colors.text.secondary,
-    backgroundColor: Colors.primary.goldenYellow,
     paddingHorizontal: Layout.spacing.sm,
     paddingVertical: Layout.spacing.xs,
     borderRadius: Layout.borderRadius.sm,
@@ -2076,6 +2506,7 @@ const styles = StyleSheet.create({
   contentSelectionContainer: {
     flex: 1,
     paddingHorizontal: Layout.spacing.lg,
+    paddingTop: Layout.spacing.md,
   },
   contentSelectionTitle: {
     fontSize: Typography.fontSize.lg,
@@ -2260,5 +2691,200 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.inverse,
+  },
+  // New styles for expandable structure
+  phaseHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: Layout.spacing.md,
+  },
+  phaseNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.primary.navyBlue,
+    color: Colors.text.inverse,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.bold,
+    textAlign: 'center',
+    lineHeight: 32,
+  },
+  phaseInfo: {
+    flex: 1,
+  },
+  phaseDetails: {
+    backgroundColor: Colors.background.primary,
+    paddingVertical: Layout.spacing.sm,
+    gap: Layout.spacing.md,
+  },
+  stepCard: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.md,
+    // marginBottom: Layout.spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray200,
+  },
+  stepHeaderNew: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Layout.spacing.sm,
+    paddingHorizontal: Layout.spacing.sm,
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.md,
+  },
+  expandedStepHeader: {
+    backgroundColor: Colors.primary.goldenYellow,
+  },
+  stepHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: Layout.spacing.md,
+  },
+  stepNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.primary.navyBlue,
+    color: Colors.text.inverse,
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.bold,
+    textAlign: 'center',
+    lineHeight: 28,
+  },
+  stepInfo: {
+    flex: 1,
+  },
+  stepDetailsNew: {
+    backgroundColor: Colors.background.primary,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.md,
+    marginBottom: Layout.spacing.md,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.primary.goldenYellow,
+  },
+  readingSectionNew: {
+    marginBottom: Layout.spacing.md,
+  },
+  focusSectionNew: {
+    marginBottom: Layout.spacing.md,
+  },
+  questionsSectionNew: {
+    marginBottom: Layout.spacing.md,
+  },
+  sectionLabelNew: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.sm,
+  },
+  readingTitleNew: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.xs,
+  },
+  readingAuthorNew: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.sm,
+  },
+  readingQuoteNew: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    fontStyle: 'italic',
+    backgroundColor: Colors.neutral.gray100,
+    padding: Layout.spacing.sm,
+    borderRadius: Layout.borderRadius.sm,
+  },
+  focusText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+  },
+  questionItem: {
+    marginBottom: Layout.spacing.lg,
+    padding: Layout.spacing.md,
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray200,
+  },
+  questionNumber: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.sm,
+  },
+  questionText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.md,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+  },
+  responseSection: {
+    marginTop: Layout.spacing.md,
+  },
+  responseLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.sm,
+  },
+  completeButton: {
+    backgroundColor: Colors.primary.navyBlue,
+    borderRadius: Layout.borderRadius.md,
+    paddingVertical: Layout.spacing.sm,
+    paddingHorizontal: Layout.spacing.md,
+    alignItems: 'center',
+    marginTop: Layout.spacing.sm,
+  },
+  completedButton: {
+    backgroundColor: Colors.success,
+  },
+  completeButtonText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.inverse,
+  },
+  // Fixed Progress Bar styles
+  activityPadContainer: {
+    flex: 1,
+  },
+  fixedProgressBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    backgroundColor: Colors.background.primary,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.neutral.gray200,
+    paddingVertical: Layout.spacing.sm,
+    paddingHorizontal: Layout.spacing.lg,
+    shadowColor: Colors.neutral.gray900,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  progressContainer: {
+    gap: Layout.spacing.xs,
+  },
+  fixedProgressText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.primary,
+    textAlign: 'center',
+  },
+  fixedProgressPercentage: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.secondary,
+    textAlign: 'center',
+  },
+  scrollViewWithFixedBar: {
+    paddingTop: 80, // Account for fixed progress bar height
   },
 });

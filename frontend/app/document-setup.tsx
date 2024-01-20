@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 import Layout from '../constants/Layout';
+import { useDocumentStore } from '../store/useDocumentStore';
 
 type DocumentType = 'resume_only' | 'resume_cover_activity' | 'cover_letter_only';
 type ExperienceLevel = 'entry' | 'mid' | 'senior' | 'executive';
@@ -34,6 +35,7 @@ export default function DocumentSetupScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const { jobTitle, company } = params;
+  const { setDocumentType } = useDocumentStore();
 
   const [config, setConfig] = useState<DocumentConfig>({
     type: 'resume_cover_activity',
@@ -46,16 +48,9 @@ export default function DocumentSetupScreen() {
   });
 
   const handleContinue = () => {
-    if (!config.targetRole.trim()) {
-      Alert.alert('Missing Information', 'Please specify the target role.');
-      return;
-    }
 
-    if (!config.companyName.trim()) {
-      Alert.alert('Missing Information', 'Please specify the company name.');
-      return;
-    }
-
+    // Store document type in Zustand store
+    setDocumentType(config.type);
     // Skip activity portfolio selection if resume only
     if (config.type === 'resume_only') {
       router.push({

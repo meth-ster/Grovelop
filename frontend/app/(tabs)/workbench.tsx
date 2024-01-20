@@ -8,9 +8,7 @@ import {
   TextInput,
   Dimensions,
   PanResponder,
-  Animated,
   Alert,
-  LinearGradient,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -29,9 +27,9 @@ type PageType = 'archetypes' | 'skills' | 'generation' | 'preview' | 'workbench'
 interface Archetype {
   id: string;
   name: string;
-  percentage: number;
+  // percentage: number;
   isPrimary: boolean;
-  subtitle: string;
+  // subtitle: string;
   icon: string;
   gradient: string[];
 }
@@ -62,54 +60,54 @@ const archetypes: Archetype[] = [
   {
     id: 'doer',
     name: 'Doer',
-    percentage: 25,
+    // percentage: 25,
     isPrimary: false,
-    subtitle: 'Build tangible solutions',
+    // subtitle: 'Build tangible solutions',
     icon: 'hammer',
     gradient: ['#8B4513', '#228B22'],
   },
   {
     id: 'thinker',
     name: 'Thinker',
-    percentage: 45,
+    // percentage: 45,
     isPrimary: true,
-    subtitle: 'Analyze and innovate',
+    // subtitle: 'Analyze and innovate',
     icon: 'bulb',
     gradient: ['#1E90FF', '#4682B4'],
   },
   {
     id: 'creator',
     name: 'Creator',
-    percentage: 15,
+    // percentage: 15,
     isPrimary: false,
-    subtitle: 'Design and express',
+    // subtitle: 'Design and express',
     icon: 'color-palette',
     gradient: ['#9932CC', '#FF69B4'],
   },
   {
     id: 'helper',
     name: 'Helper',
-    percentage: 20,
+    // percentage: 20,
     isPrimary: false,
-    subtitle: 'Support and guide',
+    // subtitle: 'Support and guide',
     icon: 'heart',
     gradient: ['#FF6347', '#87CEEB'],
   },
   {
     id: 'persuader',
     name: 'Persuader',
-    percentage: 30,
+    // percentage: 30,
     isPrimary: false,
-    subtitle: 'Lead and influence',
+    // subtitle: 'Lead and influence',
     icon: 'megaphone',
     gradient: ['#B22222', '#FF8C00'],
   },
   {
     id: 'organiser',
     name: 'Organiser',
-    percentage: 10,
+    // percentage: 10,
     isPrimary: false,
-    subtitle: 'Structure and optimize',
+    // subtitle: 'Structure and optimize',
     icon: 'clipboard',
     gradient: ['#2F4F4F', '#708090'],
   },
@@ -233,6 +231,7 @@ export default function WorkbenchScreen() {
   const [splitPosition, setSplitPosition] = useState(DEFAULT_SPLIT);
   const [activeTask, setActiveTask] = useState(0);
   const [taskResponses, setTaskResponses] = useState<{ [key: string]: string }>({});
+  const [expandedPhases, setExpandedPhases] = useState<{ [key: string]: boolean }>({});
 
   const panResponder = useRef(
     PanResponder.create({
@@ -307,6 +306,13 @@ export default function WorkbenchScreen() {
     setTaskResponses({ ...taskResponses, [taskId]: response });
   };
 
+  const togglePhaseExpansion = (phaseId: string) => {
+    setExpandedPhases(prev => ({
+      ...prev,
+      [phaseId]: !prev[phaseId]
+    }));
+  };
+
   const handleCompleteTask = () => {
     const currentTask = mockActivity.tasks[activeTask];
     const response = taskResponses[currentTask.id];
@@ -356,15 +362,15 @@ export default function WorkbenchScreen() {
             >
               <View style={[styles.archetypeGradient, { backgroundColor: archetype.gradient[0] }]}>
                 <View style={styles.archetypeHeader}>
-                  <View style={styles.percentageBadge}>
+                  {/* <View style={styles.percentageBadge}>
                     <Text style={styles.percentageText}>{archetype.percentage}%</Text>
                     {archetype.isPrimary && <Text style={styles.primaryLabel}>PRIMARY</Text>}
-                  </View>
-                  <Ionicons name={archetype.icon as any} size={32} color={Colors.text.inverse} />
+                  </View> */}
+                  <Ionicons name={archetype.icon as any} size={26} color={Colors.text.inverse} />
                 </View>
-                <Text style={styles.archetypeName}>{archetype.name}</Text>
-                <Text style={styles.archetypeSubtitle}>{archetype.subtitle}</Text>
               </View>
+                <Text style={styles.archetypeName}>{archetype.name}</Text>
+                {/* <Text style={styles.archetypeSubtitle}>{archetype.subtitle}</Text> */}
             </TouchableOpacity>
           ))}
         </View>
@@ -476,7 +482,7 @@ export default function WorkbenchScreen() {
         <TouchableOpacity onPress={() => setCurrentPage('generation')}>
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Your Personalized Activity</Text>
+        <Text style={styles.headerTitle}>Development Activity</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -489,31 +495,293 @@ export default function WorkbenchScreen() {
           
           <View style={styles.activityMeta}>
             <Text style={styles.metaText}>Skills Developed: Systems Thinking, Data Analysis</Text>
-            <Text style={styles.metaText}>Duration: 6 hours across 4 phases</Text>
+            <Text style={styles.metaText}>Total Duration: 6 hours</Text>
             <Text style={styles.metaText}>Archetype Focus: Thinker (Primary)</Text>
           </View>
 
-          <View style={styles.phasesContainer}>
-            <Text style={styles.phasesTitle}>Phase-by-Phase Breakdown</Text>
-            <View style={styles.phaseItem}>
-              <Text style={styles.phaseTitle}>Phase 1: Foundation (1.5 hours)</Text>
-              <Text style={styles.phaseDescription}>Step 1: Systems Thinking Fundamentals (45 min)</Text>
-              <Text style={styles.phaseDescription}>Step 2: Data Analysis Principles (45 min)</Text>
+          <View style={styles.activityStructure}>
+            <Text style={styles.structureTitle}>Activity Structure</Text>
+            
+            <View style={styles.durationCard}>
+              <View style={styles.durationHeader}>
+                <Ionicons name="time-outline" size={20} color={Colors.primary.goldenYellow} />
+                <Text style={styles.durationTitle}>Total Duration: 6 hours</Text>
+              </View>
+              <View style={styles.durationBreakdown}>
+                <View style={styles.durationRow}>
+                  <Text style={styles.durationPhase}>Phase 1: Foundation</Text>
+                  <Text style={styles.durationTime}>1.5 hours</Text>
+                </View>
+                <View style={styles.durationRow}>
+                  <Text style={styles.durationPhase}>Phase 2: Analysis Framework</Text>
+                  <Text style={styles.durationTime}>2 hours</Text>
+                </View>
+                <View style={styles.durationRow}>
+                  <Text style={styles.durationPhase}>Phase 3: Data Implementation</Text>
+                  <Text style={styles.durationTime}>2 hours</Text>
+                </View>
+                <View style={styles.durationRow}>
+                  <Text style={styles.durationPhase}>Phase 4: Strategic Synthesis</Text>
+                  <Text style={styles.durationTime}>30 minutes</Text>
+                </View>
+              </View>
             </View>
-            <View style={styles.phaseItem}>
-              <Text style={styles.phaseTitle}>Phase 2: Analysis Framework (2 hours)</Text>
-              <Text style={styles.phaseDescription}>Step 1: Systems Thinking Fundamentals (45 min)</Text>
-              <Text style={styles.phaseDescription}>Step 2: Data Analysis Principles (45 min)</Text>
-            </View>
-            <View style={styles.phaseItem}>
-              <Text style={styles.phaseTitle}>Phase 3: Data Implementation (2 hours)</Text>
-              <Text style={styles.phaseDescription}>Step 1: Systems Thinking Fundamentals (45 min)</Text>
-              <Text style={styles.phaseDescription}>Step 2: Data Analysis Principles (45 min)</Text>
-            </View>
-            <View style={styles.phaseItem}>
-              <Text style={styles.phaseTitle}>Phase 4: Strategic Synthesis (30 minutes)</Text>
-              <Text style={styles.phaseDescription}>Step 1: Systems Thinking Fundamentals (45 min)</Text>
-              <Text style={styles.phaseDescription}>Step 2: Data Analysis Principles (45 min)</Text>
+
+            <View style={styles.phasesSection}>
+              <Text style={styles.sectionTitle}>Phase Breakdown</Text>
+              <Text style={styles.sectionSubtitle}>Tap any phase to explore details</Text>
+              
+              <View style={styles.phaseList}>
+                <View style={styles.phaseCard}>
+                  <TouchableOpacity 
+                    style={[styles.phaseHeader, expandedPhases.phase1 && styles.expandedHeader]}
+                    onPress={() => togglePhaseExpansion('phase1')}
+                  >
+                    <View style={styles.phaseHeaderContent}>
+                      <View style={styles.phaseNumber}>1</View>
+                      <View style={styles.phaseInfo}>
+                        <Text style={styles.phaseName}>Foundation</Text>
+                        <Text style={styles.phaseDuration}>1.5 hours • 2 steps</Text>
+                      </View>
+                    </View>
+                    <Ionicons 
+                      name={expandedPhases.phase1 ? "chevron-up" : "chevron-down"} 
+                      size={20} 
+                      color={Colors.text.secondary} 
+                    />
+                  </TouchableOpacity>
+                  
+                  {expandedPhases.phase1 && (
+                    <View style={styles.phaseDetails}>
+                      <View style={styles.stepCard}>
+                        <View style={styles.stepHeader}>
+                          <Ionicons name="book-outline" size={16} color={Colors.primary.navyBlue} />
+                          <Text style={styles.stepTitle}>Systems Thinking Fundamentals</Text>
+                          <Text style={styles.stepDuration}>45 min</Text>
+                        </View>
+                        <View style={styles.stepContent}>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="library-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Reading: "Introduction to Systems Thinking" by Peter Senge</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="eye-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Focus: Understanding interconnected business systems</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="help-circle-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Questions: Apply systems mapping to your customer journey</Text>
+                          </View>
+                        </View>
+                      </View>
+                      
+                      <View style={styles.stepCard}>
+                        <View style={styles.stepHeader}>
+                          <Ionicons name="analytics-outline" size={16} color={Colors.primary.navyBlue} />
+                          <Text style={styles.stepTitle}>Data Analysis Principles</Text>
+                          <Text style={styles.stepDuration}>45 min</Text>
+                        </View>
+                        <View style={styles.stepContent}>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="library-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Reading: "Analytics for Business Decision Making"</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="eye-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Focus: Framework for customer data interpretation</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="help-circle-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Questions: Identify key retention metrics for your context</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.phaseCard}>
+                  <TouchableOpacity 
+                    style={[styles.phaseHeader, expandedPhases.phase2 && styles.expandedHeader]}
+                    onPress={() => togglePhaseExpansion('phase2')}
+                  >
+                    <View style={styles.phaseHeaderContent}>
+                      <View style={styles.phaseNumber}>2</View>
+                      <View style={styles.phaseInfo}>
+                        <Text style={styles.phaseName}>Analysis Framework</Text>
+                        <Text style={styles.phaseDuration}>2 hours • 2 steps</Text>
+                      </View>
+                    </View>
+                    <Ionicons 
+                      name={expandedPhases.phase2 ? "chevron-up" : "chevron-down"} 
+                      size={20} 
+                      color={Colors.text.secondary} 
+                    />
+                  </TouchableOpacity>
+                  
+                  {expandedPhases.phase2 && (
+                    <View style={styles.phaseDetails}>
+                      <View style={styles.stepCard}>
+                        <View style={styles.stepHeader}>
+                          <Ionicons name="construct-outline" size={16} color={Colors.primary.navyBlue} />
+                          <Text style={styles.stepTitle}>Framework Development</Text>
+                          <Text style={styles.stepDuration}>60 min</Text>
+                        </View>
+                        <View style={styles.stepContent}>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="library-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Reading: "Strategic Analysis Methods"</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="eye-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Focus: Building systematic analysis approaches</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="help-circle-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Questions: Design your retention analysis framework</Text>
+                          </View>
+                        </View>
+                      </View>
+                      
+                      <View style={styles.stepCard}>
+                        <View style={styles.stepHeader}>
+                          <Ionicons name="link-outline" size={16} color={Colors.primary.navyBlue} />
+                          <Text style={styles.stepTitle}>Data Integration</Text>
+                          <Text style={styles.stepDuration}>60 min</Text>
+                        </View>
+                        <View style={styles.stepContent}>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="library-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Reading: "Data Integration Best Practices"</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="eye-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Focus: Connecting multiple data sources</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="help-circle-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Questions: Map your data ecosystem for retention insights</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.phaseCard}>
+                  <TouchableOpacity 
+                    style={[styles.phaseHeader, expandedPhases.phase3 && styles.expandedHeader]}
+                    onPress={() => togglePhaseExpansion('phase3')}
+                  >
+                    <View style={styles.phaseHeaderContent}>
+                      <View style={styles.phaseNumber}>3</View>
+                      <View style={styles.phaseInfo}>
+                        <Text style={styles.phaseName}>Data Implementation</Text>
+                        <Text style={styles.phaseDuration}>2 hours • 2 steps</Text>
+                      </View>
+                    </View>
+                    <Ionicons 
+                      name={expandedPhases.phase3 ? "chevron-up" : "chevron-down"} 
+                      size={20} 
+                      color={Colors.text.secondary} 
+                    />
+                  </TouchableOpacity>
+                  
+                  {expandedPhases.phase3 && (
+                    <View style={styles.phaseDetails}>
+                      <View style={styles.stepCard}>
+                        <View style={styles.stepHeader}>
+                          <Ionicons name="download-outline" size={16} color={Colors.primary.navyBlue} />
+                          <Text style={styles.stepTitle}>Data Collection</Text>
+                          <Text style={styles.stepDuration}>60 min</Text>
+                        </View>
+                        <View style={styles.stepContent}>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="library-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Reading: "Customer Data Collection Strategies"</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="eye-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Focus: Gathering relevant retention data</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="help-circle-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Questions: Identify data sources for your retention analysis</Text>
+                          </View>
+                        </View>
+                      </View>
+                      
+                      <View style={styles.stepCard}>
+                        <View style={styles.stepHeader}>
+                          <Ionicons name="trending-up-outline" size={16} color={Colors.primary.navyBlue} />
+                          <Text style={styles.stepTitle}>Analysis Execution</Text>
+                          <Text style={styles.stepDuration}>60 min</Text>
+                        </View>
+                        <View style={styles.stepContent}>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="library-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Reading: "Advanced Analytics Techniques"</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="eye-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Focus: Applying analytical methods to real data</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="help-circle-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Questions: Conduct your retention data analysis</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+                </View>
+
+                <View style={styles.phaseCard}>
+                  <TouchableOpacity 
+                    style={[styles.phaseHeader, expandedPhases.phase4 && styles.expandedHeader]}
+                    onPress={() => togglePhaseExpansion('phase4')}
+                  >
+                    <View style={styles.phaseHeaderContent}>
+                      <View style={styles.phaseNumber}>4</View>
+                      <View style={styles.phaseInfo}>
+                        <Text style={styles.phaseName}>Strategic Synthesis</Text>
+                        <Text style={styles.phaseDuration}>30 minutes • 1 step</Text>
+                      </View>
+                    </View>
+                    <Ionicons 
+                      name={expandedPhases.phase4 ? "chevron-up" : "chevron-down"} 
+                      size={20} 
+                      color={Colors.text.secondary} 
+                    />
+                  </TouchableOpacity>
+                  
+                  {expandedPhases.phase4 && (
+                    <View style={styles.phaseDetails}>
+                      <View style={styles.stepCard}>
+                        <View style={styles.stepHeader}>
+                          <Ionicons name="bulb-outline" size={16} color={Colors.primary.navyBlue} />
+                          <Text style={styles.stepTitle}>Synthesis & Recommendations</Text>
+                          <Text style={styles.stepDuration}>30 min</Text>
+                        </View>
+                        <View style={styles.stepContent}>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="library-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Reading: "Strategic Communication of Insights"</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="eye-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Focus: Synthesizing findings into actionable strategies</Text>
+                          </View>
+                          <View style={styles.stepItem}>
+                            <Ionicons name="help-circle-outline" size={14} color={Colors.text.secondary} />
+                            <Text style={styles.stepText}>Questions: Develop your retention strategy recommendations</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+                </View>
+              </View>
             </View>
           </View>
 
@@ -702,7 +970,8 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
-    marginBottom: Layout.spacing.xs,
+    marginBottom: Layout.spacing.sm,
+    marginTop: Layout.spacing.md,
     flex: 1,
     marginRight: Layout.spacing.md,
   },
@@ -710,6 +979,10 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.sm,
     color: Colors.text.secondary,
     textTransform: 'capitalize',
+    backgroundColor: Colors.background.secondary,
+    padding: Layout.spacing.lg,
+    borderRadius: Layout.borderRadius.md,
+    marginBottom: Layout.spacing.xl,
   },
   difficultyBadge: {
     backgroundColor: Colors.primary.goldenYellow,
@@ -869,6 +1142,7 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     color: Colors.text.secondary,
     marginBottom: Layout.spacing.xl,
+    marginTop: Layout.spacing.md,
     textAlign: 'center',
   },
   archetypeGrid: {
@@ -876,32 +1150,33 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     gap: Layout.spacing.md,
+    paddingTop: Layout.spacing.sm,
   },
   archetypeCard: {
     width: '30%',
-    aspectRatio: 1,
-    borderRadius: Layout.borderRadius.md,
     overflow: 'hidden',
-    elevation: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  primaryArchetypeCard: {
+    width: '30%',
+    shadowOpacity: 0.2,
+  },
+  archetypeGradient: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: Layout.borderRadius.md,
     shadowColor: Colors.text.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-  },
-  primaryArchetypeCard: {
-    width: '48%',
-    elevation: 4,
-    shadowOpacity: 0.2,
-  },
-  archetypeGradient: {
-    flex: 1,
-    padding: Layout.spacing.md,
-    justifyContent: 'space-between',
+    width: 50,
+    height: 50,
   },
   archetypeHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   percentageBadge: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -921,10 +1196,12 @@ const styles = StyleSheet.create({
     marginTop: Layout.spacing.xs,
   },
   archetypeName: {
-    fontSize: Typography.fontSize.base,
+    fontSize: Typography.fontSize.xs,
     fontWeight: Typography.fontWeight.bold,
-    color: Colors.text.inverse,
+    color: Colors.neutral.black,
     marginBottom: Layout.spacing.xs,
+    marginTop: Layout.spacing.sm,
+    textAlign: 'center',
   },
   archetypeSubtitle: {
     fontSize: Typography.fontSize.sm,
@@ -995,9 +1272,6 @@ const styles = StyleSheet.create({
   selectedButton: {
     backgroundColor: Colors.primary.navyBlue,
   },
-  disabledButton: {
-    opacity: 0.3,
-  },
   selectButtonText: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.medium,
@@ -1056,10 +1330,6 @@ const styles = StyleSheet.create({
   completedStep: {
     opacity: 1,
   },
-  stepText: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.text.primary,
-  },
   progressBar: {
     height: 8,
     backgroundColor: Colors.neutral.gray200,
@@ -1080,23 +1350,11 @@ const styles = StyleSheet.create({
   activityPreview: {
     paddingBottom: Layout.spacing.xl,
   },
-  activityTitle: {
-    fontSize: Typography.fontSize.xl,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.text.primary,
-    marginBottom: Layout.spacing.md,
-  },
   activityDescription: {
     fontSize: Typography.fontSize.base,
     color: Colors.text.secondary,
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
     marginBottom: Layout.spacing.lg,
-  },
-  activityMeta: {
-    backgroundColor: Colors.background.secondary,
-    padding: Layout.spacing.lg,
-    borderRadius: Layout.borderRadius.md,
-    marginBottom: Layout.spacing.xl,
   },
   metaText: {
     fontSize: Typography.fontSize.sm,
@@ -1158,5 +1416,174 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.primary.navyBlue,
+  },
+  // Improved styles for activity structure
+  activityStructure: {
+    marginBottom: Layout.spacing.xl,
+  },
+  structureTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.lg,
+    textAlign: 'center',
+  },
+  durationCard: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.lg,
+    padding: Layout.spacing.lg,
+    marginBottom: Layout.spacing.xl,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray200,
+  },
+  durationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.md,
+    gap: Layout.spacing.sm,
+  },
+  durationTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+  },
+  durationBreakdown: {
+    gap: Layout.spacing.sm,
+  },
+  durationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: Layout.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.neutral.gray100,
+  },
+  durationPhase: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.primary,
+    flex: 1,
+  },
+  durationTime: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.primary.navyBlue,
+    backgroundColor: Colors.primary.goldenYellow,
+    paddingHorizontal: Layout.spacing.sm,
+    paddingVertical: Layout.spacing.xs,
+    borderRadius: Layout.borderRadius.sm,
+  },
+  phasesSection: {
+    marginBottom: Layout.spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.xs,
+  },
+  sectionSubtitle: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.lg,
+    fontStyle: 'italic',
+  },
+  phaseList: {
+    gap: Layout.spacing.md,
+  },
+  phaseCard: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray200,
+    overflow: 'hidden',
+  },
+  phaseHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Layout.spacing.lg,
+    backgroundColor: Colors.background.secondary,
+  },
+  expandedHeader: {
+    backgroundColor: Colors.primary.goldenYellow,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.neutral.gray200,
+  },
+  phaseHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: Layout.spacing.md,
+  },
+  phaseNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.primary.navyBlue,
+    color: Colors.text.inverse,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.bold,
+    textAlign: 'center',
+    lineHeight: 32,
+  },
+  phaseInfo: {
+    flex: 1,
+  },
+  phaseName: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.xs,
+  },
+  phaseDuration: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+  },
+  phaseDetails: {
+    backgroundColor: Colors.background.primary,
+    padding: Layout.spacing.lg,
+    gap: Layout.spacing.md,
+  },
+  stepCard: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.md,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.primary.goldenYellow,
+  },
+  stepHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.md,
+    gap: Layout.spacing.sm,
+  },
+  stepTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    flex: 1,
+  },
+  stepDuration: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.primary.navyBlue,
+    backgroundColor: Colors.neutral.gray100,
+    paddingHorizontal: Layout.spacing.sm,
+    paddingVertical: Layout.spacing.xs,
+    borderRadius: Layout.borderRadius.sm,
+  },
+  stepContent: {
+    gap: Layout.spacing.sm,
+  },
+  stepItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Layout.spacing.sm,
+  },
+  stepText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    flex: 1,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
   },
 });

@@ -72,15 +72,12 @@ export default function HomeScreen() {
       backgroundColor: Colors.primary.goldenYellow,
     },
     {
-      id: 'start',
-      title: 'New Activity',
-      icon: 'play-circle',
+      id: 'profile',
+      title: 'My Profile',
+      icon: 'person-circle',
+      route: 'profile',
       color: Colors.text.inverse,
-      backgroundColor: Colors.success,
-      action: () => {
-        // Maybe start a new activity or assessment
-        router.push('/(tabs)/workbench');
-      },
+      backgroundColor: Colors.archetypes.helper.primary,
     },
     {
       id: 'grovelop-x',
@@ -109,12 +106,15 @@ export default function HomeScreen() {
       },
     },
     {
-      id: 'my-development',
-      title: 'Development\n History',
-      icon: 'trending-up',
-      route: 'my-development',
+      id: 'start',
+      title: 'New Activity',
+      icon: 'play-circle',
       color: Colors.text.inverse,
-      backgroundColor: Colors.archetypes.creator.primary,
+      backgroundColor: Colors.success,
+      action: () => {
+        // Maybe start a new activity or assessment
+        router.push('/(tabs)/workbench');
+      },
     },
     {
       id: 'settings',
@@ -125,12 +125,12 @@ export default function HomeScreen() {
       backgroundColor: Colors.neutral.gray300,
     },
     {
-      id: 'profile',
-      title: 'My Profile',
-      icon: 'person-circle',
-      route: 'profile',
+      id: 'my-development',
+      title: 'Development\n History',
+      icon: 'trending-up',
+      route: 'my-development',
       color: Colors.text.inverse,
-      backgroundColor: Colors.archetypes.helper.primary,
+      backgroundColor: Colors.archetypes.creator.primary,
     },
     {
       id: 'help',

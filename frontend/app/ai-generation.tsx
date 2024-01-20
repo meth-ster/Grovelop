@@ -179,15 +179,18 @@ export default function AIGenerationScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} disabled={isGenerating}>
-          <Ionicons 
-            name="arrow-back" 
-            size={24} 
-            color={isGenerating ? Colors.text.tertiary : Colors.text.primary} 
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Create Application Documents for This Position</Text>
-        <View style={{ width: 24 }} />
+        <View style={styles.headerTitleContainer}>
+          <TouchableOpacity onPress={() => router.back()} disabled={isGenerating}>
+            <Ionicons 
+              name="arrow-back" 
+              size={24} 
+              color={isGenerating ? Colors.text.tertiary : Colors.text.primary} 
+            />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Create Application Documents for This Position</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <Text style={styles.headerSubtitle}>Resume/CV and Cover Letter</Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -447,17 +450,28 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background.primary,
   },
   header: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Layout.spacing.lg,
-    paddingVertical: Layout.spacing.lg,
+    paddingTop: Layout.spacing.lg,
+    paddingBottom: Layout.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: Colors.neutral.gray200,
+  },
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headerTitle: {
     fontSize: Typography.fontSize.xl,
     fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    textAlign: 'center',
+  },
+  headerSubtitle: {
+    fontSize: Typography.fontSize.sm,
     color: Colors.text.primary,
     textAlign: 'center',
   },
