@@ -70,14 +70,6 @@ export default function HomeScreen() {
       backgroundColor: Colors.primary.navyBlue,
     },
     {
-      id: 'grovelop-x',
-      title: 'Grovelop/X',
-      icon: 'logo-twitter',
-      route: 'grovelop-x',
-      color: Colors.text.inverse,
-      backgroundColor: Colors.primary.warmOrange,
-    },
-    {
       id: 'grovelop-logo',
       title: 'Grovelop',
       icon: 'diamond',
@@ -88,8 +80,16 @@ export default function HomeScreen() {
       },
     },
     {
+      id: 'grovelop-x',
+      title: 'Grovelop/X',
+      icon: 'logo-twitter',
+      route: 'grovelop-x',
+      color: Colors.text.inverse,
+      backgroundColor: Colors.primary.warmOrange,
+    },
+    {
       id: 'workbench',
-      title: 'Workbench',
+      title: 'Workbench&\n My activities',
       icon: 'construct',
       route: 'workbench',
       color: Colors.text.inverse,
@@ -97,7 +97,7 @@ export default function HomeScreen() {
     },
     {
       id: 'start',
-      title: 'START',
+      title: 'New Activity',
       icon: 'play-circle',
       color: Colors.text.inverse,
       backgroundColor: Colors.success,
@@ -108,7 +108,7 @@ export default function HomeScreen() {
     },
     {
       id: 'my-development',
-      title: 'My\nDevelopment',
+      title: 'Development\n History',
       icon: 'trending-up',
       route: 'my-development',
       color: Colors.text.inverse,
