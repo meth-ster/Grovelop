@@ -534,4 +534,13 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
     textAlign: 'center',
   },
+  editableField: {
+    backgroundColor: Colors.background.primary,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray300,
+    borderRadius: Layout.borderRadius.sm,
+    paddingHorizontal: Layout.spacing.sm,
+    paddingVertical: Layout.spacing.xs,
+    marginVertical: Layout.spacing.xs,
+  },
 });
