@@ -7,15 +7,17 @@ import {
   Alert,
   Modal,
 } from 'react-native';
+import { AlertService } from '../../services/alertService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { FlashList } from '@shopify/flash-list';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import Layout from '../../constants/Layout';
-import { JobListing } from '../../types';
+import { JobListing, Document } from '../../types';
 import { router } from 'expo-router';
 import { useJobStore } from '../../store/useJobStore';
+import { api } from '../../services/mockApi';
 
 type TabType = 'discover' | 'saved-documents' | 'favourites';
 
@@ -90,11 +92,29 @@ export default function JobsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const [savedDocuments, setSavedDocuments] = useState<Document[]>([]);
   const { jobs, saveJob, unsaveJob, fetchJobs } = useJobStore();
   
   useEffect(() => {
     fetchJobs();
+    fetchSavedDocuments();
   }, []);
+
+  // Refresh saved documents when switching to saved-documents tab
+  useEffect(() => {
+    if (activeTab === 'saved-documents') {
+      fetchSavedDocuments();
+    }
+  }, [activeTab]);
+
+  const fetchSavedDocuments = async () => {
+    try {
+      const documents = await api.getDocuments();
+      setSavedDocuments(documents);
+    } catch (error) {
+      console.error('Error fetching saved documents:', error);
+    }
+  };
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -167,12 +187,23 @@ export default function JobsScreen() {
         );
       case 'saved-documents':
         return (
-          <View style={styles.emptyState}>
-            <Ionicons name="document-text-outline" size={64} color={Colors.text.tertiary} />
-            <Text style={styles.emptyStateTitle}>Saved Documents</Text>
-            <Text style={styles.emptyStateText}>
-            Your Saved Resumes/CVs and Cover Letters will appear here
-            </Text>
+          <View style={styles.jobsList}>
+            <FlashList
+              data={savedDocuments}
+              renderItem={renderDocumentCard}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.jobsListContent}
+              ListEmptyComponent={() => (
+                <View style={styles.emptyState}>
+                  <Ionicons name="document-text-outline" size={64} color={Colors.text.tertiary} />
+                  <Text style={styles.emptyStateTitle}>No Saved Documents</Text>
+                  <Text style={styles.emptyStateText}>
+                    Your saved resumes, cover letters, and portfolios will appear here after you download them from the export screen.
+                  </Text>
+                </View>
+              )}
+            />
           </View>
         );
       case 'favourites':
@@ -267,6 +298,110 @@ export default function JobsScreen() {
           {job.skills.length > 3 && (
             <Text style={styles.moreSkills}>+{job.skills.length - 3} more</Text>
           )}
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
+
+  const renderDocumentCard = ({ item: document }: { item: Document }) => (
+    <View style={styles.documentCard}>
+      <TouchableOpacity 
+        onPress={() => {
+          // Navigate to document preview or open document
+          AlertService.confirm({
+            title: 'Document Preview',
+            message: `Would you like to view the ${document.type} document?`,
+            confirmText: 'View',
+            cancelText: 'Cancel',
+            onConfirm: () => {
+              // In a real app, this would open the document
+              AlertService.info(`Opening ${document.title}...`, 'Document');
+            },
+          });
+        }}>
+
+        {/* Document Header */}
+        <View style={styles.documentHeader}>
+          <View style={styles.documentMainInfo}>
+            <View style={styles.documentTitleRow}>
+              <Ionicons 
+                name={document.type === 'resume' ? 'document-text' : 
+                      document.type === 'cover_letter' ? 'mail' : 'folder'} 
+                size={20} 
+                color={Colors.primary.navyBlue} 
+              />
+              <Text style={styles.documentTitle}>{document.title}</Text>
+            </View>
+            <View style={styles.documentMeta}>
+              <View style={styles.documentType}>
+                <Text style={styles.documentTypeText}>
+                  {document.type.replace('_', ' ').toUpperCase()}
+                </Text>
+              </View>
+              <View style={styles.documentFormat}>
+                <Text style={styles.documentFormatText}>
+                  {document.format.toUpperCase()}
+                </Text>
+              </View>
+            </View>
+          </View>
+          
+          <View style={styles.documentActions}>
+            <TouchableOpacity 
+              style={styles.documentActionButton}
+              onPress={() => {
+                AlertService.confirm({
+                  title: 'Delete Document',
+                  message: 'Are you sure you want to delete this document?',
+                  confirmText: 'Delete',
+                  cancelText: 'Cancel',
+                  onConfirm: () => {
+                    // Remove document from savedDocuments state
+                    setSavedDocuments(prev => prev.filter(doc => doc.id !== document.id));
+                    AlertService.success('Document deleted successfully', 'Deleted');
+                  },
+                });
+              }}
+            >
+              <Ionicons 
+                name="trash-outline" 
+                size={18} 
+                color={Colors.error} 
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Target Job */}
+        {document.targetJob && (
+          <View style={styles.targetJobContainer}>
+            <Ionicons name="briefcase-outline" size={14} color={Colors.text.secondary} />
+            <Text style={styles.targetJobText}>
+              For: {document.targetJob}
+            </Text>
+          </View>
+        )}
+
+        {/* Document Info */}
+        <View style={styles.documentInfo}>
+          <View style={styles.documentInfoItem}>
+            <Ionicons name="time-outline" size={14} color={Colors.text.secondary} />
+            <Text style={styles.documentInfoText}>
+              {new Date(document.updatedAt).toLocaleDateString()}
+            </Text>
+          </View>
+          <View style={styles.documentInfoItem}>
+            <Ionicons name="document-outline" size={14} color={Colors.text.secondary} />
+            <Text style={styles.documentInfoText}>
+              {document.content.split(' ').length} words
+            </Text>
+          </View>
+          <View style={styles.documentInfoItem}>
+            <Ionicons name="layers-outline" size={14} color={Colors.text.secondary} />
+            <Text style={styles.documentInfoText}>
+              v{document.versions.length}
+            </Text>
+          </View>
         </View>
       </TouchableOpacity>
     </View>
@@ -683,5 +818,97 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.xs,
     marginBottom: Layout.spacing.xs,
+  },
+  // Document card styles
+  documentCard: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.lg,
+    marginBottom: Layout.spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray200,
+  },
+  documentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Layout.spacing.md,
+  },
+  documentMainInfo: {
+    flex: 1,
+    marginRight: Layout.spacing.md,
+  },
+  documentTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.sm,
+    gap: Layout.spacing.sm,
+  },
+  documentTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    flex: 1,
+  },
+  documentMeta: {
+    flexDirection: 'row',
+    gap: Layout.spacing.sm,
+  },
+  documentType: {
+    backgroundColor: Colors.primary.navyBlue,
+    paddingHorizontal: Layout.spacing.sm,
+    paddingVertical: Layout.spacing.xs,
+    borderRadius: Layout.borderRadius.sm,
+  },
+  documentTypeText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.inverse,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  documentFormat: {
+    backgroundColor: Colors.background.tertiary,
+    paddingHorizontal: Layout.spacing.sm,
+    paddingVertical: Layout.spacing.xs,
+    borderRadius: Layout.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray300,
+  },
+  documentFormatText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.primary,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  documentActions: {
+    alignItems: 'flex-end',
+  },
+  documentActionButton: {
+    width: Layout.touchTarget.small,
+    height: Layout.touchTarget.small,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  targetJobContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.md,
+    gap: Layout.spacing.xs,
+  },
+  targetJobText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    fontStyle: 'italic',
+  },
+  documentInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  documentInfoItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.spacing.xs,
+  },
+  documentInfoText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.secondary,
   },
 });

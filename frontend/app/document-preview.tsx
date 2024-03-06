@@ -298,7 +298,7 @@ export default function DocumentPreviewScreen() {
             {/* For other document types: Show only "Export & Apply" */}
             {documentType !== 'resume_cover_activity' && (
               <TouchableOpacity style={styles.exportButton} onPress={handleExportDocuments}>
-                <Text style={styles.exportButtonText}>Export & Apply</Text>
+                <Text style={styles.exportButtonText}>Download</Text>
                 <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
               </TouchableOpacity>
             )}

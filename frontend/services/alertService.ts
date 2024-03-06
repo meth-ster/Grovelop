@@ -31,7 +31,7 @@ export class AlertService {
     alertManager.info(message, title);
   }
 
-  // Confirmation Alert - Keep using native Alert for confirmations
+  // Confirmation Alert - Use custom alert manager
   static confirm(options: AlertOptions) {
     const {
       title = 'Confirm',
@@ -42,18 +42,12 @@ export class AlertService {
       onCancel,
     } = options;
 
-    Alert.alert(title, message, [
-      {
-        text: cancelText,
-        style: 'cancel',
-        onPress: onCancel,
-      },
-      {
-        text: confirmText,
-        style: 'default',
-        onPress: onConfirm,
-      },
-    ]);
+    alertManager.confirm(message, title, {
+      confirmText,
+      cancelText,
+      onConfirm,
+      onCancel,
+    });
   }
 
   // Custom Alert with multiple buttons

@@ -8,16 +8,16 @@ import {
   TextInput,
   Dimensions,
   Image,
-  Alert,
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/useAuthStore';
 import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 import Layout from '../constants/Layout';
+import { AlertService } from '../services/alertService';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -1009,6 +1009,7 @@ const mockCurrentActivity: Activity = {
 
 export default function ActivityPadScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams();
   const { user } = useAuthStore();
   const [activeTab, setActiveTab] = useState<TabType>('activity-pad');
   const [activityResponses, setActivityResponses] = useState<ActivityResponse[]>([]);
@@ -1026,6 +1027,24 @@ export default function ActivityPadScreen() {
   const [userActivities, setUserActivities] = useState<Activity[]>(mockActivities);
   const [currentActivityId, setCurrentActivityId] = useState<string>('2');
   const autoSaveInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Handle new activity from workbench
+  useEffect(() => {
+    if (params.newActivity) {
+      try {
+        const newActivity = JSON.parse(params.newActivity as string);
+        setUserActivities(prev => [newActivity, ...prev]);
+        console.log('New activity added:', newActivity);
+      } catch (error) {
+        console.error('Error parsing new activity:', error);
+      }
+    }
+    
+    // Set active tab if specified
+    if (params.activeTab) {
+      setActiveTab(params.activeTab as TabType);
+    }
+  }, [params.newActivity, params.activeTab]);
 
   // Auto-save functionality
   useEffect(() => {
@@ -1079,7 +1098,7 @@ export default function ActivityPadScreen() {
     const hasResponses = Object.keys(questionResponses).some(key => questionResponses[key]?.trim().length > 0);
     
     if (!hasResponses) {
-      Alert.alert('No Responses', 'Please complete some activity questions before creating a portfolio item.');
+      AlertService.error('Please complete some activity questions before creating a portfolio item.', 'No Responses');
       return;
     }
     
@@ -1144,7 +1163,7 @@ export default function ActivityPadScreen() {
       // Add to saved portfolio items
       setSavedPortfolioItems(prev => [newPortfolioItem, ...prev]);
       
-      Alert.alert('Success', 'Portfolio item saved successfully!');
+      AlertService.success('Portfolio item saved successfully!', 'Success');
       setShowPortfolioEditor(false);
       setPortfolioDraft(null);
     }
@@ -1174,7 +1193,7 @@ export default function ActivityPadScreen() {
   const handleCompleteQuestion = (questionId: string) => {
     const response = questionResponses[questionId];
     if (!response?.trim()) {
-      Alert.alert('Incomplete', 'Please provide a response before completing this question.');
+      AlertService.error('Please provide a response before completing this question.', 'Incomplete');
       return;
     }
     
@@ -1186,7 +1205,7 @@ export default function ActivityPadScreen() {
     // Update activity progress and save to user activities
     updateActivityProgress();
     
-    Alert.alert(
+    AlertService.custom(
       'Question Completed!',
       'Your response has been saved to My Activities.',
       [{ text: 'Continue', onPress: () => {} }]
@@ -1257,39 +1276,7 @@ export default function ActivityPadScreen() {
 
   const renderMyActivities = () => (
     <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Completed Activities</Text>
-        {userActivities
-          .filter(activity => activity.status === 'completed')
-          .map(activity => (
-            <TouchableOpacity 
-              key={activity.id} 
-              style={styles.activityCard}
-              onPress={() => handleContinueActivity(activity.id)}
-            >
-              <View style={styles.activityHeader}>
-                <View style={styles.activityInfo}>
-                  <Text style={styles.activityTitle}>{activity.title.description}</Text>
-                  <Text style={styles.activityDescription}>Skills: {activity.title.skillFocus.join(', ')}</Text>
-                </View>
-                <View style={styles.completedBadge}>
-                  <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
-                </View>
-              </View>
-              <View style={styles.activityMeta}>
-                <Text style={styles.metaText}>Completed: {activity.completedAt}</Text>
-                <Text style={styles.metaText}>Duration: {activity.duration.total}</Text>
-              </View>
-              <View style={styles.skillsContainer}>
-                {activity.title.skillFocus.map((skill, index) => (
-                  <View key={index} style={styles.skillTag}>
-                    <Text style={styles.skillText}>{skill}</Text>
-                  </View>
-                ))}
-              </View>
-            </TouchableOpacity>
-          ))}
-      </View>
+      
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>In Progress</Text>
@@ -1346,6 +1333,40 @@ export default function ActivityPadScreen() {
               <View style={styles.activityMeta}>
                 <Text style={styles.metaText}>Estimated: {activity.duration.total}</Text>
                 <Text style={styles.metaText}>Phases: {activity.duration.phases}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Completed Activities</Text>
+        {userActivities
+          .filter(activity => activity.status === 'completed')
+          .map(activity => (
+            <TouchableOpacity 
+              key={activity.id} 
+              style={styles.activityCard}
+              onPress={() => handleContinueActivity(activity.id)}
+            >
+              <View style={styles.activityHeader}>
+                <View style={styles.activityInfo}>
+                  <Text style={styles.activityTitle}>{activity.title.description}</Text>
+                  <Text style={styles.activityDescription}>Skills: {activity.title.skillFocus.join(', ')}</Text>
+                </View>
+                <View style={styles.completedBadge}>
+                  <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
+                </View>
+              </View>
+              <View style={styles.activityMeta}>
+                <Text style={styles.metaText}>Completed: {activity.completedAt}</Text>
+                <Text style={styles.metaText}>Duration: {activity.duration.total}</Text>
+              </View>
+              <View style={styles.skillsContainer}>
+                {activity.title.skillFocus.map((skill, index) => (
+                  <View key={index} style={styles.skillTag}>
+                    <Text style={styles.skillText}>{skill}</Text>
+                  </View>
+                ))}
               </View>
             </TouchableOpacity>
           ))}
@@ -1619,20 +1640,20 @@ export default function ActivityPadScreen() {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.addPortfolioButton}>
+      {/* <TouchableOpacity style={styles.addPortfolioButton}>
         <Ionicons name="add-circle-outline" size={24} color={Colors.primary.navyBlue} />
         <Text style={styles.addPortfolioText}>Add New Portfolio Item</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </ScrollView>
   );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
+        {/* <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>ActivityPad</Text>
+        </TouchableOpacity> */}
+        <Text style={styles.headerTitle}>{activeTab === 'my-activities' ? 'My Activities' : activeTab === 'activity-pad' ? 'ActivityPad' : 'Portfolio Items'}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -1642,6 +1663,20 @@ export default function ActivityPadScreen() {
 
       {/* Bottom Tabs */}
       <View style={styles.bottomTabsContainer}>
+        <TouchableOpacity
+          style={[styles.bottomTab, styles.homeTab]}
+          onPress={() => router.push('/(tabs)/home')}
+        >
+          <Ionicons 
+            name="home-outline" 
+            size={24} 
+            color={Colors.text.secondary} 
+          />
+          <Text style={styles.bottomTabText}>
+            Home
+          </Text>
+        </TouchableOpacity>
+        
         <TouchableOpacity
           style={[styles.bottomTab, activeTab === 'my-activities' && styles.activeBottomTab]}
           onPress={() => setActiveTab('my-activities')}
@@ -1933,7 +1968,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: Layout.spacing.lg,
     paddingVertical: Layout.spacing.md,
     borderBottomWidth: 1,
@@ -1964,6 +1999,9 @@ const styles = StyleSheet.create({
   activeBottomTab: {
     backgroundColor: Colors.background.secondary,
     borderRadius: Layout.borderRadius.sm,
+  },
+  homeTab: {
+    // Home tab has no special styling - uses default bottomTab style
   },
   bottomTabText: {
     fontSize: Typography.fontSize.xs,
@@ -2678,7 +2716,7 @@ const styles = StyleSheet.create({
   },
   continueButtonText: {
     fontSize: Typography.fontSize.sm,
-    color: Colors.primary.navyBlue,
+    color: Colors.neutral.white,
     fontWeight: Typography.fontWeight.medium,
   },
   // AI Generation styles

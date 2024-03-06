@@ -25,6 +25,7 @@ type Props = {
   onSubscribe: () => void;
   footer?: React.ReactNode;
   highlight?: boolean;
+  showCurrentPlanBadge?: boolean; // show "Current Plan" badge
 };
 
 function formatPrice(p: Price) {
@@ -47,10 +48,18 @@ export default function PlanCard({
   onSubscribe,
   footer,
   highlight,
+  showCurrentPlanBadge = false,
 }: Props) {
   return (
     <View style={[styles.card, highlight && styles.highlight]}>
-      <Text style={styles.name}>{name}</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.name}>{name}</Text>
+        {showCurrentPlanBadge && (
+          <View style={styles.currentPlanBadge}>
+            <Text style={styles.currentPlanBadgeText}>Current Plan</Text>
+          </View>
+        )}
+      </View>
       <View style={styles.priceRow}>
         {originalPrice && <Text style={styles.original}>{formatPrice(originalPrice)}</Text>}
         <Text style={styles.price}>
@@ -91,11 +100,28 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.primary.goldenYellow,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.sm,
+  },
   name: {
     fontSize: Typography.fontSize.lg,
     color: Colors.text.primary,
     fontWeight: Typography.fontWeight.semibold,
-    marginBottom: Layout.spacing.sm,
+    flex: 1,
+  },
+  currentPlanBadge: {
+    backgroundColor: Colors.primary.goldenYellow,
+    paddingHorizontal: Layout.spacing.sm,
+    paddingVertical: Layout.spacing.xs,
+    borderRadius: Layout.borderRadius.full,
+  },
+  currentPlanBadgeText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.primary,
+    fontWeight: Typography.fontWeight.semibold,
   },
   priceRow: {
     flexDirection: 'row',

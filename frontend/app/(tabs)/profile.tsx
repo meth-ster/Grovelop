@@ -52,7 +52,7 @@ export default function ProfileScreen() {
         <Text style={styles.scoreLabel}>
           {archetype.charAt(0).toUpperCase() + archetype.slice(1)}
         </Text>
-        <Text style={styles.scoreValue}>{score}/10</Text>
+        <Text style={styles.scoreValue}>{score * 10}%</Text>
       </View>
       <View style={styles.scoreBar}>
         <View 

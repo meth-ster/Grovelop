@@ -29,6 +29,10 @@ interface GridItem {
   logoColor: string;
   backgroundColor: string;
   action?: () => void;
+  badges?: Array<{
+    count: number;
+    color: string;
+  }>;
 }
 
 export default function HomeScreen() {
@@ -44,7 +48,12 @@ export default function HomeScreen() {
         router.push('/grovelop-x');
         break;
       case 'workbench':
-        router.push('/activity-pad');
+        router.push({
+          pathname: '/activity-pad',
+          params: {
+            activeTab: 'my-activities'
+          }
+        });
         break;
       case 'my-development':
         router.push('/activity-library');
@@ -72,6 +81,12 @@ export default function HomeScreen() {
       color: Colors.text.primary,
       logoColor: Colors.text.primary,
       backgroundColor: Colors.primary.goldenYellow,
+      badges: [
+        {
+          count: 12, // Daily new job offerings
+          color: Colors.error,
+        },
+      ],
     },
     {
       id: 'profile',
@@ -99,6 +114,16 @@ export default function HomeScreen() {
       color: Colors.text.primary,
       logoColor: Colors.neutral.white,
       backgroundColor: Colors.archetypes.thinker.primary,
+      badges: [
+        {
+          count: 3, // Incomplete activities
+          color: Colors.error,
+        },
+        {
+          count: 5, // Not started activities
+          color: Colors.warning,
+        },
+      ],
     },
     {
       id: 'grovelop-logo',
@@ -116,7 +141,7 @@ export default function HomeScreen() {
       logoColor: Colors.neutral.white,
       backgroundColor: Colors.success,
       action: () => {
-        // Maybe start a new activity or assessment
+        // Start a new activity
         router.push('/(tabs)/workbench');
       },
     },
@@ -151,30 +176,53 @@ export default function HomeScreen() {
 
   const renderGridItem = (item: GridItem) => (
     <View style={styles.gridItemWrapper}>
-      <TouchableOpacity
-        key={item.id}
-        style={[styles.gridItem, { backgroundColor: item.backgroundColor }]}
-        onPress={() => {
-          if (item.action) {
-            item.action();
-          } else if (item.route) {
-            handleNavigation(item.route);
-          }
-        }}
-        activeOpacity={0.8}
-      >
-        {item.icon === 'logo' ? (
-          <Image 
-            source={require('../../assets/images/logo.png')} 
-            style={styles.logoImage}
-            resizeMode="contain"
-          />
-        ) : item.icon === 'x-logo' ? (
-          <XLogo size={32} color={item.logoColor} />
-        ) : (
-          <Ionicons name={item.icon} size={32} color={item.logoColor} />
+      <View style={styles.gridItemContainer}>
+        <TouchableOpacity
+          key={item.id}
+          style={item.id === 'grovelop-logo' ? [styles.gridItem, { backgroundColor: item.backgroundColor }] : [styles.gridItem, styles.gridItemShadow, { backgroundColor: item.backgroundColor }]}
+          onPress={() => {
+            if (item.action) {
+              item.action();
+            } else if (item.route) {
+              handleNavigation(item.route);
+            }
+          }}
+          activeOpacity={0.8}
+        >
+          {item.icon === 'logo' ? (
+            <Image 
+              source={require('../../assets/images/logo.png')} 
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          ) : item.icon === 'x-logo' ? (
+            <XLogo size={32} color={item.logoColor} />
+          ) : (
+            <Ionicons name={item.icon} size={32} color={item.logoColor} />
+          )}
+        </TouchableOpacity>
+        
+        {/* Badges */}
+        {item.badges && item.badges.length > 0 && (
+          <View style={styles.badgesContainer}>
+            {item.badges.map((badge, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.badge,
+                  { 
+                    backgroundColor: badge.color,
+                    right: index * 16, // Stack badges with 8px offset
+                    zIndex: item.badges!.length - index, // Higher z-index for first badge
+                  }
+                ]}
+              >
+                <Text style={styles.badgeText}>{badge.count}</Text>
+              </View>
+            ))}
+          </View>
         )}
-      </TouchableOpacity>
+      </View>
       <Text style={[styles.gridItemText, { color: item.color }]}>
         {item.title}
       </Text>
@@ -249,9 +297,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: Layout.spacing.md,
   },
+  gridItemShadow: {
+    shadowColor: Colors.neutral.black,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 7,
+  },
   gridItemWrapper: {
     alignItems: 'center',
     padding: Layout.spacing.md,
+  },
+  gridItemContainer: {
+    position: 'relative',
+  },
+  badgesContainer: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+  },
+  badge: {
+    position: 'absolute',
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+    shadowColor: Colors.neutral.black,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  badgeText: {
+    color: Colors.text.inverse,
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.bold,
+    textAlign: 'center',
   },
   gridItemText: {
     fontSize: Typography.fontSize.xs,

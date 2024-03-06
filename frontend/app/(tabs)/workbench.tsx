@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import Layout from '../../constants/Layout';
+import { AlertService } from '../../services/alertService';
 
 const { height: screenHeight } = Dimensions.get('window');
 const MIN_PANEL_HEIGHT = 100;
@@ -289,17 +290,79 @@ export default function WorkbenchScreen() {
   };
 
   const handleStartActivity = () => {
-    setCurrentPage('workbench');
+    router.push('/activity-pad');
   };
 
   const handleSaveActivity = () => {
-    Alert.alert(
-      'Activity Saved Successfully ✓',
-      'Systems Analysis for Customer Retention Strategy has been added to your Activity Library.',
-      [
-        { text: 'Launching ActivityPad…', onPress: () => setCurrentPage('workbench') }
-      ]
+    // Validate that we have the required selections
+    if (!selectedArchetype || selectedSkills.length === 0) {
+      AlertService.error('Please select an archetype and at least one skill before saving the activity.', 'Incomplete Selection');
+      return;
+    }
+
+    // Get selected skill names
+    const selectedSkillNames = selectedSkills.map(skillId => 
+      skills.find(s => s.id === skillId)?.name || 'Unknown Skill'
     );
+
+    // Create dynamic activity title based on archetype and skills
+    const activityTitle = `${selectedArchetype.name} Development: ${selectedSkillNames.join(' & ')}`;
+
+    // Create dynamic objectives based on selected skills
+    const objectives = selectedSkillNames.map(skillName => ({
+      category: skillName,
+      outcome: `Develop and enhance ${skillName.toLowerCase()} capabilities`
+    }));
+
+    // Calculate duration based on number of skills (more skills = longer duration)
+    const baseHours = 3;
+    const skillMultiplier = selectedSkills.length;
+    const totalHours = baseHours + (skillMultiplier - 1) * 1.5;
+    const phases = Math.min(4, selectedSkills.length + 1);
+
+    // Create the new activity object using current selections
+    const newActivity = {
+      id: 'activity-' + Date.now(), // Generate unique ID
+      title: {
+        description: activityTitle,
+        skillFocus: selectedSkillNames
+      },
+      objectives: objectives,
+      duration: {
+        total: `${totalHours} hours`,
+        totalHours: totalHours,
+        phases: phases,
+        breakdown: [
+          { phase: 1, duration: `${totalHours * 0.25} hours`, hours: totalHours * 0.25 },
+          { phase: 2, duration: `${totalHours * 0.35} hours`, hours: totalHours * 0.35 },
+          { phase: 3, duration: `${totalHours * 0.3} hours`, hours: totalHours * 0.3 },
+          { phase: 4, duration: `${totalHours * 0.1} hours`, hours: totalHours * 0.1 }
+        ]
+      },
+      phases: [], // Will be populated when activity is started
+      resources: {
+        readingMaterials: [],
+        additionalTools: []
+      },
+      followUpTasks: [],
+      status: 'not_started' as const,
+      progress: 0,
+      createdAt: new Date().toISOString()
+    };
+
+    // Show success message and navigate
+    AlertService.success(`${activityTitle} has been added to your Activity Library.`, 'Activity Saved Successfully ✓');
+    
+    // Navigate after a short delay to allow the alert to show
+    setTimeout(() => {
+      router.push({
+        pathname: '/activity-pad',
+        params: {
+          newActivity: JSON.stringify(newActivity),
+          activeTab: 'my-activities'
+        }
+      });
+    }, 1000);
   };
 
   const handleTaskResponse = (taskId: string, response: string) => {
@@ -388,9 +451,13 @@ export default function WorkbenchScreen() {
         <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      {/* Fixed text section */}
+      <View style={styles.fixedTextSection}>
         <Text style={styles.selectedArchetypeText}>{selectedArchetype?.name}</Text>
         <Text style={styles.skillsSubtitle}>Choose 1-2 recommended skills.</Text>
+      </View>
+
+      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         
         <View style={styles.skillsList}>
           {skills.map((skill) => (
@@ -427,11 +494,14 @@ export default function WorkbenchScreen() {
         <View style={styles.selectionCounter}>
           <Text style={styles.counterText}>{selectedSkills.length} of 2 skills selected</Text>
         </View>
-
-        <TouchableOpacity style={styles.generateButton} onPress={handleStartGeneration}>
-          <Text style={styles.generateButtonText}>Generate Activity</Text>
-        </TouchableOpacity>
       </ScrollView>
+
+      {/* Fixed button at the bottom */}
+      <View style={styles.fixedButtonContainer}>
+        <TouchableOpacity style={styles.generateButton} onPress={handleStartGeneration}>
+          <Text style={styles.generateButtonText}>See Activity</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 
@@ -479,7 +549,7 @@ export default function WorkbenchScreen() {
   const renderPreviewPage = () => (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => setCurrentPage('generation')}>
+        <TouchableOpacity onPress={() => setCurrentPage('skills')}>
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Development Activity</Text>
@@ -785,137 +855,23 @@ export default function WorkbenchScreen() {
             </View>
           </View>
 
-          <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.startButton} onPress={handleStartActivity}>
-              <Text style={styles.startButtonText}>Start Activity</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSaveActivity}>
-              <Text style={styles.saveButtonText}>Save for Later</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
-  );
 
-  const renderWorkbenchPage = () => (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => setCurrentPage('archetypes')}>
-          <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Workbench</Text>
-        <TouchableOpacity onPress={() => setCurrentPage('archetypes')} disabled={isGenerating}>
-          <Ionicons 
-            name="add-circle" 
-            size={24} 
-            color={isGenerating ? Colors.text.tertiary : Colors.primary.goldenYellow} 
-          />
-        </TouchableOpacity>
-      </View>
-
-      {/* Activity Display Panel */}
-      <View style={[styles.activityPanel, { height: splitPosition }]}>
-        <View style={styles.activityHeader}>
-          <View>
-            <Text style={styles.activityTitle}>{mockActivity.title}</Text>
-            <Text style={styles.activityMeta}>
-              {mockActivity.type.replace('_', ' ')} • {mockActivity.difficulty}
-            </Text>
-          </View>
-          <View style={styles.difficultyBadge}>
-            <Text style={styles.difficultyText}>
-              {mockActivity.difficulty.charAt(0).toUpperCase() + mockActivity.difficulty.slice(1)}
-            </Text>
-          </View>
-        </View>
-
-        <ScrollView style={styles.readingContent} showsVerticalScrollIndicator={false}>
-          <Text style={styles.readingText}>{mockActivity.readingMaterial}</Text>
-        </ScrollView>
-      </View>
-
-      {/* Drag Handle */}
-      <View style={styles.dragHandle} {...panResponder.panHandlers}>
-        <View style={styles.dragIndicator} />
-      </View>
-
-      {/* WorkPad Panel */}
-      <View style={[styles.workpadPanel, { height: screenHeight - splitPosition - 60 }]}>
-        <View style={styles.workpadHeader}>
-          <Text style={styles.workpadTitle}>WorkPad</Text>
-          <View style={styles.taskNavigation}>
-            <TouchableOpacity
-              onPress={() => setActiveTask(Math.max(0, activeTask - 1))}
-              disabled={activeTask === 0}
-              style={[styles.navButton, activeTask === 0 && styles.disabledButton]}
-            >
-              <Ionicons 
-                name="chevron-back" 
-                size={20} 
-                color={activeTask === 0 ? Colors.text.tertiary : Colors.text.primary} 
-              />
-            </TouchableOpacity>
-            
-            <Text style={styles.taskCounter}>
-              {activeTask + 1} / {mockActivity.tasks.length}
-            </Text>
-            
-            <TouchableOpacity
-              onPress={() => setActiveTask(Math.min(mockActivity.tasks.length - 1, activeTask + 1))}
-              disabled={activeTask === mockActivity.tasks.length - 1}
-              style={[styles.navButton, activeTask === mockActivity.tasks.length - 1 && styles.disabledButton]}
-            >
-              <Ionicons 
-                name="chevron-forward" 
-                size={20} 
-                color={activeTask === mockActivity.tasks.length - 1 ? Colors.text.tertiary : Colors.text.primary} 
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <ScrollView style={styles.taskContent} showsVerticalScrollIndicator={false}>
-          <View style={styles.taskCard}>
-            <Text style={styles.taskTitle}>{mockActivity.tasks[activeTask].title}</Text>
-            <Text style={styles.taskDescription}>{mockActivity.tasks[activeTask].description}</Text>
-            
-            <View style={styles.responseSection}>
-              <Text style={styles.responseLabel}>Your Response:</Text>
-              <TextInput
-                style={styles.responseInput}
-                placeholder="Type your response here..."
-                value={taskResponses[mockActivity.tasks[activeTask].id] || ''}
-                onChangeText={(text) => handleTaskResponse(mockActivity.tasks[activeTask].id, text)}
-                multiline
-                placeholderTextColor={Colors.text.tertiary}
-              />
-            </View>
-
-            <TouchableOpacity style={styles.completeButton} onPress={handleCompleteTask}>
-              <Text style={styles.completeButtonText}>Complete Task</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-
-        {/* Progress Indicators */}
-        <View style={styles.progressSection}>
-          <View style={styles.progressDots}>
-            {mockActivity.tasks.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.progressDot,
-                  index === activeTask && styles.activeDot,
-                  taskResponses[mockActivity.tasks[index].id] && styles.completedDot,
-                ]}
-              />
-            ))}
-          </View>
+      {/* Fixed buttons at the bottom */}
+      <View style={styles.fixedButtonContainer}>
+        <View style={styles.actionButtons}>
+          <TouchableOpacity style={styles.startButton} onPress={handleStartActivity}>
+            <Text style={styles.startButtonText}>Start Activity</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSaveActivity}>
+            <Text style={styles.saveButtonText}>Save for Later</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
   );
+
 
   // Main render logic
   switch (currentPage) {
@@ -927,8 +883,6 @@ export default function WorkbenchScreen() {
       return renderGenerationPage();
     case 'preview':
       return renderPreviewPage();
-    case 'workbench':
-      return renderWorkbenchPage();
     default:
       return renderArchetypesPage();
   }
@@ -1137,6 +1091,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: Layout.spacing.lg,
+    paddingBottom: 100, // Add padding to prevent content from being hidden behind fixed button
   },
   subtitle: {
     fontSize: Typography.fontSize.base,
@@ -1209,6 +1164,13 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   // Skills selection styles
+  fixedTextSection: {
+    paddingHorizontal: Layout.spacing.lg,
+    paddingVertical: Layout.spacing.md,
+    backgroundColor: Colors.background.primary,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.neutral.gray200,
+  },
   selectedArchetypeText: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semibold,
@@ -1219,7 +1181,6 @@ const styles = StyleSheet.create({
   skillsSubtitle: {
     fontSize: Typography.fontSize.base,
     color: Colors.text.secondary,
-    marginBottom: Layout.spacing.xl,
     textAlign: 'center',
   },
   skillsList: {
@@ -1585,5 +1546,17 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
     flex: 1,
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+  },
+  fixedButtonContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.background.primary,
+    paddingHorizontal: Layout.spacing.lg,
+    paddingVertical: Layout.spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.neutral.gray200,
+    paddingBottom: Layout.spacing.lg, // Extra padding for safe area
   },
 });

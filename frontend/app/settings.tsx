@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -15,6 +14,8 @@ import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 import Layout from '../constants/Layout';
 import { AppSettings, NotificationSettings } from '../types';
+import { AlertService } from '../services/alertService';
+import { useAuthStore } from '../store/useAuthStore';
 
 interface SettingSection {
   title: string;
@@ -35,6 +36,7 @@ interface SettingItem {
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const { logout } = useAuthStore();
   
   const [settings, setSettings] = useState<AppSettings>({
     theme: 'auto',
@@ -73,24 +75,78 @@ export default function SettingsScreen() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      AlertService.success('You have been logged out successfully.', 'Logged Out');
+    } catch (error) {
+      AlertService.error('Failed to logout. Please try again.');
+    }
+  };
+
   const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'Are you sure you want to delete your account? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: () => {
-            Alert.alert('Account Deleted', 'Your account has been scheduled for deletion.');
-          }
-        },
-      ]
-    );
+    AlertService.confirm({
+      title: 'Delete Account',
+      message: 'Are you sure you want to delete your account? This action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: () => {
+        AlertService.success('Your account has been scheduled for deletion.', 'Account Deleted');
+      },
+    });
   };
 
   const settingSections: SettingSection[] = [
+    {
+      title: 'General Settings',
+      items: [
+        {
+          id: 'celebrate',
+          title: 'Celebrate Grovelop',
+          description: 'Share your success with the world',
+          type: 'action',
+          icon: 'trophy',
+          action: () => AlertService.success('Thank you for being part of the Grovelop community! 🎉', 'Celebrate!'),
+        },
+        {
+          id: 'upgrade',
+          title: 'Upgrade Plan',
+          description: 'Manage your subscription plan',
+          type: 'navigation',
+          icon: 'star',
+          route: '/subscription',
+        },
+        {
+          id: 'logout',
+          title: 'Logout',
+          description: 'Sign out of your account',
+          type: 'action',
+          icon: 'log-out',
+          action: () => AlertService.confirm({
+            title: 'Logout',
+            message: 'Are you sure you want to logout?',
+            confirmText: 'Logout',
+            cancelText: 'Cancel',
+            onConfirm: async () => {
+              try {
+                await logout();
+                // AlertService.success('You have been logged out successfully.', 'Logged Out');
+              } catch (error) {
+                AlertService.error('Failed to logout. Please try again.');
+              }
+            },
+          }),
+        },
+        {
+          id: 'information',
+          title: 'Information',
+          description: 'Learn about professional archetypes',
+          type: 'navigation',
+          icon: 'information-circle',
+          route: '/info',
+        },
+      ],
+    },
     {
       title: 'Notifications',
       items: [
@@ -190,7 +246,7 @@ export default function SettingsScreen() {
           description: 'Download your personal data',
           type: 'action',
           icon: 'download',
-          action: () => Alert.alert('Export Data', 'Your data export will be emailed to you.'),
+          action: () => AlertService.success('Your data export will be emailed to you.', 'Export Data'),
         },
       ],
     },
@@ -211,7 +267,7 @@ export default function SettingsScreen() {
           description: 'Get help from our team',
           type: 'action',
           icon: 'chatbubble-ellipses',
-          action: () => Alert.alert('Contact Support', 'Redirecting to support chat...'),
+          action: () => AlertService.info('Redirecting to support chat...', 'Contact Support'),
         },
         {
           id: 'feedback',
@@ -219,7 +275,7 @@ export default function SettingsScreen() {
           description: 'Help us improve Grovelop',
           type: 'action',
           icon: 'thumbs-up',
-          action: () => Alert.alert('Feedback', 'Thank you for your feedback!'),
+          action: () => AlertService.success('Thank you for your feedback!', 'Feedback'),
         },
         {
           id: 'rate',
@@ -227,7 +283,7 @@ export default function SettingsScreen() {
           description: 'Leave a review in the app store',
           type: 'action',
           icon: 'star',
-          action: () => Alert.alert('Rate App', 'Redirecting to app store...'),
+          action: () => AlertService.info('Redirecting to app store...', 'Rate App'),
         },
       ],
     },

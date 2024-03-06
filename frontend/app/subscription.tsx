@@ -6,6 +6,10 @@ import Layout from '../constants/Layout';
 import Typography from '../constants/Typography';
 import { Accordion, PlanCard, PrimaryButton, SecondaryButton } from '../components/shared';
 import { useRouter } from 'expo-router';
+import { useAuthStore } from '../store/useAuthStore';
+import { AlertService } from '../services/alertService';
+import { SUBSCRIPTION_PLANS } from '../services/mockApi';
+import { Ionicons } from '@expo/vector-icons';
 
 const STRIPE_URLS = {
   FREE: 'https://buy.stripe.com/test_free_trial',
@@ -16,29 +20,17 @@ const STRIPE_URLS = {
 
 export default function Subscription() {
   const router = useRouter();
+  const { user, updateUser } = useAuthStore();
   const [showFreeWarning, setShowFreeWarning] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Plans content (Business cards-style)
-  const explorePoints = [
-    'Centralized team billing (per user/month)',
-    'Usage analytics and reporting',
-    'Org-wide privacy mode controls',
-    'Role-based access control',
-    'SAML/OIDC SSO',
-  ];
+  // Get current subscription or default to free
+  const currentSubscription = user?.subscription || SUBSCRIPTION_PLANS.FREE;
 
-  const developPoints = [
-    'Everything in Explore, plus:',
-    'Curated X Feed (daily insights)',
-    'Job Aspiration Matching',
-    'Job Application Creator — 8/month (2/week)',
-  ];
-
-  const masterPoints = [
-    'Everything in Develop, plus:',
-    'Unlimited Development Activities',
-    'Priority support and account management',
-  ];
+  // Plans content (Business cards-style) - using centralized subscription plans
+  const explorePoints = SUBSCRIPTION_PLANS.EXPLORE.features;
+  const developPoints = SUBSCRIPTION_PLANS.DEVELOP.features;
+  const masterPoints = SUBSCRIPTION_PLANS.MASTER.features;
 
   const openStripe = async (url: string) => {
     try {
@@ -49,46 +41,121 @@ export default function Subscription() {
     }
   };
 
+  const handleUnsubscribe = () => {
+    AlertService.confirm({
+      title: 'Cancel Subscription',
+      message: 'Are you sure you want to cancel your subscription? You will lose access to premium features at the end of your current billing period.',
+      confirmText: 'Cancel Subscription',
+      cancelText: 'Keep Subscription',
+      onConfirm: async () => {
+        setIsLoading(true);
+        try {
+          // In real app, this would call an API
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          const updatedSubscription = {
+            ...currentSubscription,
+            status: 'cancelled' as const,
+            autoRenew: false,
+            startDate: currentSubscription.startDate,
+          };
+          
+          await updateUser({
+            subscription: updatedSubscription,
+          });
+          
+          AlertService.success('Your subscription has been cancelled. You will retain access until the end of your current billing period.', 'Subscription Cancelled');
+        } catch (error) {
+          AlertService.error('Failed to cancel subscription. Please try again.');
+        } finally {
+          setIsLoading(false);
+        }
+      },
+    });
+  };
+
+  const handleReactivate = async () => {
+    setIsLoading(true);
+    try {
+      // In real app, this would call an API
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const updatedSubscription = {
+        ...currentSubscription,
+        status: 'active' as const,
+        autoRenew: true,
+        startDate: currentSubscription.startDate,
+      };
+      
+      await updateUser({
+        subscription: updatedSubscription,
+      });
+      
+      AlertService.success('Your subscription has been reactivated!', 'Subscription Reactivated');
+    } catch (error) {
+      AlertService.error('Failed to reactivate subscription. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header with back button */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={Colors.primary.goldenYellow} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Subscription</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+
         <Text style={styles.title}>Choose your plan</Text>
         <View style={styles.section}>
 
           <PlanCard
-            name="Explore"
-            originalPrice={{ currency: 'USD', amount: 1999, interval: 'month' }}
-            price={{ currency: 'USD', amount: Math.round(1999 * 0.75), interval: 'month' }}
+            name={SUBSCRIPTION_PLANS.EXPLORE.name}
+            originalPrice={{ currency: 'USD', amount: Math.round(SUBSCRIPTION_PLANS.EXPLORE.originalPrice! * 100), interval: 'month' }}
+            price={{ currency: 'USD', amount: Math.round(SUBSCRIPTION_PLANS.EXPLORE.price * 100), interval: 'month' }}
             perLabel="/user/mo."
-            subtitleNote="$6/mo if you sign up now"
+            subtitleNote={`$${SUBSCRIPTION_PLANS.EXPLORE.price}/mo if you sign up now`}
             bullets={explorePoints}
-            buttonTitle="Get Explore"
-            onSubscribe={() => openStripe(STRIPE_URLS.EXPLORE)}
-            highlight
+            buttonTitle={currentSubscription.type === 'explore' ? 'Unsubscribe' : `Get ${SUBSCRIPTION_PLANS.EXPLORE.name}`}
+            onSubscribe={currentSubscription.type === 'explore' ? handleUnsubscribe : () => openStripe(STRIPE_URLS.EXPLORE)}
+            highlight={currentSubscription.type === 'explore'}
+            showCurrentPlanBadge={currentSubscription.type === 'explore'}
           />
           <PlanCard
-            name="Develop"
-            originalPrice={{ currency: 'USD', amount: 3999, interval: 'month' }}
-            price={{ currency: 'USD', amount: Math.round(3999 * 0.75), interval: 'month' }}
+            name={SUBSCRIPTION_PLANS.DEVELOP.name}
+            originalPrice={{ currency: 'USD', amount: Math.round(SUBSCRIPTION_PLANS.DEVELOP.originalPrice! * 100), interval: 'month' }}
+            price={{ currency: 'USD', amount: Math.round(SUBSCRIPTION_PLANS.DEVELOP.price * 100), interval: 'month' }}
             perLabel="/user/mo."
-            subtitleNote="$9/mo if you sign up now"
+            subtitleNote={`$${SUBSCRIPTION_PLANS.DEVELOP.price}/mo if you sign up now`}
             bullets={developPoints}
-            buttonTitle="Get Develop"
-            onSubscribe={() => openStripe(STRIPE_URLS.DEVELOP)}
+            buttonTitle={currentSubscription.type === 'develop' ? 'Unsubscribe' : `Get ${SUBSCRIPTION_PLANS.DEVELOP.name}`}
+            onSubscribe={currentSubscription.type === 'develop' ? handleUnsubscribe : () => openStripe(STRIPE_URLS.DEVELOP)}
+            highlight={currentSubscription.type === 'develop'}
+            showCurrentPlanBadge={currentSubscription.type === 'develop'}
           />
           <PlanCard
-            name="Master"
-            originalPrice={{ currency: 'USD', amount: 6999, interval: 'month' }}
-            price={{ currency: 'USD', amount: Math.round(6999 * 0.63), interval: 'month' }}
+            name={SUBSCRIPTION_PLANS.MASTER.name}
+            originalPrice={{ currency: 'USD', amount: Math.round(SUBSCRIPTION_PLANS.MASTER.originalPrice! * 100), interval: 'month' }}
+            price={{ currency: 'USD', amount: Math.round(SUBSCRIPTION_PLANS.MASTER.price * 100), interval: 'month' }}
             perLabel="/user/mo."
-            subtitleNote="$15/mo if you sign up now"
+            subtitleNote={`$${SUBSCRIPTION_PLANS.MASTER.price}/mo if you sign up now`}
             bullets={masterPoints}
-            buttonTitle="Get Master"
-            onSubscribe={() => openStripe(STRIPE_URLS.MASTER)}
+            buttonTitle={currentSubscription.type === 'master' ? 'Unsubscribe' : `Get ${SUBSCRIPTION_PLANS.MASTER.name}`}
+            onSubscribe={currentSubscription.type === 'master' ? handleUnsubscribe : () => openStripe(STRIPE_URLS.MASTER)}
+            highlight={currentSubscription.type === 'master'}
+            showCurrentPlanBadge={currentSubscription.type === 'master'}
           />
         </View>
 
-        <SecondaryButton title="Continue with Free 12 hour trial" onPress={() => setShowFreeWarning(true)} />
+        {currentSubscription.type === 'free' && (
+          <SecondaryButton title="Continue with Free 12 hour trial" onPress={() => setShowFreeWarning(true)} />
+        )}
       </ScrollView>
 
       <Modal visible={showFreeWarning} transparent animationType="fade" onRequestClose={() => setShowFreeWarning(false)}>
@@ -123,10 +190,52 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.primary.navyBlue,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Layout.spacing.lg,
+    paddingVertical: Layout.spacing.md,
+  },
+  headerTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.primary.goldenYellow,
+  },
   content: {
     flexGrow: 1,
     padding: Layout.spacing.lg,
     gap: Layout.spacing.lg,
+  },
+  cancelButton: {
+    backgroundColor: Colors.error + '20',
+    borderWidth: 1,
+    borderColor: Colors.error,
+    paddingVertical: Layout.spacing.sm,
+    paddingHorizontal: Layout.spacing.md,
+    borderRadius: Layout.borderRadius.md,
+    flex: 1,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.error,
+  },
+  reactivateButton: {
+    backgroundColor: Colors.success + '20',
+    borderWidth: 1,
+    borderColor: Colors.success,
+    paddingVertical: Layout.spacing.sm,
+    paddingHorizontal: Layout.spacing.md,
+    borderRadius: Layout.borderRadius.md,
+    flex: 1,
+    alignItems: 'center',
+  },
+  reactivateButtonText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.success,
   },
   title: {
     color: Colors.primary.goldenYellow,

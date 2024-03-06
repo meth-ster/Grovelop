@@ -324,8 +324,9 @@ export default function ActivityLibraryScreen() {
   };
 
   const renderArchetypePieChart = (archetypes: ArchetypeData[]) => {
-    const chartSize = 200;
+    const chartSize = 180;
     const radius = chartSize / 2;
+    const labelRadius = radius + 40; // Position labels outside the pie
     
     // Calculate cumulative angles for proper pie segments
     let cumulativeAngle = 0;
@@ -349,39 +350,65 @@ export default function ActivityLibraryScreen() {
         <View style={styles.pieChartContainer}>
           <Text style={styles.pieChartTitle}>Archetype Distribution</Text>
           
-          {/* Proper Pie Chart with accurate segments */}
+          {/* Pie Chart with labels outside segments */}
           <View style={styles.pieChartWrapper}>
-            <View style={[styles.pieChart, { width: chartSize, height: chartSize }]}>
-              {/* Create accurate pie segments using a different approach */}
+            <View style={[styles.pieChart, { width: chartSize + 100, height: chartSize + 100, display: 'flex' }]}>
+              {/* Create pie segments */}
               {segments.map((segment, index) => {
-                // Create a circular progress ring for each segment
-                const size = chartSize;
-                const strokeWidth = 50;
-                const radius = (size - strokeWidth) / 2;
-                const circumference = radius * 2 * Math.PI;
-                const strokeDasharray = circumference;
-                const strokeDashoffset = circumference - (segment.angle / 360) * circumference;
+                return (
+                  <View key={index} style={{ position: 'absolute', top: 50, left: 50 }}>
+                    {/* Pie segment */}
+                    <View
+                      style={[
+                        styles.pieSegmentRing,
+                        {
+                          width: chartSize,
+                          height: chartSize,
+                          borderRadius: chartSize / 2,
+                          borderWidth: 40,
+                          borderColor: 'transparent',
+                          borderTopColor: segment.color,
+                          borderRightColor: segment.angle > 90 ? segment.color : 'transparent',
+                          borderBottomColor: segment.angle > 180 ? segment.color : 'transparent',
+                          borderLeftColor: segment.angle > 270 ? segment.color : 'transparent',
+                          transform: [{ rotate: `${segment.startAngle}deg` }],
+                        }
+                      ]}
+                    />
+                  </View>
+                );
+              })}
+              
+              {/* Labels positioned outside the pie */}
+              {segments.map((segment, index) => {
+                // Calculate label position (outside the pie)
+                const labelAngle = segment.startAngle + (segment.angle / 2);
+                const labelX = Math.cos((labelAngle - 90) * Math.PI / 180) * labelRadius + (chartSize + 100) / 2;
+                const labelY = Math.sin((labelAngle - 90) * Math.PI / 180) * labelRadius + (chartSize + 100) / 2;
                 
                 return (
                   <View
-                    key={index}
+                    key={`label-${index}`}
                     style={[
-                      styles.pieSegmentRing,
+                      styles.pieSegmentLabel,
                       {
-                        width: size,
-                        height: size,
-                        borderRadius: size / 2,
-                        borderWidth: strokeWidth,
-                        borderColor: 'transparent',
-                        borderTopColor: segment.color,
-                        borderRightColor: segment.angle > 90 ? segment.color : 'transparent',
-                        borderBottomColor: segment.angle > 180 ? segment.color : 'transparent',
-                        borderLeftColor: segment.angle > 270 ? segment.color : 'transparent',
-                        transform: [{ rotate: `${segment.startAngle}deg` }],
                         position: 'absolute',
+                        left: labelX - 40, // Center the label
+                        top: labelY - 20,
+                        width: 80,
+                        height: 40,
+                        justifyContent: 'center',
+                        alignItems: 'center',
                       }
                     ]}
-                  />
+                  >
+                    <Text style={[styles.pieSegmentLabelText, { color: segment.color }]}>
+                      {segment.name}
+                    </Text>
+                    <Text style={[styles.pieSegmentPercentageText, { color: segment.color }]}>
+                      {segment.percentage}%
+                    </Text>
+                  </View>
                 );
               })}
             </View>
@@ -413,7 +440,6 @@ export default function ActivityLibraryScreen() {
         <Text style={styles.sectionSubtitle}>Your current personality and working style breakdown</Text>
         
         {renderArchetypePieChart(mockCurrentArchetypes)}
-        {renderArchetypeLegend(mockCurrentArchetypes)}
       </View>
 
       {/* Current Goals Section */}
@@ -482,7 +508,6 @@ export default function ActivityLibraryScreen() {
             {selectedSnapshot === snapshot.id && (
               <View style={styles.snapshotDetails}>
                 {renderArchetypePieChart(snapshot.archetypes)}
-                {renderArchetypeLegend(snapshot.archetypes)}
                 
                 <View style={styles.snapshotGoals}>
                   <Text style={styles.snapshotGoalsTitle}>Main Goals at this time:</Text>
@@ -965,6 +990,7 @@ const styles = StyleSheet.create({
   chartContainer: {
     alignItems: 'center',
     marginVertical: Layout.spacing.lg,
+    overflow: 'visible', // Allow labels to extend outside
   },
   pieChartContainer: {
     width: '100%',
@@ -974,6 +1000,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.neutral.gray200,
     alignItems: 'center',
+    overflow: 'visible', // Allow labels to extend outside
   },
   pieChartTitle: {
     fontSize: Typography.fontSize.lg,
@@ -986,16 +1013,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Layout.spacing.lg,
+    overflow: 'visible', // Allow labels to extend outside
   },
   pieChart: {
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'visible', // Allow labels to extend outside
   },
   pieSegmentRing: {
     position: 'absolute',
     top: 0,
     left: 0,
+  },
+  pieSegmentLabel: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    shadowColor: Colors.neutral.black,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  pieSegmentLabelText: {
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.semibold,
+    textAlign: 'center',
+    lineHeight: 14,
+  },
+  pieSegmentPercentageText: {
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.bold,
+    textAlign: 'center',
+    lineHeight: 14,
   },
   circularProgressContainer: {
     marginTop: Layout.spacing.xl,

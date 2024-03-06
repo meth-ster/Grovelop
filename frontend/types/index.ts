@@ -8,6 +8,7 @@ export interface User {
   profilePicture?: string;
   archetype?: UserArchetype;
   assessmentCompleted: boolean;
+  subscription?: SubscriptionPlan;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,6 +31,21 @@ export interface UserArchetype {
 }
 
 export type ArchetypeType = 'doer' | 'thinker' | 'creator' | 'helper' | 'persuader' | 'organiser';
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  type: 'free' | 'explore' | 'develop' | 'master';
+  price: number;
+  originalPrice?: number;
+  currency: string;
+  billingCycle: 'monthly' | 'yearly';
+  features: string[];
+  status: 'active' | 'cancelled' | 'expired' | 'trial';
+  startDate: string;
+  endDate?: string;
+  autoRenew: boolean;
+}
 
 export interface Question {
   id: string;

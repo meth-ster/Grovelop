@@ -14,6 +14,76 @@ const STORAGE_KEYS = {
   THREADS: 'grovelop_threads',
 };
 
+// Subscription Plans Configuration
+export const SUBSCRIPTION_PLANS = {
+  FREE: {
+    id: 'free',
+    name: 'Free Plan',
+    type: 'free' as const,
+    price: 0,
+    currency: 'USD',
+    billingCycle: 'monthly' as const,
+    features: ['Basic features', 'Limited activities'],
+    status: 'active' as const,
+    startDate: new Date().toISOString(),
+    autoRenew: false,
+  },
+  EXPLORE: {
+    id: 'explore',
+    name: 'Explore',
+    type: 'explore' as const,
+    price: 6.00, // $6/mo after discount
+    originalPrice: 19.99,
+    currency: 'USD',
+    billingCycle: 'monthly' as const,
+    features: [
+      'Centralized team billing (per user/month)',
+      'Usage analytics and reporting',
+      'Org-wide privacy mode controls',
+      'Role-based access control',
+      'SAML/OIDC SSO',
+    ],
+    status: 'active' as const,
+    startDate: new Date().toISOString(),
+    autoRenew: true,
+  },
+  DEVELOP: {
+    id: 'develop',
+    name: 'Develop',
+    type: 'develop' as const,
+    price: 9.00, // $9/mo after discount
+    originalPrice: 39.99,
+    currency: 'USD',
+    billingCycle: 'monthly' as const,
+    features: [
+      'Everything in Explore, plus:',
+      'Curated X Feed (daily insights)',
+      'Job Aspiration Matching',
+      'Job Application Creator — 8/month (2/week)',
+    ],
+    status: 'active' as const,
+    startDate: new Date().toISOString(),
+    autoRenew: true,
+  },
+  MASTER: {
+    id: 'master',
+    name: 'Master',
+    type: 'master' as const,
+    price: 15.00, // $15/mo after discount
+    originalPrice: 69.99,
+    currency: 'USD',
+    billingCycle: 'monthly' as const,
+    features: [
+      'Everything in Develop, plus:',
+      'Unlimited Development Activities',
+      'Priority support and account management',
+    ],
+    status: 'active' as const,
+    startDate: new Date().toISOString(),
+    autoRenew: true,
+  },
+};
+
 // Default mock data (used for initial setup)
 const defaultMockUsers: User[] = [
   {
@@ -23,6 +93,11 @@ const defaultMockUsers: User[] = [
     password: 'password123',
     profilePicture: 'https://via.placeholder.com/100',
     assessmentCompleted: true,
+    subscription: {
+      ...SUBSCRIPTION_PLANS.DEVELOP,
+      startDate: '2024-01-15T00:00:00Z',
+      endDate: '2024-02-15T00:00:00Z',
+    },
     archetype: {
       primary: 'thinker',
       secondary: 'creator',
@@ -48,6 +123,13 @@ const defaultMockUsers: User[] = [
     name: 'Demo User',
     password: 'password123',
     assessmentCompleted: false,
+    subscription: {
+      ...SUBSCRIPTION_PLANS.MASTER,
+      status: 'cancelled',
+      startDate: '2024-01-01T00:00:00Z',
+      endDate: '2024-12-31T00:00:00Z',
+      autoRenew: false,
+    },
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },

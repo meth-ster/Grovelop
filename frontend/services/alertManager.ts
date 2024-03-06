@@ -95,6 +95,27 @@ class AlertManager {
       duration: duration || 4000,
     });
   }
+
+  confirm(
+    message: string, 
+    title: string = 'Confirm', 
+    options: {
+      confirmText?: string;
+      cancelText?: string;
+      onConfirm?: () => void;
+      onCancel?: () => void;
+    } = {}
+  ) {
+    this.showAlert({
+      type: 'confirm',
+      title,
+      message,
+      confirmText: options.confirmText || 'Confirm',
+      cancelText: options.cancelText || 'Cancel',
+      onConfirm: options.onConfirm,
+      onCancel: options.onCancel,
+    });
+  }
 }
 
 // Create singleton instance

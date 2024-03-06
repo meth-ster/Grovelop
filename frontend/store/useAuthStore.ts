@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../types';
-import { api } from '../services/mockApi';
+import { api, SUBSCRIPTION_PLANS } from '../services/mockApi';
 import { AlertService } from '../services/alertService';
 import { router } from 'expo-router';
 
@@ -73,6 +73,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         password: 'password123',
         profilePicture: 'https://via.placeholder.com/100',
         assessmentCompleted: false,
+        subscription: {
+          ...SUBSCRIPTION_PLANS.EXPLORE,
+          startDate: '2024-01-15T00:00:00Z',
+          endDate: '2024-02-15T00:00:00Z',
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -107,6 +112,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         name: 'Apple User',
         password: 'password123',
         assessmentCompleted: false,
+        subscription: {
+          ...SUBSCRIPTION_PLANS.MASTER,
+          startDate: '2024-01-01T00:00:00Z',
+          endDate: '2025-01-01T00:00:00Z',
+        },
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
