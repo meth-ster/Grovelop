@@ -171,7 +171,12 @@ export default function AssessmentScreen() {
   };
 
   const handleNext = () => {
+    console.log('handleNext called, currentAnswer:', currentAnswer);
+    console.log('Current question required:', currentQuestion.required);
+    console.log('Current question index:', currentQuestionIndex, 'Total questions:', mockQuestions.length);
+    
     if (!currentAnswer && currentQuestion.required) {
+      console.log('Validation failed - no answer provided');
       Alert.alert('Required', 'Please answer this question to continue.');
       return;
     }
@@ -190,6 +195,7 @@ export default function AssessmentScreen() {
     setResponses(updatedResponses);
 
     if (currentQuestionIndex < mockQuestions.length - 1) {
+      console.log('Moving to next question');
       // Move to next question
       Animated.timing(slideAnimation, {
         toValue: -screenWidth,
@@ -206,6 +212,7 @@ export default function AssessmentScreen() {
         }).start();
       });
     } else {
+      console.log('This is the last question - submitting assessment');
       // Submit assessment
       handleSubmitAssessment(updatedResponses);
     }
