@@ -254,7 +254,27 @@ export default function ActivityLibraryScreen() {
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Activity Library</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          Alert.alert(
+            'Create New Activity',
+            'Choose how you want to create your activity:',
+            [
+              { 
+                text: 'AI Generated', 
+                onPress: () => Alert.alert('AI Activity', 'AI will generate a personalized activity based on your profile and goals. Feature coming soon!') 
+              },
+              { 
+                text: 'Custom Activity', 
+                onPress: () => Alert.alert('Custom Activity', 'Create your own learning activity with custom goals and tasks. Feature coming soon!') 
+              },
+              { 
+                text: 'Import Template', 
+                onPress: () => Alert.alert('Import Template', 'Choose from pre-made activity templates. Feature coming soon!') 
+              },
+              { text: 'Cancel', style: 'cancel' }
+            ]
+          );
+        }}>
           <Ionicons name="add-circle" size={24} color={Colors.primary.goldenYellow} />
         </TouchableOpacity>
       </View>
