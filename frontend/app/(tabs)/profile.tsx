@@ -104,7 +104,31 @@ export default function ProfileScreen() {
             )}
             
             {isEditMode && (
-              <TouchableOpacity style={styles.editImageButton}>
+              <TouchableOpacity 
+                style={styles.editImageButton}
+                onPress={() => {
+                  Alert.alert(
+                    'Update Profile Picture',
+                    'Choose how you want to update your profile picture:',
+                    [
+                      { 
+                        text: 'Take Photo', 
+                        onPress: () => Alert.alert('Camera', 'Camera feature coming soon! You\'ll be able to take a new profile photo.') 
+                      },
+                      { 
+                        text: 'Choose from Gallery', 
+                        onPress: () => Alert.alert('Gallery', 'Gallery selection coming soon! You\'ll be able to choose from your photos.') 
+                      },
+                      { 
+                        text: 'Remove Photo', 
+                        onPress: () => Alert.alert('Photo Removed', 'Profile picture has been removed.'),
+                        style: 'destructive'
+                      },
+                      { text: 'Cancel', style: 'cancel' }
+                    ]
+                  );
+                }}
+              >
                 <Ionicons name="camera" size={16} color={Colors.text.inverse} />
               </TouchableOpacity>
             )}
