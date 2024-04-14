@@ -67,9 +67,18 @@ const mockJobDetail: JobListing & {
 export default function JobDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
   
   // In a real app, you would fetch job details based on params.id
   const job = mockJobDetail;
+
+  const toggleSection = (section: string) => {
+    if (expandedSections.includes(section)) {
+      setExpandedSections(expandedSections.filter(s => s !== section));
+    } else {
+      setExpandedSections([...expandedSections, section]);
+    }
+  };
 
   const handleApply = () => {
     Alert.alert(
