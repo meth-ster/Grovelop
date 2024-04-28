@@ -63,7 +63,8 @@ export default function WelcomeScreen() {
     setIsLoading(true);
     try {
       await loginWithGoogle();
-      router.replace('/assessment');
+      // User will be redirected automatically by index.tsx
+      console.log('Google authentication successful');
     } catch (error) {
       Alert.alert('Error', 'Google authentication failed');
     } finally {
@@ -75,7 +76,8 @@ export default function WelcomeScreen() {
     setIsLoading(true);
     try {
       await loginWithApple();
-      router.replace('/assessment');
+      // User will be redirected automatically by index.tsx
+      console.log('Apple authentication successful');
     } catch (error) {
       Alert.alert('Error', 'Apple authentication failed');
     } finally {
