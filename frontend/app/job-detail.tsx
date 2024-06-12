@@ -590,4 +590,133 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.inverse,
   },
+  expandableHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Layout.spacing.md,
+  },
+  requirementBullet: {
+    marginRight: Layout.spacing.sm,
+    marginTop: 2,
+  },
+  matchingBullet: {
+    // Already styled with icon
+  },
+  matchingRequirement: {
+    color: Colors.success,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  profileMatchAnalysis: {
+    backgroundColor: Colors.background.tertiary,
+    padding: Layout.spacing.lg,
+    marginHorizontal: Layout.spacing.lg,
+    borderRadius: Layout.borderRadius.md,
+    marginBottom: Layout.spacing.lg,
+  },
+  successProbability: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.spacing.md,
+  },
+  probabilityContent: {
+    flex: 1,
+  },
+  probabilityText: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.success,
+    marginBottom: Layout.spacing.xs,
+  },
+  probabilitySubtext: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+  },
+  postedDate: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.tertiary,
+    marginTop: Layout.spacing.xs,
+  },
+  companyIntelligence: {
+    gap: Layout.spacing.md,
+  },
+  intelligenceItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Layout.spacing.md,
+  },
+  intelligenceIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: Layout.borderRadius.md,
+    backgroundColor: Colors.background.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  intelligenceContent: {
+    flex: 1,
+  },
+  intelligenceLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.xs,
+  },
+  intelligenceValue: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+  },
+  benefitsList: {
+    gap: Layout.spacing.sm,
+  },
+  benefitItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Layout.spacing.sm,
+  },
+  benefitText: {
+    flex: 1,
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.primary,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: Layout.spacing.md,
+    paddingHorizontal: Layout.spacing.lg,
+    marginBottom: Layout.spacing.lg,
+  },
+  secondaryActionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: Colors.primary.navyBlue,
+    borderRadius: Layout.borderRadius.md,
+    paddingVertical: Layout.spacing.md,
+    gap: Layout.spacing.sm,
+  },
+  secondaryActionText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.primary.navyBlue,
+  },
+  primaryActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.primary.goldenYellow,
+    borderRadius: Layout.borderRadius.md,
+    paddingVertical: Layout.spacing.lg,
+    marginHorizontal: Layout.spacing.lg,
+    gap: Layout.spacing.sm,
+    marginBottom: Layout.spacing.lg,
+  },
+  primaryActionButtonText: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary,
+  },
 });
