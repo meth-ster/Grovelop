@@ -500,7 +500,10 @@ export default function AssessmentScreen() {
             styles.nextButton,
             (!currentAnswer && currentQuestion.required) && styles.disabledButton,
           ]}
-          onPress={handleNext}
+          onPress={() => {
+            console.log('Button clicked - calling handleNext');
+            handleNext();
+          }}
           disabled={isSubmitting || (!currentAnswer && currentQuestion.required)}
         >
           <Text style={styles.nextButtonText}>
