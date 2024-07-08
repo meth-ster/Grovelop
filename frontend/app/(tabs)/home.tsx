@@ -15,6 +15,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import Layout from '../../constants/Layout';
+import XLogo from '../../components/XLogo';
 
 const { width: screenWidth } = Dimensions.get('window');
 const gridItemSize = (screenWidth - Layout.spacing.lg * 4) / 3;
@@ -22,7 +23,7 @@ const gridItemSize = (screenWidth - Layout.spacing.lg * 4) / 3;
 interface GridItem {
   id: string;
   title: string;
-  icon: keyof typeof Ionicons.glyphMap | 'logo';
+  icon: keyof typeof Ionicons.glyphMap | 'logo' | 'x-logo';
   route?: string;
   color: string;
   backgroundColor: string;
@@ -42,7 +43,7 @@ export default function HomeScreen() {
         router.push('/grovelop-x');
         break;
       case 'workbench':
-        router.push('/(tabs)/workbench');
+        router.push('/activity-pad');
         break;
       case 'my-development':
         router.push('/activity-library');
@@ -71,32 +72,6 @@ export default function HomeScreen() {
       backgroundColor: Colors.primary.goldenYellow,
     },
     {
-      id: 'grovelop-logo',
-      title: 'Grovelop',
-      icon: 'logo',
-      color: Colors.text.inverse,
-      backgroundColor: Colors.primary.navyBlue,
-      action: () => {
-        // Maybe show app info or achievements
-      },
-    },
-    {
-      id: 'grovelop-x',
-      title: 'Grovelop/X',
-      icon: 'logo-twitter',
-      route: 'grovelop-x',
-      color: Colors.text.inverse,
-      backgroundColor: Colors.primary.warmOrange,
-    },
-    {
-      id: 'workbench',
-      title: 'Workbench&\n My activities',
-      icon: 'construct',
-      route: 'workbench',
-      color: Colors.text.inverse,
-      backgroundColor: Colors.archetypes.thinker.primary,
-    },
-    {
       id: 'start',
       title: 'New Activity',
       icon: 'play-circle',
@@ -105,6 +80,32 @@ export default function HomeScreen() {
       action: () => {
         // Maybe start a new activity or assessment
         router.push('/(tabs)/workbench');
+      },
+    },
+    {
+      id: 'grovelop-x',
+      title: 'Grovelop/X',
+      icon: 'x-logo',
+      route: 'grovelop-x',
+      color: Colors.text.inverse,
+      backgroundColor: Colors.primary.warmOrange,
+    },
+    {
+      id: 'workbench',
+      title: 'ActivityPad',
+      icon: 'construct',
+      route: 'workbench',
+      color: Colors.text.inverse,
+      backgroundColor: Colors.archetypes.thinker.primary,
+    },
+    {
+      id: 'grovelop-logo',
+      title: '',
+      icon: 'logo',
+      color: Colors.text.inverse,
+      backgroundColor: Colors.primary.navyBlue,
+      action: () => {
+        // Maybe show app info or achievements
       },
     },
     {
@@ -160,6 +161,8 @@ export default function HomeScreen() {
           style={styles.logoImage}
           resizeMode="contain"
         />
+      ) : item.icon === 'x-logo' ? (
+        <XLogo size={32} color={item.color} />
       ) : (
         <Ionicons name={item.icon} size={32} color={item.color} />
       )}
@@ -339,8 +342,8 @@ const styles = StyleSheet.create({
     lineHeight: Typography.lineHeight.tight * Typography.fontSize.xs,
   },
   logoImage: {
-    width: 60,
-    height: 60,
+    width: 80,
+    height: 80,
   },
   statsContainer: {
     paddingHorizontal: Layout.spacing.lg,

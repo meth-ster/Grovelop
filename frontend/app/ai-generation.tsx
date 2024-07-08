@@ -197,8 +197,8 @@ export default function AIGenerationScreen() {
           <Text style={styles.jobTitle}>{jobTitle}</Text>
           <Text style={styles.companyName}>at {company}</Text>
           <Text style={styles.documentType}>
-            {documentType === 'both' ? 'Resume/CV and Cover Letter' : 
-                         documentType === 'resume' ? 'Resume Only' : 'Cover Letter Only'}
+            {documentType === 'resume_cover_activity' ? 'Resume/CV and Cover Letter' : 
+             documentType === 'resume_only' ? 'Resume Only' : 'Cover Letter Only'}
           </Text>
         </View>
 
@@ -434,22 +434,6 @@ export default function AIGenerationScreen() {
             <View style={styles.stepsContainer}>
               {generationSteps.map(renderGenerationStep)}
             </View>
-
-            {/* Cancel Button */}
-            <TouchableOpacity 
-              style={styles.cancelButton}
-              onPress={() => {
-                AlertService.confirm({
-                  title: 'Cancel Generation',
-                  message: 'Are you sure you want to cancel? Progress will be lost.',
-                  confirmText: 'Cancel',
-                  cancelText: 'Continue Generating',
-                  onConfirm: () => router.back(),
-                });
-              }}
-            >
-              <Text style={styles.cancelButtonText}>Cancel Generation</Text>
-            </TouchableOpacity>
           </>
         )}
       </ScrollView>

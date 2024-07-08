@@ -170,7 +170,7 @@ export default function JobsScreen() {
         return (
           <>
             {/* Search */}
-            <View style={styles.searchContainer}>
+            {/* <View style={styles.searchContainer}>
               <Search
                 placeholder="Search jobs, companies, skills..."
                 value={searchQuery}
@@ -179,10 +179,10 @@ export default function JobsScreen() {
                   console.log('Searching for:', query);
                 }}
               />
-            </View>
+            </View> */}
 
             {/* Filters */}
-            <View style={styles.filtersContainer}>
+            {/* <View style={styles.filtersContainer}>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
                 {[
                   { key: 'all', label: 'All Jobs', count: jobs.length },
@@ -208,7 +208,7 @@ export default function JobsScreen() {
                   </TouchableOpacity>
                 ))}
               </ScrollView>
-            </View>
+            </View> */}
 
             {/* Jobs List */}
             <View style={styles.jobsList}>
@@ -237,7 +237,7 @@ export default function JobsScreen() {
             <Ionicons name="document-text-outline" size={64} color={Colors.text.tertiary} />
             <Text style={styles.emptyStateTitle}>Saved Documents</Text>
             <Text style={styles.emptyStateText}>
-              Your generated CVs and cover letters will appear here.
+            Your Saved Resumes/CVs and Cover Letters will appear here
             </Text>
           </View>
         );
@@ -371,12 +371,12 @@ export default function JobsScreen() {
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Job Opportunities</Text>
-        <TouchableOpacity 
+        {/* <TouchableOpacity 
           style={styles.filterButton}
           onPress={() => setShowFilterModal(true)}
         >
           <Ionicons name="options-outline" size={24} color={Colors.text.primary} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Tab Content */}
@@ -438,25 +438,6 @@ export default function JobsScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Quick Actions FAB */}
-      <TouchableOpacity 
-        style={styles.fab}
-        onPress={() => {
-          Alert.alert(
-            'Quick Actions',
-            'What would you like to do?',
-            [
-              { text: 'Create Job Alert', onPress: () => Alert.alert('Job Alert', 'Job alert created! You\'ll be notified of matching opportunities.') },
-              { text: 'Upload Resume', onPress: () => Alert.alert('Upload Resume', 'Resume upload feature coming soon!') },
-              { text: 'Set Preferences', onPress: () => Alert.alert('Preferences', 'Job preferences updated successfully!') },
-              { text: 'Cancel', style: 'cancel' }
-            ]
-          );
-        }}
-      >
-        <Ionicons name="add" size={24} color={Colors.text.inverse} />
-      </TouchableOpacity>
-
       {/* Filter Modal - Display Only */}
       <Modal
         visible={showFilterModal}
@@ -512,16 +493,18 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: Layout.spacing.lg,
     paddingTop: Layout.spacing.lg,
-    paddingBottom: Layout.spacing.sm
+    paddingBottom: Layout.spacing.sm,
+    position: 'relative',
   },
   headerTitle: {
     fontSize: Typography.fontSize['2xl'],
     fontWeight: Typography.fontWeight.bold,
     color: Colors.text.primary,
+    marginBottom: Layout.spacing.md,
   },
   headerSubtitle: {
     fontSize: Typography.fontSize.base,
@@ -536,6 +519,8 @@ const styles = StyleSheet.create({
     color: Colors.text.secondary,
   },
   backButton: {
+    position: 'absolute',
+    left: Layout.spacing.lg,
     width: Layout.touchTarget.small,
     height: Layout.touchTarget.small,
     alignItems: 'center',
