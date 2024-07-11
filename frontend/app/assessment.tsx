@@ -604,4 +604,57 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.inverse,
   },
+  rankingContainer: {
+    gap: Layout.spacing.md,
+  },
+  rankingInstructions: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: Layout.spacing.md,
+    fontStyle: 'italic',
+  },
+  rankingOption: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.md,
+    padding: Layout.spacing.lg,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  rankedOption: {
+    backgroundColor: Colors.primary.goldenYellow,
+    borderColor: Colors.primary.goldenYellow,
+  },
+  rankingContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rankingNumber: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.neutral.gray300,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Layout.spacing.md,
+  },
+  rankedNumber: {
+    backgroundColor: Colors.primary.navyBlue,
+  },
+  rankingNumberText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.secondary,
+  },
+  rankedNumberText: {
+    color: Colors.text.inverse,
+  },
+  rankingOptionText: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.primary,
+    flex: 1,
+  },
+  rankedOptionText: {
+    fontWeight: Typography.fontWeight.semibold,
+  },
 });
