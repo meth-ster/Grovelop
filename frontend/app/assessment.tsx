@@ -711,6 +711,9 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.inverse,
   },
+  completionButtons: {
+    gap: Layout.spacing.md,
+  },
   rankingContainer: {
     gap: Layout.spacing.md,
   },
