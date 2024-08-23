@@ -80,7 +80,26 @@ export default function ProfileScreen() {
           <View style={styles.headerActions}>
             <TouchableOpacity 
               style={styles.headerButton}
-              onPress={() => setIsEditMode(!isEditMode)}
+              onPress={async () => {
+                if (isEditMode) {
+                  // Save changes
+                  try {
+                    await updateUser({
+                      name: editedName,
+                      email: editedEmail,
+                    });
+                    Alert.alert('Success', 'Profile updated successfully!');
+                    setIsEditMode(false);
+                  } catch (error) {
+                    Alert.alert('Error', 'Failed to update profile. Please try again.');
+                  }
+                } else {
+                  // Enter edit mode
+                  setEditedName(user?.name || '');
+                  setEditedEmail(user?.email || '');
+                  setIsEditMode(true);
+                }
+              }}
             >
               <Ionicons 
                 name={isEditMode ? "checkmark" : "pencil"} 
