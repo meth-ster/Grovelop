@@ -284,12 +284,7 @@ export default function MoreScreen() {
   );
 }
 
-// Mock data for demonstration
-const jobs = [
-  { id: '1', saved: true },
-  { id: '2', saved: true },
-  { id: '3', saved: false },
-];
+/* Mock data removed */
 
 const styles = StyleSheet.create({
   container: {
