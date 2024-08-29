@@ -45,14 +45,12 @@ export default function WelcomeScreen() {
     try {
       if (authMode === 'login') {
         await login(email, password);
-        Alert.alert('Welcome Back!', `Successfully signed in as ${email}`, [
-          { text: 'Continue', onPress: () => router.replace('/assessment') }
-        ]);
+        // User will be redirected by the index.tsx based on auth state
+        console.log('Login successful, user will be redirected automatically');
       } else {
         await register(email, password, name);
-        Alert.alert('Account Created!', `Welcome ${name}! Your account has been created successfully.`, [
-          { text: 'Start Assessment', onPress: () => router.replace('/assessment') }
-        ]);
+        // User will be redirected by the index.tsx based on auth state
+        console.log('Registration successful, user will be redirected automatically');
       }
     } catch (error) {
       Alert.alert('Error', `${authMode === 'login' ? 'Login' : 'Registration'} failed. Please try again.`);
