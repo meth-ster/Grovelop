@@ -155,8 +155,30 @@ export default function ProfileScreen() {
             )}
           </View>
           
-          <Text style={styles.userName}>{user?.name || 'User Name'}</Text>
-          <Text style={styles.userEmail}>{user?.email}</Text>
+          {isEditMode ? (
+            <TextInput
+              style={[styles.userName, styles.editableField]}
+              value={editedName}
+              onChangeText={setEditedName}
+              placeholder="Enter your name"
+              placeholderTextColor={Colors.text.tertiary}
+            />
+          ) : (
+            <Text style={styles.userName}>{user?.name || 'User Name'}</Text>
+          )}
+          
+          {isEditMode ? (
+            <TextInput
+              style={[styles.userEmail, styles.editableField]}
+              value={editedEmail}
+              onChangeText={setEditedEmail}
+              placeholder="Enter your email"
+              keyboardType="email-address"
+              placeholderTextColor={Colors.text.tertiary}
+            />
+          ) : (
+            <Text style={styles.userEmail}>{user?.email}</Text>
+          )}
           
           {user?.archetype && (
             <View style={[
