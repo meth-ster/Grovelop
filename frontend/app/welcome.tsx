@@ -31,8 +31,13 @@ export default function WelcomeScreen() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleEmailAuth = async () => {
-    if (!email || !password || (authMode === 'register' && !name)) {
-      Alert.alert('Error', 'Please fill in all fields');
+    if (!email || !password) {
+      Alert.alert('Error', 'Please enter email and password');
+      return;
+    }
+    
+    if (authMode === 'register' && !name) {
+      Alert.alert('Error', 'Please enter your full name');
       return;
     }
 
@@ -40,12 +45,17 @@ export default function WelcomeScreen() {
     try {
       if (authMode === 'login') {
         await login(email, password);
+        Alert.alert('Welcome Back!', `Successfully signed in as ${email}`, [
+          { text: 'Continue', onPress: () => router.replace('/assessment') }
+        ]);
       } else {
         await register(email, password, name);
+        Alert.alert('Account Created!', `Welcome ${name}! Your account has been created successfully.`, [
+          { text: 'Start Assessment', onPress: () => router.replace('/assessment') }
+        ]);
       }
-      router.replace('/assessment');
     } catch (error) {
-      Alert.alert('Error', 'Authentication failed. Please try again.');
+      Alert.alert('Error', `${authMode === 'login' ? 'Login' : 'Registration'} failed. Please try again.`);
     } finally {
       setIsLoading(false);
     }
