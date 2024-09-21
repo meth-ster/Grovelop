@@ -276,23 +276,57 @@ export default function GrovelopXScreen() {
 
       {/* Engagement */}
       <View style={styles.engagementRow}>
-        <TouchableOpacity style={styles.engagementButton}>
-          <Ionicons name="heart-outline" size={20} color={Colors.text.secondary} />
-          <Text style={styles.engagementText}>{formatEngagement(post.engagement.likes)}</Text>
+        <TouchableOpacity 
+          style={styles.engagementButton}
+          onPress={() => handleLikePost(post.id)}
+        >
+          <Ionicons 
+            name={likedPosts.has(post.id) ? "heart" : "heart-outline"} 
+            size={20} 
+            color={likedPosts.has(post.id) ? Colors.error : Colors.text.secondary} 
+          />
+          <Text style={[
+            styles.engagementText,
+            likedPosts.has(post.id) && { color: Colors.error }
+          ]}>
+            {formatEngagement(post.engagement.likes)}
+          </Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.engagementButton}>
-          <Ionicons name="repeat-outline" size={20} color={Colors.text.secondary} />
-          <Text style={styles.engagementText}>{formatEngagement(post.engagement.retweets)}</Text>
+        <TouchableOpacity 
+          style={styles.engagementButton}
+          onPress={() => handleRetweetPost(post.id)}
+        >
+          <Ionicons 
+            name={retweetedPosts.has(post.id) ? "repeat" : "repeat-outline"} 
+            size={20} 
+            color={retweetedPosts.has(post.id) ? Colors.success : Colors.text.secondary} 
+          />
+          <Text style={[
+            styles.engagementText,
+            retweetedPosts.has(post.id) && { color: Colors.success }
+          ]}>
+            {formatEngagement(post.engagement.retweets)}
+          </Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.engagementButton}>
+        <TouchableOpacity 
+          style={styles.engagementButton}
+          onPress={() => handleCommentPost(post.id)}
+        >
           <Ionicons name="chatbubble-outline" size={20} color={Colors.text.secondary} />
           <Text style={styles.engagementText}>{formatEngagement(post.engagement.comments)}</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.engagementButton}>
-          <Ionicons name="bookmark-outline" size={20} color={Colors.text.secondary} />
+        <TouchableOpacity 
+          style={styles.engagementButton}
+          onPress={() => handleBookmarkPost(post.id)}
+        >
+          <Ionicons 
+            name={bookmarkedPosts.has(post.id) ? "bookmark" : "bookmark-outline"} 
+            size={20} 
+            color={bookmarkedPosts.has(post.id) ? Colors.primary.goldenYellow : Colors.text.secondary} 
+          />
         </TouchableOpacity>
       </View>
     </View>
