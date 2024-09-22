@@ -89,7 +89,7 @@ export default function MoreScreen() {
           description: 'Your bookmarked opportunities',
           icon: 'bookmark',
           route: '/saved-jobs',
-          badge: jobs.filter(j => j.saved).length,
+          badge: '2',
         },
         {
           id: 'messages',
