@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/useAuthStore';
+import { AlertService } from '../../services/alertService';
 import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import Layout from '../../constants/Layout';
@@ -35,15 +36,9 @@ export default function MoreScreen() {
   const router = useRouter();
   const { user, logout } = useAuthStore();
 
-  const handleLogout = () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Sign Out', onPress: logout, style: 'destructive' },
-      ]
-    );
+  const handleLogout = async () => {
+    await logout();
+
   };
 
   const handleNavigation = (route: string) => {
@@ -132,7 +127,7 @@ export default function MoreScreen() {
           description: 'Help us improve Grovelop',
           icon: 'chatbubble-ellipses',
           action: () => {
-            Alert.alert('Feedback', 'Thank you for your interest in helping us improve!');
+            AlertService.info('Thank you for your interest in helping us improve!', 'Feedback');
           },
         },
       ],
@@ -172,7 +167,7 @@ export default function MoreScreen() {
           <Ionicons 
             name={item.icon} 
             size={24} 
-            color={item.color || Colors.text.primary} 
+            color={item.color || Colors.text.primary}
           />
         </View>
         

@@ -15,17 +15,19 @@ import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 import Layout from '../constants/Layout';
 
-type DocumentType = 'resume' | 'cover_letter' | 'both';
+type DocumentType = 'resume_only' | 'resume_cover_activity' | 'cover_letter_only';
 type ExperienceLevel = 'entry' | 'mid' | 'senior' | 'executive';
-type GeographicFormat = 'US' | 'UK' | 'EU' | 'APAC';
+type GeographicFormat = 'US' | 'EU' | 'Academic' | 'International';
+type ToneStyle = 'conservative' | 'professional' | 'creative' | 'executive';
 
 interface DocumentConfig {
   type: DocumentType;
   experienceLevel: ExperienceLevel;
   geographicFormat: GeographicFormat;
-  tone: 'professional' | 'creative' | 'technical' | 'executive';
+  tone: ToneStyle;
   targetRole: string;
-  customInstructions: string;
+  companyName: string;
+  jobDescription: string;
 }
 
 export default function DocumentSetupScreen() {
@@ -34,12 +36,13 @@ export default function DocumentSetupScreen() {
   const { jobTitle, company } = params;
 
   const [config, setConfig] = useState<DocumentConfig>({
-    type: 'both',
+    type: 'resume_cover_activity',
     experienceLevel: 'mid',
     geographicFormat: 'US',
     tone: 'professional',
     targetRole: (jobTitle as string) || '',
-    customInstructions: '',
+    companyName: (company as string) || '',
+    jobDescription: '',
   });
 
   const handleContinue = () => {
@@ -48,19 +51,41 @@ export default function DocumentSetupScreen() {
       return;
     }
 
-    router.push({
-      pathname: '/activity-portfolio-selection',
-      params: {
-        jobTitle,
-        company,
-        documentType: config.type,
-        experienceLevel: config.experienceLevel,
-        geographicFormat: config.geographicFormat,
-        tone: config.tone,
-        targetRole: config.targetRole,
-        customInstructions: config.customInstructions,
-      }
-    });
+    if (!config.companyName.trim()) {
+      Alert.alert('Missing Information', 'Please specify the company name.');
+      return;
+    }
+
+    // Skip activity portfolio selection if resume only
+    if (config.type === 'resume_only') {
+      router.push({
+        pathname: '/ai-generation',
+        params: {
+          jobTitle: config.targetRole,
+          company: config.companyName,
+          documentType: config.type,
+          experienceLevel: config.experienceLevel,
+          geographicFormat: config.geographicFormat,
+          tone: config.tone,
+          targetRole: config.targetRole,
+          jobDescription: config.jobDescription,
+        }
+      });
+    } else {
+      router.push({
+        pathname: '/activity-portfolio-selection',
+        params: {
+          jobTitle: config.targetRole,
+          company: config.companyName,
+          documentType: config.type,
+          experienceLevel: config.experienceLevel,
+          geographicFormat: config.geographicFormat,
+          tone: config.tone,
+          targetRole: config.targetRole,
+          jobDescription: config.jobDescription,
+        }
+      });
+    }
   };
 
   const renderOption = (
@@ -87,9 +112,9 @@ export default function DocumentSetupScreen() {
             ]}>
               {option.label}
             </Text>
-            {option.description && (
+            {/* {option.description && (
               <Text style={styles.optionDescription}>{option.description}</Text>
-            )}
+            )} */}
           </TouchableOpacity>
         ))}
       </View>
@@ -103,130 +128,37 @@ export default function DocumentSetupScreen() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Document Setup</Text>
+        <Text style={styles.headerTitle}>Create New Document</Text>
         <View style={{ width: 24 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Job Context */}
+        {/* Target Position */}
+        <Text style={styles.optionLabel2}>Target Position:</Text>
         <View style={styles.jobContext}>
-          <Text style={styles.contextTitle}>Applying for:</Text>
-          <Text style={styles.jobTitle}>{jobTitle}</Text>
-          <Text style={styles.companyName}>at {company}</Text>
+          <Text style={styles.contextTitle}>{jobTitle}</Text>
+          <Text style={styles.sectionTitle}>at {company}</Text>
         </View>
 
         {/* Document Type Selection */}
         {renderOption(
-          'What documents do you need?',
+          'Document Type:',
           [
-            { value: 'resume', label: 'Resume Only', description: 'Professional resume tailored for this role' },
-            { value: 'cover_letter', label: 'Cover Letter Only', description: 'Compelling cover letter for this application' },
-            { value: 'both', label: 'Complete Package', description: 'Resume + Cover Letter combo' },
+            { value: 'resume_only', label: 'Resume/CV only', description: 'User skips screen 3 and goes directly to screen 4' },
+            { value: 'resume_cover_activity', label: 'Resume/CV + Cover Letter + Portfolio Item', description: 'Complete application package with portfolio' },
+            { value: 'cover_letter_only', label: 'Cover Letter only', description: 'Cover letter tailored for this application' },
           ],
           config.type,
           (value) => setConfig({ ...config, type: value })
         )}
 
-        {/* Experience Level */}
-        {renderOption(
-          'Your Experience Level',
-          [
-            { value: 'entry', label: 'Entry Level', description: '0-2 years experience' },
-            { value: 'mid', label: 'Mid-Level', description: '3-7 years experience' },
-            { value: 'senior', label: 'Senior', description: '8-15 years experience' },
-            { value: 'executive', label: 'Executive', description: '15+ years, leadership roles' },
-          ],
-          config.experienceLevel,
-          (value) => setConfig({ ...config, experienceLevel: value })
-        )}
 
-        {/* Geographic Format */}
-        {renderOption(
-          'Geographic Format',
-          [
-            { value: 'US', label: 'United States', description: 'US resume format' },
-            { value: 'UK', label: 'United Kingdom', description: 'UK CV format' },
-            { value: 'EU', label: 'European', description: 'European CV format' },
-            { value: 'APAC', label: 'Asia-Pacific', description: 'APAC resume format' },
-          ],
-          config.geographicFormat,
-          (value) => setConfig({ ...config, geographicFormat: value })
-        )}
-
-        {/* Tone Selection */}
-        {renderOption(
-          'Writing Tone',
-          [
-            { value: 'professional', label: 'Professional', description: 'Formal business tone' },
-            { value: 'creative', label: 'Creative', description: 'More dynamic and engaging' },
-            { value: 'technical', label: 'Technical', description: 'Technical depth focus' },
-            { value: 'executive', label: 'Executive', description: 'Leadership-focused tone' },
-          ],
-          config.tone,
-          (value) => setConfig({ ...config, tone: value })
-        )}
-
-        {/* Target Role */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Target Role</Text>
-          <TextInput
-            style={styles.textInput}
-            value={config.targetRole}
-            onChangeText={(text) => setConfig({ ...config, targetRole: text })}
-            placeholder="Enter specific role title"
-            placeholderTextColor={Colors.text.tertiary}
-          />
-        </View>
-
-        {/* Custom Instructions */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Custom Instructions (Optional)</Text>
-          <TextInput
-            style={[styles.textInput, styles.multilineInput]}
-            value={config.customInstructions}
-            onChangeText={(text) => setConfig({ ...config, customInstructions: text })}
-            placeholder="Any specific requirements or preferences..."
-            placeholderTextColor={Colors.text.tertiary}
-            multiline
-            numberOfLines={4}
-          />
-        </View>
-
-        {/* Configuration Summary */}
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryTitle}>Configuration Summary</Text>
-          <View style={styles.summaryItems}>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Documents:</Text>
-              <Text style={styles.summaryValue}>
-                {config.type === 'both' ? 'Resume + Cover Letter' : 
-                 config.type === 'resume' ? 'Resume Only' : 'Cover Letter Only'}
-              </Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Experience:</Text>
-              <Text style={styles.summaryValue}>
-                {config.experienceLevel.charAt(0).toUpperCase() + config.experienceLevel.slice(1)}
-              </Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Format:</Text>
-              <Text style={styles.summaryValue}>{config.geographicFormat}</Text>
-            </View>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Tone:</Text>
-              <Text style={styles.summaryValue}>
-                {config.tone.charAt(0).toUpperCase() + config.tone.slice(1)}
-              </Text>
-            </View>
-          </View>
-        </View>
       </ScrollView>
 
       {/* Continue Button */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.continueButton} onPress={handleContinue}>
-          <Text style={styles.continueButtonText}>Continue to Portfolio Selection</Text>
+          <Text style={styles.continueButtonText}>Continue</Text>
           <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
         </TouchableOpacity>
       </View>
@@ -260,26 +192,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary.navyBlue,
     padding: Layout.spacing.lg,
     marginHorizontal: Layout.spacing.lg,
-    marginTop: Layout.spacing.lg,
+    marginTop: Layout.spacing.md,
     borderRadius: Layout.borderRadius.md,
     marginBottom: Layout.spacing.xl,
   },
   contextTitle: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.text.inverse,
-    opacity: 0.8,
-    marginBottom: Layout.spacing.xs,
-  },
-  jobTitle: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.text.inverse,
-    marginBottom: Layout.spacing.xs,
+    marginBottom: Layout.spacing.sm,
   },
-  companyName: {
+  sectionTitle: {
     fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
     color: Colors.primary.goldenYellow,
-    fontWeight: Typography.fontWeight.medium,
   },
   optionGroup: {
     paddingHorizontal: Layout.spacing.lg,
@@ -290,6 +216,13 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
     marginBottom: Layout.spacing.md,
+  },
+  optionLabel2: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    paddingHorizontal: Layout.spacing.lg,
+    marginTop: Layout.spacing.lg,
   },
   optionButtons: {
     gap: Layout.spacing.sm,
@@ -303,7 +236,7 @@ const styles = StyleSheet.create({
   },
   selectedOption: {
     backgroundColor: Colors.primary.goldenYellow,
-    borderColor: Colors.primary.navyBlue,
+    // borderColor: Colors.primary.navyBlue,
   },
   optionText: {
     fontSize: Typography.fontSize.base,
@@ -312,7 +245,7 @@ const styles = StyleSheet.create({
     marginBottom: Layout.spacing.xs,
   },
   selectedOptionText: {
-    fontWeight: Typography.fontWeight.bold,
+    // fontWeight: Typography.fontWeight.bold,
   },
   optionDescription: {
     fontSize: Typography.fontSize.sm,

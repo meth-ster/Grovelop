@@ -24,6 +24,8 @@ interface PortfolioActivity {
   impact: 'high' | 'medium' | 'low';
   completionDate: string;
   selected: boolean;
+  archetype: 'Thinker' | 'Persuader' | 'Organiser' | 'Creator';
+  relevanceLevel: 'highly_relevant' | 'moderately_relevant';
 }
 
 const mockActivities: PortfolioActivity[] = [
@@ -37,6 +39,8 @@ const mockActivities: PortfolioActivity[] = [
     impact: 'high',
     completionDate: '2024-01-10',
     selected: true,
+    archetype: 'Thinker',
+    relevanceLevel: 'highly_relevant',
   },
   {
     id: '2',
@@ -48,6 +52,8 @@ const mockActivities: PortfolioActivity[] = [
     impact: 'high',
     completionDate: '2024-01-05',
     selected: true,
+    archetype: 'Thinker',
+    relevanceLevel: 'highly_relevant',
   },
   {
     id: '3',
@@ -59,6 +65,8 @@ const mockActivities: PortfolioActivity[] = [
     impact: 'medium',
     completionDate: '2023-12-20',
     selected: false,
+    archetype: 'Persuader',
+    relevanceLevel: 'moderately_relevant',
   },
   {
     id: '4',
@@ -69,7 +77,9 @@ const mockActivities: PortfolioActivity[] = [
     relevanceScore: 85,
     impact: 'high',
     completionDate: '2023-11-15',
-    selected: true,
+    selected: false,
+    archetype: 'Organiser',
+    relevanceLevel: 'moderately_relevant',
   },
   {
     id: '5',
@@ -81,6 +91,8 @@ const mockActivities: PortfolioActivity[] = [
     impact: 'high',
     completionDate: '2023-10-30',
     selected: false,
+    archetype: 'Creator',
+    relevanceLevel: 'moderately_relevant',
   },
   {
     id: '6',
@@ -92,6 +104,8 @@ const mockActivities: PortfolioActivity[] = [
     impact: 'medium',
     completionDate: '2023-12-01',
     selected: false,
+    archetype: 'Persuader',
+    relevanceLevel: 'moderately_relevant',
   },
 ];
 
@@ -215,6 +229,18 @@ export default function ActivityPortfolioSelectionScreen() {
         {/* Description */}
         <Text style={styles.activityDescription}>{activity.description}</Text>
 
+        {/* Archetype and Relevance Info */}
+        <View style={styles.activityMeta}>
+          <View style={styles.archetypeTag}>
+            <Text style={styles.archetypeText}>{activity.archetype}</Text>
+          </View>
+          <Text style={styles.relevanceDescription}>
+            → {activity.relevanceLevel === 'highly_relevant' 
+              ? 'Demonstrates data analysis and strategic thinking' 
+              : 'Could demonstrate soft skills and team dynamics'}
+          </Text>
+        </View>
+
         {/* Skills */}
         <View style={styles.skillsContainer}>
           <Text style={styles.skillsLabel}>Skills demonstrated:</Text>
@@ -241,8 +267,8 @@ export default function ActivityPortfolioSelectionScreen() {
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Portfolio Selection</Text>
-          <Text style={styles.headerSubtitle}>Select Evidence from Your Development.</Text>
+          <Text style={styles.headerTitle}>Activity Portfolio Selection</Text>
+          <Text style={styles.headerSubtitle}>Select Evidence of Your Knowledge and Skills</Text>
         </View>
         <TouchableOpacity onPress={() => {
           Alert.alert('Help', 'Select activities that best demonstrate your qualifications for this role. Higher relevance scores indicate better alignment.');
@@ -254,24 +280,28 @@ export default function ActivityPortfolioSelectionScreen() {
       {/* Selection Summary */}
       <View style={styles.selectionSummary}>
         <View style={styles.summaryStats}>
-          <Text style={styles.selectedCount}>{selectedCount} selected</Text>
-          <Text style={styles.recommendationText}>
-            Recommended: {activities.filter(a => a.relevanceScore >= 80).length} activities
-          </Text>
-        </View>
-        <View style={styles.selectionActions}>
-          <TouchableOpacity style={styles.selectionButton} onPress={handleSelectAll}>
-            <Text style={styles.selectionButtonText}>Smart Select</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.selectionButton} onPress={handleSelectNone}>
-            <Text style={styles.selectionButtonText}>Clear All</Text>
-          </TouchableOpacity>
+          <Text style={styles.selectedCount}>Selected: {selectedCount} of {activities.length} activities</Text>
         </View>
       </View>
 
       {/* Activities List */}
       <ScrollView style={styles.activitiesList} showsVerticalScrollIndicator={false}>
-        {sortedActivities.map(renderActivity)}
+        {/* Highly Relevant Activities */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Recommended Portfolio Items for This Role:</Text>
+          <Text style={styles.subsectionTitle}>Highly Relevant (Auto-selected):</Text>
+          {activities
+            .filter(activity => activity.relevanceLevel === 'highly_relevant')
+            .map(renderActivity)}
+        </View>
+
+        {/* Moderately Relevant Activities */}
+        <View style={styles.sectionContainer}>
+          <Text style={styles.subsectionTitle}>Moderately Relevant:</Text>
+          {activities
+            .filter(activity => activity.relevanceLevel === 'moderately_relevant')
+            .map(renderActivity)}
+        </View>
       </ScrollView>
 
       {/* Continue Button */}
@@ -282,7 +312,7 @@ export default function ActivityPortfolioSelectionScreen() {
           disabled={selectedCount === 0}
         >
           <Text style={styles.continueButtonText}>
-            Continue with {selectedCount} Activities
+            Continue with Selection
           </Text>
           <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
         </TouchableOpacity>
@@ -491,5 +521,39 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
+  },
+  sectionContainer: {
+    marginBottom: Layout.spacing.xl,
+    marginTop: Layout.spacing.md,
+  },
+  sectionTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.sm,
+  },
+  subsectionTitle: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.md,
+  },
+  archetypeTag: {
+    backgroundColor: Colors.primary.navyBlue,
+    paddingHorizontal: Layout.spacing.sm,
+    paddingVertical: Layout.spacing.xs,
+    borderRadius: Layout.borderRadius.sm,
+    marginRight: Layout.spacing.sm,
+  },
+  archetypeText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.inverse,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  relevanceDescription: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    fontStyle: 'italic',
+    flex: 1,
   },
 });

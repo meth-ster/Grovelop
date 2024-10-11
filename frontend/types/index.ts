@@ -4,6 +4,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  password: string;
   profilePicture?: string;
   archetype?: UserArchetype;
   assessmentCompleted: boolean;

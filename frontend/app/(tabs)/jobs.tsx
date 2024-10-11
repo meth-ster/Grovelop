@@ -18,6 +18,9 @@ import Layout from '../../constants/Layout';
 import { JobListing } from '../../types';
 import { router } from 'expo-router';
 import { Search } from '../../components';
+
+type TabType = 'discover' | 'saved-documents' | 'favourites';
+
 // Mock job data
 const mockJobs: JobListing[] = [
   {
@@ -85,6 +88,7 @@ const mockJobs: JobListing[] = [
 type FilterType = 'all' | 'saved' | 'applied' | 'all_matches' | 'very_high_success';
 
 export default function JobsScreen() {
+  const [activeTab, setActiveTab] = useState<TabType>('discover');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [jobs, setJobs] = useState(mockJobs);
@@ -158,6 +162,109 @@ export default function JobsScreen() {
     if (score >= 75) return Colors.primary.goldenYellow;
     if (score >= 60) return Colors.warning;
     return Colors.error;
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'discover':
+        return (
+          <>
+            {/* Search */}
+            <View style={styles.searchContainer}>
+              <Search
+                placeholder="Search jobs, companies, skills..."
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                onSearch={(query) => {
+                  console.log('Searching for:', query);
+                }}
+              />
+            </View>
+
+            {/* Filters */}
+            <View style={styles.filtersContainer}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
+                {[
+                  { key: 'all', label: 'All Jobs', count: jobs.length },
+                  { key: 'all_matches', label: 'All Matches', count: jobs.filter(j => j.matchScore >= 60).length },
+                  { key: 'very_high_success', label: 'Very High Success', count: jobs.filter(j => j.matchScore >= 90).length },
+                  { key: 'saved', label: 'Saved', count: jobs.filter(j => j.saved).length },
+                  { key: 'applied', label: 'Applied', count: jobs.filter(j => j.applied).length },
+                ].map((filter) => (
+                  <TouchableOpacity
+                    key={filter.key}
+                    style={[
+                      styles.filterChip,
+                      activeFilter === filter.key && styles.activeFilterChip,
+                    ]}
+                    onPress={() => setActiveFilter(filter.key as FilterType)}
+                  >
+                    <Text style={[
+                      styles.filterText,
+                      activeFilter === filter.key && styles.activeFilterText,
+                    ]}>
+                      {filter.label} ({filter.count})
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+
+            {/* Jobs List */}
+            <View style={styles.jobsList}>
+              <FlashList
+                data={filteredJobs}
+                renderItem={renderJobCard}
+                keyExtractor={(item) => item.id}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.jobsListContent}
+                ListEmptyComponent={() => (
+                  <View style={styles.emptyState}>
+                    <Ionicons name="briefcase-outline" size={64} color={Colors.text.tertiary} />
+                    <Text style={styles.emptyStateTitle}>No jobs found</Text>
+                    <Text style={styles.emptyStateText}>
+                      Try adjusting your search or filters to find more opportunities.
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+          </>
+        );
+      case 'saved-documents':
+        return (
+          <View style={styles.emptyState}>
+            <Ionicons name="document-text-outline" size={64} color={Colors.text.tertiary} />
+            <Text style={styles.emptyStateTitle}>Saved Documents</Text>
+            <Text style={styles.emptyStateText}>
+              Your generated CVs and cover letters will appear here.
+            </Text>
+          </View>
+        );
+      case 'favourites':
+        return (
+          <View style={styles.jobsList}>
+            <FlashList
+              data={jobs.filter(job => job.saved)}
+              renderItem={renderJobCard}
+              keyExtractor={(item) => item.id}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={styles.jobsListContent}
+              ListEmptyComponent={() => (
+                <View style={styles.emptyState}>
+                  <Ionicons name="heart-outline" size={64} color={Colors.text.tertiary} />
+                  <Text style={styles.emptyStateTitle}>No saved jobs</Text>
+                  <Text style={styles.emptyStateText}>
+                    Start discovering jobs and save the ones you're interested in.
+                  </Text>
+                </View>
+              )}
+            />
+          </View>
+        );
+      default:
+        return null;
+    }
   };
 
   const renderJobCard = ({ item: job }: { item: JobListing }) => (
@@ -257,6 +364,12 @@ export default function JobsScreen() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Job Opportunities</Text>
         <TouchableOpacity 
           style={styles.filterButton}
@@ -265,61 +378,64 @@ export default function JobsScreen() {
           <Ionicons name="options-outline" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
       </View>
-      <View style={styles.headerSubtitleContainer}>
-        <Text style={styles.headerSubtitleText}>Jobs matched to your aspirations</Text>
+
+      {/* Tab Content */}
+      <View style={styles.contentContainer}>
+        {renderTabContent()}
       </View>
 
-      {/* Search */}
-      <View style={styles.searchContainer}>
-        <Search
-          placeholder="Search jobs, companies, skills..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          onSearch={(query) => {
-            // Optional: Add any additional search logic here
-            console.log('Searching for:', query);
-          }}
-        />
-      </View>
-
-      {/* Filters */}
-      <View style={styles.filtersContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-          {[
-            { key: 'all', label: 'All Jobs', count: jobs.length },
-            { key: 'all_matches', label: 'All Matches', count: jobs.filter(j => j.matchScore >= 60).length },
-            { key: 'very_high_success', label: 'Very High Success', count: jobs.filter(j => j.matchScore >= 90).length },
-            { key: 'saved', label: 'Saved', count: jobs.filter(j => j.saved).length },
-            { key: 'applied', label: 'Applied', count: jobs.filter(j => j.applied).length },
-          ].map((filter) => (
-            <TouchableOpacity
-              key={filter.key}
-              style={[
-                styles.filterChip,
-                activeFilter === filter.key && styles.activeFilterChip,
-              ]}
-              onPress={() => setActiveFilter(filter.key as FilterType)}
-            >
-              <Text style={[
-                styles.filterText,
-                activeFilter === filter.key && styles.activeFilterText,
-              ]}>
-                {filter.label} ({filter.count})
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* Job List */}
-      <View style={styles.jobsList}>
-        <FlashList
-          data={filteredJobs}
-          renderItem={renderJobCard}
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.jobsListContent}
-        />
+      {/* Bottom Tabs */}
+      <View style={styles.bottomTabsContainer}>
+        <TouchableOpacity
+          style={[styles.bottomTab, activeTab === 'discover' && styles.activeBottomTab]}
+          onPress={() => setActiveTab('discover')}
+        >
+          <Ionicons 
+            name="compass-outline" 
+            size={24} 
+            color={activeTab === 'discover' ? Colors.primary.navyBlue : Colors.text.secondary} 
+          />
+          <Text style={[
+            styles.bottomTabText, 
+            activeTab === 'discover' && styles.activeBottomTabText
+          ]}>
+            Discover Jobs
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.bottomTab, activeTab === 'saved-documents' && styles.activeBottomTab]}
+          onPress={() => setActiveTab('saved-documents')}
+        >
+          <Ionicons 
+            name="document-text-outline" 
+            size={24} 
+            color={activeTab === 'saved-documents' ? Colors.primary.navyBlue : Colors.text.secondary} 
+          />
+          <Text style={[
+            styles.bottomTabText, 
+            activeTab === 'saved-documents' && styles.activeBottomTabText
+          ]}>
+            Saved Documents
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.bottomTab, activeTab === 'favourites' && styles.activeBottomTab]}
+          onPress={() => setActiveTab('favourites')}
+        >
+          <Ionicons 
+            name="heart-outline" 
+            size={24} 
+            color={activeTab === 'favourites' ? Colors.primary.navyBlue : Colors.text.secondary} 
+          />
+          <Text style={[
+            styles.bottomTabText, 
+            activeTab === 'favourites' && styles.activeBottomTabText
+          ]}>
+            Favourites
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Quick Actions FAB */}
@@ -419,11 +535,51 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     color: Colors.text.secondary,
   },
+  backButton: {
+    width: Layout.touchTarget.small,
+    height: Layout.touchTarget.small,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   filterButton: {
     width: Layout.touchTarget.small,
     height: Layout.touchTarget.small,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  bottomTabsContainer: {
+    flexDirection: 'row',
+    backgroundColor: Colors.background.primary,
+    borderTopWidth: 1,
+    borderTopColor: Colors.neutral.gray200,
+    paddingTop: Layout.spacing.sm,
+    paddingBottom: Layout.spacing.sm,
+    paddingHorizontal: Layout.spacing.sm,
+  },
+  bottomTab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Layout.spacing.sm,
+    paddingHorizontal: Layout.spacing.xs,
+    gap: Layout.spacing.xs,
+  },
+  activeBottomTab: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: Layout.borderRadius.sm,
+  },
+  bottomTabText: {
+    fontSize: Typography.fontSize.xs,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.secondary,
+    textAlign: 'center',
+  },
+  activeBottomTabText: {
+    color: Colors.primary.navyBlue,
+    fontWeight: Typography.fontWeight.semibold,
   },
   searchContainer: {
     paddingHorizontal: Layout.spacing.lg,
@@ -607,9 +763,30 @@ const styles = StyleSheet.create({
   appliedButtonText: {
     color: Colors.text.inverse,
   },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Layout.spacing.xl,
+    paddingVertical: Layout.spacing['2xl'],
+  },
+  emptyStateTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginTop: Layout.spacing.lg,
+    marginBottom: Layout.spacing.sm,
+    textAlign: 'center',
+  },
+  emptyStateText: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+  },
   fab: {
     position: 'absolute',
-    bottom: Layout.spacing.xl,
+    bottom: 100, // Position above the bottom tabs
     right: Layout.spacing.lg,
     width: 56,
     height: 56,

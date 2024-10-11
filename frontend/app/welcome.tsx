@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -23,13 +23,25 @@ type AuthMode = 'login' | 'register';
 
 export default function WelcomeScreen() {
   const router = useRouter();
-  const { login, register, loginWithGoogle, loginWithApple } = useAuthStore();
+  const { login, register, loginWithGoogle, loginWithApple, isAuthenticated, user, isLoading } = useAuthStore();
   
   const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle navigation after authentication
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      console.log('Welcome screen - user authenticated, redirecting...');
+      if (!user?.assessmentCompleted) {
+        router.replace('/assessment');
+      } else {
+        router.replace('/(tabs)/home');
+      }
+    }
+  }, [isAuthenticated, isLoading, user?.assessmentCompleted, router]);
 
   const handleEmailAuth = async () => {
     if (!email || !password) {
@@ -42,47 +54,53 @@ export default function WelcomeScreen() {
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
       if (authMode === 'login') {
         await login(email, password);
-        // User will be redirected by the index.tsx based on auth state
         console.log('Login successful, user will be redirected automatically');
+        // Clear form
+        setEmail('');
+        setPassword('');
       } else {
         await register(email, password, name);
-        // User will be redirected by the index.tsx based on auth state
         console.log('Registration successful, user will be redirected automatically');
+        // Clear form
+        setEmail('');
+        setPassword('');
+        setName('');
       }
     } catch (error) {
-      Alert.alert('Error', `${authMode === 'login' ? 'Login' : 'Registration'} failed. Please try again.`);
+      // Error handling is done in the store with alerts
+      console.error('Auth error:', error);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleAuth = async () => {
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
       await loginWithGoogle();
-      // User will be redirected automatically by index.tsx
       console.log('Google authentication successful');
     } catch (error) {
-      Alert.alert('Error', 'Google authentication failed');
+      // Error handling is done in the store with alerts
+      console.error('Google auth error:', error);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleAppleAuth = async () => {
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
       await loginWithApple();
-      // User will be redirected automatically by index.tsx
       console.log('Apple authentication successful');
     } catch (error) {
-      Alert.alert('Error', 'Apple authentication failed');
+      // Error handling is done in the store with alerts
+      console.error('Apple auth error:', error);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -131,7 +149,7 @@ export default function WelcomeScreen() {
             <TouchableOpacity 
               style={styles.socialButton}
               onPress={handleGoogleAuth}
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
               <Ionicons name="logo-google" size={20} color={Colors.text.primary} />
               <Text style={styles.socialButtonText}>Continue with Google</Text>
@@ -141,7 +159,7 @@ export default function WelcomeScreen() {
               <TouchableOpacity 
                 style={styles.socialButton}
                 onPress={handleAppleAuth}
-                disabled={isLoading}
+                disabled={isSubmitting}
               >
                 <Ionicons name="logo-apple" size={20} color={Colors.text.primary} />
                 <Text style={styles.socialButtonText}>Continue with Apple</Text>
@@ -196,10 +214,10 @@ export default function WelcomeScreen() {
               <TouchableOpacity
                 style={styles.primaryButton}
                 onPress={handleEmailAuth}
-                disabled={isLoading}
+                disabled={isSubmitting}
               >
                 <Text style={styles.primaryButtonText}>
-                  {isLoading ? 'Please wait...' : (authMode === 'login' ? 'Sign In' : 'Create Account')}
+                  {isSubmitting ? 'Please wait...' : (authMode === 'login' ? 'Sign In' : 'Create Account')}
                 </Text>
               </TouchableOpacity>
             </View>

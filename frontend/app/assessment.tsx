@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../store/useAuthStore';
+import { AlertService } from '../services/alertService';
 import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 import Layout from '../constants/Layout';
@@ -270,11 +271,14 @@ export default function AssessmentScreen() {
       
       console.log('User updated successfully, navigating to home...');
       
+      // Show success message
+      AlertService.success('Assessment completed successfully! Your personality profile has been generated.');
+      
       // Navigate to home immediately
       router.replace('/(tabs)/home');
     } catch (error) {
       console.error('Assessment submission error:', error);
-      Alert.alert('Error', 'Failed to submit assessment. Please try again.');
+      AlertService.error('Failed to submit assessment. Please try again.');
       setIsSubmitting(false);
     }
   };

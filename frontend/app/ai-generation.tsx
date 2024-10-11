@@ -7,10 +7,12 @@ import {
   TouchableOpacity,
   Alert,
   Animated,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { AlertService } from '../services/alertService';
 import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 import Layout from '../constants/Layout';
@@ -38,31 +40,49 @@ export default function AIGenerationScreen() {
   const progressAnimation = useState(new Animated.Value(0))[0];
   const pulseAnimation = useState(new Animated.Value(1))[0];
 
+  // Configuration state
+  const [config, setConfig] = useState({
+    tone: 'professional',
+    experienceLevel: 'mid',
+    geographicFormat: 'US',
+    references: '',
+    attachments: [] as string[],
+  });
+
+  // Configuration handlers
+  const updateConfig = (key: string, value: string) => {
+    setConfig(prev => ({ ...prev, [key]: value }));
+  };
+
+  const addAttachment = () => {
+    AlertService.info('Attachment feature coming soon! You\'ll be able to add files here.');
+  };
+
   const generationSteps: GenerationProgress[] = [
     {
       step: 'analyzing',
       progress: 20,
-      message: 'Analyzing job requirements and your profile...',
+      message: 'Analyzing your profile and strengths',
     },
     {
       step: 'generating_resume',
       progress: 50,
-      message: 'Generating tailored resume content...',
+      message: 'Integrating completed activity portfolio',
     },
     {
       step: 'generating_cover_letter',
       progress: 80,
-      message: 'Crafting personalized cover letter...',
+      message: 'Crafting compelling achievement statements',
     },
     {
       step: 'finalizing',
       progress: 95,
-      message: 'Finalizing documents and formatting...',
+      message: 'Generating employer-specific cover letter',
     },
     {
       step: 'complete',
       progress: 100,
-      message: 'Documents generated successfully!',
+      message: 'Formatting professional document layout',
     },
   ];
 
@@ -166,80 +186,208 @@ export default function AIGenerationScreen() {
             color={isGenerating ? Colors.text.tertiary : Colors.text.primary} 
           />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>AI Generation</Text>
+        <Text style={styles.headerTitle}>Create Application Documents for This Position</Text>
         <View style={{ width: 24 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Job Context */}
         <View style={styles.jobContext}>
-          <Text style={styles.contextLabel}>Generating for:</Text>
+          <Text style={styles.contextLabel}>Applying for:</Text>
           <Text style={styles.jobTitle}>{jobTitle}</Text>
           <Text style={styles.companyName}>at {company}</Text>
           <Text style={styles.documentType}>
-            Document Type: {documentType === 'both' ? 'Resume + Cover Letter' : 
+            {documentType === 'both' ? 'Resume/CV and Cover Letter' : 
                          documentType === 'resume' ? 'Resume Only' : 'Cover Letter Only'}
           </Text>
         </View>
 
         {!isGenerating ? (
           <>
-            {/* Generation Settings Summary */}
-            <View style={styles.settingsSummary}>
-              <Text style={styles.summaryTitle}>Generation Settings</Text>
-              <View style={styles.settingsGrid}>
-                <View style={styles.settingItem}>
-                  <Ionicons name="person" size={16} color={Colors.primary.navyBlue} />
-                  <Text style={styles.settingText}>Experience Level: {params.experienceLevel}</Text>
+            {/* Configuration Options */}
+            <View style={styles.configurationContainer}>
+              
+              {/* Tone & Style */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Tone & Style:</Text>
+                <View style={styles.optionButtons}>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.tone === 'conservative' && styles.selectedOption]}
+                    onPress={() => updateConfig('tone', 'conservative')}
+                  >
+                    <Text style={[styles.optionText, config.tone === 'conservative' && styles.selectedOptionText]}>Conservative/Traditional</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.tone === 'professional' && styles.selectedOption]}
+                    onPress={() => updateConfig('tone', 'professional')}
+                  >
+                    <Text style={[styles.optionText, config.tone === 'professional' && styles.selectedOptionText]}>Professional/Modern</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.tone === 'creative' && styles.selectedOption]}
+                    onPress={() => updateConfig('tone', 'creative')}
+                  >
+                    <Text style={[styles.optionText, config.tone === 'creative' && styles.selectedOptionText]}>Creative/Dynamic</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.tone === 'executive' && styles.selectedOption]}
+                    onPress={() => updateConfig('tone', 'executive')}
+                  >
+                    <Text style={[styles.optionText, config.tone === 'executive' && styles.selectedOptionText]}>Executive/Leadership</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.settingItem}>
-                  <Ionicons name="globe" size={16} color={Colors.primary.navyBlue} />
-                  <Text style={styles.settingText}>Format: {params.geographicFormat}</Text>
+              </View>
+
+              {/* Experience Level */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Experience Level:</Text>
+                <View style={styles.optionButtons}>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.experienceLevel === 'entry' && styles.selectedOption]}
+                    onPress={() => updateConfig('experienceLevel', 'entry')}
+                  >
+                    <Text style={[styles.optionText, config.experienceLevel === 'entry' && styles.selectedOptionText]}>Entry Level (0-2 years)</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.experienceLevel === 'mid' && styles.selectedOption]}
+                    onPress={() => updateConfig('experienceLevel', 'mid')}
+                  >
+                    <Text style={[styles.optionText, config.experienceLevel === 'mid' && styles.selectedOptionText]}>Mid-Level (3-7 years)</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.experienceLevel === 'senior' && styles.selectedOption]}
+                    onPress={() => updateConfig('experienceLevel', 'senior')}
+                  >
+                    <Text style={[styles.optionText, config.experienceLevel === 'senior' && styles.selectedOptionText]}>Senior Level (8+ years)</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.experienceLevel === 'executive' && styles.selectedOption]}
+                    onPress={() => updateConfig('experienceLevel', 'executive')}
+                  >
+                    <Text style={[styles.optionText, config.experienceLevel === 'executive' && styles.selectedOptionText]}>Executive Level (10+ years)</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.settingItem}>
-                  <Ionicons name="chatbubble" size={16} color={Colors.primary.navyBlue} />
-                  <Text style={styles.settingText}>Tone: {params.tone}</Text>
+              </View>
+
+              {/* Geographic Format */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Geographic Format:</Text>
+                <View style={styles.optionButtons}>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.geographicFormat === 'US' && styles.selectedOption]}
+                    onPress={() => updateConfig('geographicFormat', 'US')}
+                  >
+                    <Text style={[styles.optionText, config.geographicFormat === 'US' && styles.selectedOptionText]}>US Resume Style</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.geographicFormat === 'EU' && styles.selectedOption]}
+                    onPress={() => updateConfig('geographicFormat', 'EU')}
+                  >
+                    <Text style={[styles.optionText, config.geographicFormat === 'EU' && styles.selectedOptionText]}>European CV Style</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.geographicFormat === 'Academic' && styles.selectedOption]}
+                    onPress={() => updateConfig('geographicFormat', 'Academic')}
+                  >
+                    <Text style={[styles.optionText, config.geographicFormat === 'Academic' && styles.selectedOptionText]}>Academic CV Style</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.optionButton, config.geographicFormat === 'International' && styles.selectedOption]}
+                    onPress={() => updateConfig('geographicFormat', 'International')}
+                  >
+                    <Text style={[styles.optionText, config.geographicFormat === 'International' && styles.selectedOptionText]}>International Format</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.settingItem}>
-                  <Ionicons name="library" size={16} color={Colors.primary.navyBlue} />
-                  <Text style={styles.settingText}>
-                    Activities: {selectedActivities ? JSON.parse(selectedActivities as string).length : 0} selected
-                  </Text>
-                </View>
+              </View>
+
+              {/* Education */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Education:</Text>
+                <Text style={styles.configValue}>${'{educationFromUserProfile}'}</Text>
+              </View>
+
+              {/* Previous Work Experience */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Previous Work Experience:</Text>
+                <Text style={styles.configValue}>${'{workExperienceFromUserProfile}'}</Text>
+              </View>
+
+              {/* References */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>References and their contacts:</Text>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder="Enter references and contact information"
+                  placeholderTextColor={Colors.text.tertiary}
+                  multiline
+                  numberOfLines={3}
+                  value={config.references}
+                  onChangeText={(text) => updateConfig('references', text)}
+                />
+              </View>
+
+              {/* Attachments */}
+              <View style={styles.configSection}>
+                <Text style={styles.configLabel}>Attach transcripts / Letters of recommendations / University diplomas:</Text>
+                <TouchableOpacity style={styles.attachmentButton} onPress={addAttachment}>
+                  <Ionicons name="attach" size={20} color={Colors.primary.navyBlue} />
+                  <Text style={styles.attachmentText}>Add Attachments</Text>
+                </TouchableOpacity>
+                {config.attachments.length > 0 && (
+                  <View style={styles.attachmentsList}>
+                    {config.attachments.map((attachment, index) => (
+                      <View key={index} style={styles.attachmentItem}>
+                        <Ionicons name="document" size={16} color={Colors.text.secondary} />
+                        <Text style={styles.attachmentItemText}>{attachment}</Text>
+                        <TouchableOpacity onPress={() => {
+                          setConfig(prev => ({
+                            ...prev,
+                            attachments: prev.attachments.filter((_, i) => i !== index)
+                          }));
+                        }}>
+                          <Ionicons name="close" size={16} color={Colors.error} />
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                )}
               </View>
             </View>
 
-            {/* AI Features */}
-            <View style={styles.aiFeatures}>
-              <Text style={styles.featuresTitle}>AI-Powered Features</Text>
-              <View style={styles.featuresList}>
-                <View style={styles.featureItem}>
-                  <Ionicons name="scan" size={20} color={Colors.primary.goldenYellow} />
-                  <View style={styles.featureContent}>
-                    <Text style={styles.featureTitle}>Smart Content Analysis</Text>
-                    <Text style={styles.featureDescription}>
-                      Analyzes job requirements and matches them with your activities
-                    </Text>
-                  </View>
+            {/* Configuration Summary */}
+            <View style={styles.configSummary}>
+              <Text style={styles.summaryTitle}>Generation Settings</Text>
+              <View style={styles.summaryGrid}>
+                <View style={styles.summaryItem}>
+                  <Text style={styles.summaryLabel}>Tone:</Text>
+                  <Text style={styles.summaryValue}>
+                    {config.tone === 'conservative' ? 'Conservative/Traditional' :
+                     config.tone === 'professional' ? 'Professional/Modern' :
+                     config.tone === 'creative' ? 'Creative/Dynamic' : 'Executive/Leadership'}
+                  </Text>
                 </View>
-                <View style={styles.featureItem}>
-                  <Ionicons name="create" size={20} color={Colors.primary.goldenYellow} />
-                  <View style={styles.featureContent}>
-                    <Text style={styles.featureTitle}>Tailored Content Generation</Text>
-                    <Text style={styles.featureDescription}>
-                      Creates custom content highlighting your relevant experience
-                    </Text>
-                  </View>
+                <View style={styles.summaryItem}>
+                  <Text style={styles.summaryLabel}>Experience:</Text>
+                  <Text style={styles.summaryValue}>
+                    {config.experienceLevel === 'entry' ? 'Entry Level (0-2 years)' :
+                     config.experienceLevel === 'mid' ? 'Mid-Level (3-7 years)' :
+                     config.experienceLevel === 'senior' ? 'Senior Level (8+ years)' : 'Executive Level (10+ years)'}
+                  </Text>
                 </View>
-                <View style={styles.featureItem}>
-                  <Ionicons name="trophy" size={20} color={Colors.primary.goldenYellow} />
-                  <View style={styles.featureContent}>
-                    <Text style={styles.featureTitle}>Achievement Optimization</Text>
-                    <Text style={styles.featureDescription}>
-                      Emphasizes accomplishments that matter most for this role
-                    </Text>
-                  </View>
+                <View style={styles.summaryItem}>
+                  <Text style={styles.summaryLabel}>Format:</Text>
+                  <Text style={styles.summaryValue}>
+                    {config.geographicFormat === 'US' ? 'US Resume Style' :
+                     config.geographicFormat === 'EU' ? 'European CV Style' :
+                     config.geographicFormat === 'Academic' ? 'Academic CV Style' : 'International Format'}
+                  </Text>
                 </View>
+                {config.references && (
+                  <View style={styles.summaryItem}>
+                    <Text style={styles.summaryLabel}>References:</Text>
+                    <Text style={styles.summaryValue}>Provided</Text>
+                  </View>
+                )}
               </View>
             </View>
 
@@ -248,7 +396,7 @@ export default function AIGenerationScreen() {
               <Animated.View style={{ transform: [{ scale: pulseAnimation }] }}>
                 <Ionicons name="sparkles" size={24} color={Colors.text.primary} />
               </Animated.View>
-              <Text style={styles.generateButtonText}>Generate Documents</Text>
+              <Text style={styles.generateButtonText}>Create Resume/CV and Cover Letter</Text>
             </TouchableOpacity>
           </>
         ) : (
@@ -262,7 +410,7 @@ export default function AIGenerationScreen() {
                 <Ionicons name="sparkles" size={48} color={Colors.primary.goldenYellow} />
               </Animated.View>
               
-              <Text style={styles.progressTitle}>Generating Your Documents</Text>
+              <Text style={styles.progressTitle}>Creating Your Professional Documents...</Text>
               <Text style={styles.progressMessage}>{generationState.message}</Text>
               
               {/* Progress Bar */}
@@ -279,6 +427,7 @@ export default function AIGenerationScreen() {
               </View>
               
               <Text style={styles.progressPercentage}>{generationState.progress}%</Text>
+              <Text style={styles.estimatedTime}>Estimated completion: 45 seconds</Text>
             </View>
 
             {/* Generation Steps */}
@@ -290,14 +439,13 @@ export default function AIGenerationScreen() {
             <TouchableOpacity 
               style={styles.cancelButton}
               onPress={() => {
-                Alert.alert(
-                  'Cancel Generation',
-                  'Are you sure you want to cancel? Progress will be lost.',
-                  [
-                    { text: 'Continue Generating', style: 'cancel' },
-                    { text: 'Cancel', onPress: () => router.back(), style: 'destructive' }
-                  ]
-                );
+                AlertService.confirm({
+                  title: 'Cancel Generation',
+                  message: 'Are you sure you want to cancel? Progress will be lost.',
+                  confirmText: 'Cancel',
+                  cancelText: 'Continue Generating',
+                  onConfirm: () => router.back(),
+                });
               }}
             >
               <Text style={styles.cancelButtonText}>Cancel Generation</Text>
@@ -327,6 +475,7 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.xl,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
+    textAlign: 'center',
   },
   scrollContent: {
     paddingBottom: Layout.spacing.xl,
@@ -473,6 +622,11 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeight.bold,
     color: Colors.primary.navyBlue,
   },
+  estimatedTime: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    marginTop: Layout.spacing.sm,
+  },
   stepsContainer: {
     paddingHorizontal: Layout.spacing.lg,
     marginTop: Layout.spacing.xl,
@@ -525,5 +679,136 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     color: Colors.error,
     fontWeight: Typography.fontWeight.medium,
+  },
+  configurationContainer: {
+    backgroundColor: Colors.background.secondary,
+    marginHorizontal: Layout.spacing.lg,
+    padding: Layout.spacing.lg,
+    borderRadius: Layout.borderRadius.md,
+    marginBottom: Layout.spacing.lg,
+  },
+  configTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.xs,
+  },
+  configSubtitle: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.secondary,
+    marginBottom: Layout.spacing.lg,
+  },
+  configSection: {
+    marginBottom: Layout.spacing.lg,
+  },
+  configLabel: {
+    fontSize: Typography.fontSize.base,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.sm,
+  },
+  configValue: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    fontStyle: 'italic',
+    backgroundColor: Colors.background.primary,
+    padding: Layout.spacing.sm,
+    borderRadius: Layout.borderRadius.sm,
+  },
+  optionButtons: {
+    flexDirection: 'column',
+    flexWrap: 'wrap',
+    gap: Layout.spacing.sm,
+    marginLeft: 60,
+  },
+  optionButton: {
+    backgroundColor: Colors.background.primary,
+    paddingHorizontal: Layout.spacing.md,
+    paddingVertical: Layout.spacing.sm,
+    borderRadius: Layout.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray300,
+  },
+  selectedOption: {
+    backgroundColor: Colors.primary.goldenYellow,
+  },
+  optionText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.primary,
+  },
+  selectedOptionText: {
+    // fontWeight: Typography.fontWeight.semibold,
+  },
+  textInput: {
+    backgroundColor: Colors.background.primary,
+    borderRadius: Layout.borderRadius.sm,
+    padding: Layout.spacing.sm,
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.primary,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray300,
+    textAlignVertical: 'top',
+  },
+  attachmentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background.primary,
+    padding: Layout.spacing.sm,
+    borderRadius: Layout.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray300,
+    borderStyle: 'dashed',
+  },
+  attachmentText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.primary.navyBlue,
+    marginLeft: Layout.spacing.sm,
+  },
+  attachmentsList: {
+    marginTop: Layout.spacing.sm,
+    gap: Layout.spacing.xs,
+  },
+  attachmentItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background.primary,
+    padding: Layout.spacing.sm,
+    borderRadius: Layout.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: Colors.neutral.gray300,
+  },
+  attachmentItemText: {
+    flex: 1,
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.primary,
+    marginLeft: Layout.spacing.sm,
+  },
+  configSummary: {
+    backgroundColor: Colors.background.secondary,
+    marginHorizontal: Layout.spacing.lg,
+    padding: Layout.spacing.lg,
+    borderRadius: Layout.borderRadius.md,
+    marginBottom: Layout.spacing.lg,
+  },
+  summaryGrid: {
+    gap: Layout.spacing.sm,
+  },
+  summaryItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  summaryLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  summaryValue: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.primary,
+    fontWeight: Typography.fontWeight.semibold,
+    textAlign: 'right',
+    flex: 1,
+    marginLeft: Layout.spacing.sm,
   },
 });
