@@ -217,7 +217,15 @@ export default function JobsScreen() {
 
       {/* Actions */}
       <View style={styles.jobCardActions}>
-        <TouchableOpacity style={styles.viewButton}>
+        <TouchableOpacity 
+          style={styles.viewButton}
+          onPress={() => {
+            router.push({
+              pathname: '/job-detail',
+              params: { jobId: job.id }
+            });
+          }}
+        >
           <Text style={styles.viewButtonText}>View Details</Text>
         </TouchableOpacity>
         
