@@ -45,14 +45,12 @@ export default function WelcomeScreen() {
     try {
       if (authMode === 'login') {
         await login(email, password);
-        Alert.alert('Welcome Back!', `Successfully signed in as ${email}`, [
-          { text: 'Continue', onPress: () => router.replace('/assessment') }
-        ]);
+        // User will be redirected by the index.tsx based on auth state
+        console.log('Login successful, user will be redirected automatically');
       } else {
         await register(email, password, name);
-        Alert.alert('Account Created!', `Welcome ${name}! Your account has been created successfully.`, [
-          { text: 'Start Assessment', onPress: () => router.replace('/assessment') }
-        ]);
+        // User will be redirected by the index.tsx based on auth state
+        console.log('Registration successful, user will be redirected automatically');
       }
     } catch (error) {
       Alert.alert('Error', `${authMode === 'login' ? 'Login' : 'Registration'} failed. Please try again.`);
@@ -65,7 +63,8 @@ export default function WelcomeScreen() {
     setIsLoading(true);
     try {
       await loginWithGoogle();
-      router.replace('/assessment');
+      // User will be redirected automatically by index.tsx
+      console.log('Google authentication successful');
     } catch (error) {
       Alert.alert('Error', 'Google authentication failed');
     } finally {
@@ -77,7 +76,8 @@ export default function WelcomeScreen() {
     setIsLoading(true);
     try {
       await loginWithApple();
-      router.replace('/assessment');
+      // User will be redirected automatically by index.tsx
+      console.log('Apple authentication successful');
     } catch (error) {
       Alert.alert('Error', 'Apple authentication failed');
     } finally {
@@ -199,19 +199,8 @@ export default function WelcomeScreen() {
                 disabled={isLoading}
               >
                 <Text style={styles.primaryButtonText}>
-                  {authMode === 'login' ? 'Sign In' : 'Create Account'}
+                  {isLoading ? 'Please wait...' : (authMode === 'login' ? 'Sign In' : 'Create Account')}
                 </Text>
-              </TouchableOpacity>
-
-              {/* Direct Dashboard Test Button */}
-              <TouchableOpacity
-                style={[styles.primaryButton, { backgroundColor: Colors.success, marginTop: Layout.spacing.md }]}
-                onPress={() => {
-                  console.log('Direct dashboard button clicked');
-                  router.push('/(tabs)/home');
-                }}
-              >
-                <Text style={styles.primaryButtonText}>🧪 Skip to Dashboard (Test)</Text>
               </TouchableOpacity>
             </View>
 
@@ -238,19 +227,6 @@ export default function WelcomeScreen() {
             <Text style={styles.trialText}>
               🎉 Start your 12-hour free trial and discover your career potential!
             </Text>
-          </View>
-
-          {/* Direct Dashboard Access for Testing */}
-          <View style={styles.testSection}>
-            <TouchableOpacity
-              style={styles.testButton}
-              onPress={() => {
-                console.log('Direct dashboard access button clicked');
-                router.push('/(tabs)/home');
-              }}
-            >
-              <Text style={styles.testButtonText}>🧪 Test: Go to Dashboard Directly</Text>
-            </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -402,26 +378,5 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
     textAlign: 'center',
     fontWeight: Typography.fontWeight.medium,
-  },
-  testSection: {
-    backgroundColor: Colors.neutral.gray200,
-    borderRadius: Layout.borderRadius.md,
-    padding: Layout.spacing.md,
-    marginVertical: Layout.spacing.lg,
-    borderWidth: 2,
-    borderColor: Colors.primary.goldenYellow,
-    borderStyle: 'dashed',
-  },
-  testButton: {
-    backgroundColor: Colors.primary.goldenYellow,
-    borderRadius: Layout.borderRadius.md,
-    paddingVertical: Layout.spacing.md,
-    alignItems: 'center',
-    minHeight: Layout.touchTarget.medium,
-  },
-  testButtonText: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.text.primary,
   },
 });

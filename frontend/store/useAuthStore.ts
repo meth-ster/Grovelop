@@ -2,10 +2,14 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../types';
 
+// Get backend URL from environment
+const BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  token: string | null;
   login: (email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   loginWithApple: () => Promise<void>;
@@ -19,28 +23,38 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isAuthenticated: false,
   isLoading: true,
+  token: null,
 
   login: async (email: string, password: string) => {
     try {
       set({ isLoading: true });
       
-      // Mock authentication - replace with real API call
-      const mockUser: User = {
-        id: '1',
-        email,
-        name: email.split('@')[0],
-        assessmentCompleted: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Login failed');
+      }
+
+      const data = await response.json();
+      const { access_token, user } = data;
       
-      await AsyncStorage.setItem('user', JSON.stringify(mockUser));
+      // Store token and user data
+      await AsyncStorage.setItem('token', access_token);
+      await AsyncStorage.setItem('user', JSON.stringify(user));
       await AsyncStorage.setItem('isAuthenticated', 'true');
       
       set({ 
-        user: mockUser, 
+        user, 
         isAuthenticated: true, 
-        isLoading: false 
+        isLoading: false,
+        token: access_token
       });
     } catch (error) {
       console.error('Login error:', error);
@@ -53,9 +67,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      // Mock Google authentication
+      // For now, create a mock Google login until we implement OAuth
       const mockUser: User = {
-        id: 'google_1',
+        id: 'google_' + Date.now(),
         email: 'user@gmail.com',
         name: 'Google User',
         profilePicture: 'https://via.placeholder.com/100',
@@ -83,9 +97,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      // Mock Apple authentication
+      // For now, create a mock Apple login until we implement OAuth
       const mockUser: User = {
-        id: 'apple_1',
+        id: 'apple_' + Date.now(),
         email: 'user@icloud.com',
         name: 'Apple User',
         assessmentCompleted: false,
@@ -112,23 +126,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      // Mock registration
-      const mockUser: User = {
-        id: Date.now().toString(),
-        email,
-        name,
-        assessmentCompleted: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      const response = await fetch(`${BACKEND_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password, name }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Registration failed');
+      }
+
+      const data = await response.json();
+      const { access_token, user } = data;
       
-      await AsyncStorage.setItem('user', JSON.stringify(mockUser));
+      // Store token and user data
+      await AsyncStorage.setItem('token', access_token);
+      await AsyncStorage.setItem('user', JSON.stringify(user));
       await AsyncStorage.setItem('isAuthenticated', 'true');
       
       set({ 
-        user: mockUser, 
+        user, 
         isAuthenticated: true, 
-        isLoading: false 
+        isLoading: false,
+        token: access_token
       });
     } catch (error) {
       console.error('Registration error:', error);
@@ -139,13 +162,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: async () => {
     try {
+      await AsyncStorage.removeItem('token');
       await AsyncStorage.removeItem('user');
       await AsyncStorage.removeItem('isAuthenticated');
       
       set({ 
         user: null, 
         isAuthenticated: false, 
-        isLoading: false 
+        isLoading: false,
+        token: null
       });
     } catch (error) {
       console.error('Logout error:', error);
@@ -156,9 +181,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      const [userData, authStatus] = await Promise.all([
+      const [userData, authStatus, token] = await Promise.all([
         AsyncStorage.getItem('user'),
         AsyncStorage.getItem('isAuthenticated'),
+        AsyncStorage.getItem('token'),
       ]);
       
       if (userData && authStatus === 'true') {
@@ -166,13 +192,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ 
           user, 
           isAuthenticated: true, 
-          isLoading: false 
+          isLoading: false,
+          token
         });
       } else {
         set({ 
           user: null, 
           isAuthenticated: false, 
-          isLoading: false 
+          isLoading: false,
+          token: null
         });
       }
     } catch (error) {
@@ -180,7 +208,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ 
         user: null, 
         isAuthenticated: false, 
-        isLoading: false 
+        isLoading: false,
+        token: null
       });
     }
   },
