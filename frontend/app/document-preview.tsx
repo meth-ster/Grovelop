@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 import Layout from '../constants/Layout';
+import { useDocumentStore } from '../store/useDocumentStore';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -103,13 +104,31 @@ John Doe`,
 export default function DocumentPreviewScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { jobTitle, company, documentType } = params;
+  const { jobTitle, company } = params;
+  const { documentType } = useDocumentStore();
 
   const [activeTab, setActiveTab] = useState<DocumentTab>('resume');
   const [documents, setDocuments] = useState(mockGeneratedDocuments);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
   const [currentView, setCurrentView] = useState<'resume' | 'cover_letter'>('resume');
+
+  // Determine initial view based on document type from store
+  const getInitialView = () => {
+    if (documentType === 'cover_letter_only') {
+      return 'cover_letter';
+    }
+    return 'resume';
+  };
+
+  // Set initial view based on document type from store
+  useEffect(() => {
+    setCurrentView(getInitialView());
+  }, [documentType]);
+
+  useEffect(() => {
+    console.log('documentType: >>---->>', documentType);
+  }, []);
 
   const activeDocument = documents.find(doc => doc.type === activeTab);
 
@@ -183,7 +202,13 @@ export default function DocumentPreviewScreen() {
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>
-          {currentView === 'resume' ? 'Resume/CV Preview' : 'Cover Letter Preview'}
+          {documentType === 'resume_only' 
+            ? 'Resume/CV Preview' 
+            : documentType === 'cover_letter_only' 
+            ? 'Cover Letter Preview' 
+            : currentView === 'resume' 
+            ? 'Resume/CV Preview' 
+            : 'Cover Letter Preview'}
         </Text>
         <TouchableOpacity onPress={handleRegenerateSection}>
           <Ionicons name="refresh" size={24} color={Colors.primary.goldenYellow} />
@@ -241,27 +266,42 @@ export default function DocumentPreviewScreen() {
       <View style={styles.actionBar}>
         {!isEditing ? (
           <>
-            <TouchableOpacity 
-              style={styles.navigationButton} 
-              onPress={currentView === 'resume' ? handleViewCoverLetter : handleBackToResume}
-            >
-              {currentView === 'resume' ? (
-                <>
-                  <Text style={styles.navigationButtonText}>See Cover Letter</Text>
-                  <Ionicons name="arrow-forward" size={20} color={Colors.primary.navyBlue} />
-                </>
-              ) : (
-                <>
+            {/* For resume_cover_activity: Show only "See Cover Letter" when viewing resume */}
+            {documentType === 'resume_cover_activity' && currentView === 'resume' && (
+              <TouchableOpacity 
+                style={styles.navigationButton} 
+                onPress={handleViewCoverLetter}
+              >
+                <Text style={styles.navigationButtonText}>See Cover Letter</Text>
+                <Ionicons name="arrow-forward" size={20} color={Colors.primary.navyBlue} />
+              </TouchableOpacity>
+            )}
+            
+            {/* For resume_cover_activity: Show both "Back to Resume" and "Export & Apply" when viewing cover letter */}
+            {documentType === 'resume_cover_activity' && currentView === 'cover_letter' && (
+              <>
+                <TouchableOpacity 
+                  style={styles.navigationButton} 
+                  onPress={handleBackToResume}
+                >
                   <Ionicons name="arrow-back" size={20} color={Colors.primary.navyBlue} />
                   <Text style={styles.navigationButtonText}>Back to Resume</Text>
-                </>
-              )}
-            </TouchableOpacity>
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.exportButton} onPress={handleExportDocuments}>
+                  <Text style={styles.exportButtonText}>Export & Apply</Text>
+                  <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
+                </TouchableOpacity>
+              </>
+            )}
             
-            <TouchableOpacity style={styles.exportButton} onPress={handleExportDocuments}>
-              <Text style={styles.exportButtonText}>Export & Apply</Text>
-              <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
-            </TouchableOpacity>
+            {/* For other document types: Show only "Export & Apply" */}
+            {documentType !== 'resume_cover_activity' && (
+              <TouchableOpacity style={styles.exportButton} onPress={handleExportDocuments}>
+                <Text style={styles.exportButtonText}>Export & Apply</Text>
+                <Ionicons name="arrow-forward" size={20} color={Colors.text.primary} />
+              </TouchableOpacity>
+            )}
           </>
         ) : (
           <>

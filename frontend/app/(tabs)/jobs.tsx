@@ -164,6 +164,17 @@ export default function JobsScreen() {
     return Colors.error;
   };
 
+  const getHeaderTitle = () => {
+    switch (activeTab) {
+      case 'saved-documents':
+        return 'Saved CVs and Cover Letters';
+      case 'favourites':
+        return 'Saved Jobs';
+      default:
+        return 'Job Opportunities';
+    }
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'discover':
@@ -370,7 +381,7 @@ export default function JobsScreen() {
         >
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Job Opportunities</Text>
+        <Text style={styles.headerTitle}>{getHeaderTitle()}</Text>
         {/* <TouchableOpacity 
           style={styles.filterButton}
           onPress={() => setShowFilterModal(true)}
