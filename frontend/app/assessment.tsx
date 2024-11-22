@@ -495,24 +495,54 @@ export default function AssessmentScreen() {
 
       {/* Navigation Footer */}
       <View style={styles.footer}>
-        <TouchableOpacity
-          style={[
-            styles.nextButton,
-            (!currentAnswer && currentQuestion.required) && styles.disabledButton,
-          ]}
-          onPress={() => {
-            console.log('Button clicked - calling handleNext');
-            handleNext();
-          }}
-          disabled={isSubmitting || (!currentAnswer && currentQuestion.required)}
-        >
-          <Text style={styles.nextButtonText}>
-            {currentQuestionIndex === mockQuestions.length - 1 
-              ? (isSubmitting ? 'Analyzing...' : 'Complete Assessment')
-              : 'Next'
-            }
-          </Text>
-        </TouchableOpacity>
+        {currentQuestionIndex === mockQuestions.length - 1 ? (
+          /* Last question - show completion button */
+          <TouchableOpacity
+            style={[
+              styles.nextButton,
+              !currentAnswer && styles.disabledButton,
+            ]}
+            onPress={() => {
+              console.log('Complete Assessment clicked, currentAnswer:', currentAnswer);
+              if (currentAnswer) {
+                // Save the final response
+                const response: QuestionnaireResponse = {
+                  questionId: currentQuestion.id,
+                  answer: currentAnswer,
+                  timestamp: new Date().toISOString(),
+                };
+                const finalResponses = [
+                  ...responses.filter(r => r.questionId !== currentQuestion.id),
+                  response,
+                ];
+                console.log('Calling handleSubmitAssessment directly');
+                handleSubmitAssessment(finalResponses);
+              } else {
+                Alert.alert('Required', 'Please answer this question to complete the assessment.');
+              }
+            }}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.nextButtonText}>
+              {isSubmitting ? 'Analyzing...' : 'Complete Assessment'}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          /* Regular Next button */
+          <TouchableOpacity
+            style={[
+              styles.nextButton,
+              (!currentAnswer && currentQuestion.required) && styles.disabledButton,
+            ]}
+            onPress={() => {
+              console.log('Next button clicked - calling handleNext');
+              handleNext();
+            }}
+            disabled={isSubmitting || (!currentAnswer && currentQuestion.required)}
+          >
+            <Text style={styles.nextButtonText}>Next</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </SafeAreaView>
   );
