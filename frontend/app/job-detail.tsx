@@ -138,11 +138,23 @@ export default function JobDetailScreen() {
                 <Text style={styles.jobTypeText}>{job.type.replace('-', ' ')}</Text>
               </View>
             </View>
+            <Text style={styles.postedDate}>Posted 3 days ago</Text>
           </View>
           
           <View style={[styles.matchScore, { backgroundColor: getMatchScoreColor(job.matchScore) }]}>
             <Text style={styles.matchScoreText}>{job.matchScore}%</Text>
             <Text style={styles.matchScoreLabel}>Match</Text>
+          </View>
+        </View>
+
+        {/* Profile Match Analysis */}
+        <View style={styles.profileMatchAnalysis}>
+          <View style={styles.successProbability}>
+            <Ionicons name="trending-up" size={24} color={Colors.success} />
+            <View style={styles.probabilityContent}>
+              <Text style={styles.probabilityText}>{job.successProbability}% success probability</Text>
+              <Text style={styles.probabilitySubtext}>Based on your profile match</Text>
+            </View>
           </View>
         </View>
 
