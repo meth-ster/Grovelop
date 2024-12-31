@@ -323,6 +323,72 @@ export default function AssessmentScreen() {
           </View>
         );
 
+      case 'ranking':
+        return (
+          <View style={styles.rankingContainer}>
+            <Text style={styles.rankingInstructions}>
+              Tap to select your order of importance (1 = most important)
+            </Text>
+            {currentQuestion.options?.map((option, index) => {
+              const selectedRanking = currentAnswer || [];
+              const rankPosition = selectedRanking.findIndex((item: any) => item.value === option.value);
+              const isRanked = rankPosition !== -1;
+              
+              return (
+                <TouchableOpacity
+                  key={option.id}
+                  style={[
+                    styles.rankingOption,
+                    isRanked && styles.rankedOption,
+                  ]}
+                  onPress={() => {
+                    let newRanking = [...selectedRanking];
+                    
+                    if (isRanked) {
+                      // Remove from ranking
+                      newRanking = newRanking.filter((item: any) => item.value !== option.value);
+                      // Adjust positions of remaining items
+                      newRanking = newRanking.map((item: any, idx: number) => ({
+                        ...item,
+                        position: idx + 1
+                      }));
+                    } else {
+                      // Add to ranking
+                      newRanking.push({
+                        value: option.value,
+                        text: option.text,
+                        position: newRanking.length + 1
+                      });
+                    }
+                    
+                    handleAnswer(newRanking);
+                  }}
+                >
+                  <View style={styles.rankingContent}>
+                    <View style={[
+                      styles.rankingNumber,
+                      isRanked && styles.rankedNumber,
+                    ]}>
+                      <Text style={[
+                        styles.rankingNumberText,
+                        isRanked && styles.rankedNumberText,
+                      ]}>
+                        {isRanked ? rankPosition + 1 : '?'}
+                      </Text>
+                    </View>
+                    <Text style={[
+                      styles.rankingOptionText,
+                      isRanked && styles.rankedOptionText,
+                    ]}>
+                      {option.text}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        );
+
       default:
         return <Text>Question type not implemented</Text>;
     }
