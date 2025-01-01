@@ -512,24 +512,44 @@ export default function AssessmentScreen() {
             if (currentQuestionIndex === mockQuestions.length - 1) {
               // Last question - complete assessment
               console.log('Last question - completing assessment');
+              setIsSubmitting(true);
+              
               try {
+                // Save the final response first
+                const response: QuestionnaireResponse = {
+                  questionId: currentQuestion.id,
+                  answer: currentAnswer,
+                  timestamp: new Date().toISOString(),
+                };
+                const finalResponses = [...responses.filter(r => r.questionId !== currentQuestion.id), response];
+                
+                // Create archetype based on responses (simplified)
+                const mockArchetype = {
+                  primary: 'thinker' as const,
+                  secondary: 'creator' as const,
+                  scores: { doer: 6, thinker: 9, creator: 8, helper: 5, persuader: 4, organiser: 7 },
+                  description: 'You are a strategic thinker who thrives on solving complex problems and generating innovative solutions.',
+                  strengths: ['Analytical thinking', 'Problem-solving', 'Innovation'],
+                  growthAreas: ['Leadership skills', 'Communication', 'Team collaboration'],
+                  careerSuggestions: ['Data Scientist', 'Research & Development', 'Strategy Consultant'],
+                };
+
                 await updateUser({
                   assessmentCompleted: true,
-                  archetype: {
-                    primary: 'thinker' as const,
-                    secondary: 'creator' as const,
-                    scores: { doer: 6, thinker: 9, creator: 8, helper: 5, persuader: 4, organiser: 7 },
-                    description: 'You are a strategic thinker who thrives on solving complex problems.',
-                    strengths: ['Analytical thinking', 'Problem-solving'],
-                    growthAreas: ['Leadership skills', 'Communication'],
-                    careerSuggestions: ['Data Scientist', 'Strategy Consultant'],
-                  },
+                  archetype: mockArchetype,
                 });
-                console.log('User updated successfully, navigating to home');
-                router.replace('/(tabs)/home');
+                
+                console.log('Assessment completed successfully! Navigating to dashboard...');
+                
+                // Small delay to show completion state, then navigate
+                setTimeout(() => {
+                  router.replace('/(tabs)/home');
+                }, 1500);
+                
               } catch (error) {
-                console.error('Error updating user:', error);
-                router.replace('/(tabs)/home'); // Navigate anyway
+                console.error('Error completing assessment:', error);
+                setIsSubmitting(false);
+                Alert.alert('Error', 'Failed to complete assessment. Please try again.');
               }
             } else {
               // Regular next question logic
