@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import Colors from '../constants/Colors';
 import Typography from '../constants/Typography';
 import Layout from '../constants/Layout';
 import { JobListing } from '../types';
+import { useJobStore } from '../store/useJobStore';
 
 // Enhanced job data for detail view with all required components
 const mockJobDetail: JobListing & {
@@ -68,9 +69,18 @@ export default function JobDetailScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  const { jobs, saveJob, unsaveJob, fetchJobs } = useJobStore();
+  
+  useEffect(() => {
+    if (jobs.length === 0) {
+      fetchJobs();
+    }
+  }, []);
   
   // In a real app, you would fetch job details based on params.id
-  const job = mockJobDetail;
+  const jobId = params.jobId as string;
+  const foundJob = jobs.find(j => j.id === jobId);
+  const job = foundJob ? { ...mockJobDetail, ...foundJob } : mockJobDetail;
 
   const toggleSection = (section: string) => {
     if (expandedSections.includes(section)) {
@@ -80,36 +90,16 @@ export default function JobDetailScreen() {
     }
   };
 
-  const handleApply = () => {
-    Alert.alert(
-      `Apply for ${job.title}`,
-      `You are about to apply for the ${job.title} position at ${job.company}. This will redirect you to the application form.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Continue to Application', 
-          onPress: () => {
-            Alert.alert('Application Started', 'Redirecting to application form...');
-            // In a real app, this would navigate to application form or external URL
-          }
-        },
-      ]
-    );
-  };
-
-  const handleSave = () => {
-    Alert.alert('Job Saved!', 'This job has been added to your saved jobs.');
+  const handleSave = async () => {
+    if (job.saved) {
+      await unsaveJob(job.id);
+    } else {
+      await saveJob(job.id);
+    }
   };
 
   const handleShare = () => {
     Alert.alert('Share Job', 'Job details copied to clipboard and ready to share!');
-  };
-
-  const getMatchScoreColor = (score: number) => {
-    if (score >= 90) return Colors.success;
-    if (score >= 75) return Colors.primary.goldenYellow;
-    if (score >= 60) return Colors.warning;
-    return Colors.error;
   };
 
   return (
@@ -182,49 +172,6 @@ export default function JobDetailScreen() {
           )}
         </View>
 
-        {/* Requirements - Highlighted Matching */}
-        {/* <View style={styles.section}>
-          <TouchableOpacity 
-            style={styles.expandableHeader}
-            onPress={() => toggleSection('requirements')}
-          >
-            <Text style={styles.sectionTitle}>Requirements</Text>
-            <Ionicons 
-              name={expandedSections.includes('requirements') ? 'chevron-up' : 'chevron-down'} 
-              size={20} 
-              color={Colors.text.secondary} 
-            />
-          </TouchableOpacity>
-          {expandedSections.includes('requirements') && (
-            <View>
-              {job.requirements.map((requirement, index) => {
-                // Simulate matching - first 3 requirements match user profile
-                const isMatching = index < 3;
-                return (
-                  <View key={index} style={styles.requirementItem}>
-                    <View style={[
-                      styles.requirementBullet,
-                      isMatching && styles.matchingBullet
-                    ]}>
-                      <Ionicons 
-                        name={isMatching ? 'checkmark-circle' : 'ellipse-outline'} 
-                        size={16} 
-                        color={isMatching ? Colors.success : Colors.text.secondary} 
-                      />
-                    </View>
-                    <Text style={[
-                      styles.requirementText,
-                      isMatching && styles.matchingRequirement
-                    ]}>
-                      {requirement}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-          )}
-        </View> */}
-
         {/* Company Intelligence */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Company Information</Text>
@@ -284,50 +231,10 @@ export default function JobDetailScreen() {
           </View>
         </View>
 
-        {/* Skills */}
-        {/* <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Required Skills</Text>
-          <View style={styles.skillsContainer}>
-            {job.skills.map((skill, index) => (
-              <View key={index} style={styles.skillTag}>
-                <Text style={styles.skillText}>{skill}</Text>
-              </View>
-            ))}
-          </View>
-        </View> */}
-
-        {/* Job Info */}
-        {/* <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Job Information</Text>
-          <View style={styles.infoGrid}>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Posted</Text>
-              <Text style={styles.infoValue}>Jan 15, 2024</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Deadline</Text>
-              <Text style={styles.infoValue}>Feb 15, 2024</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Job Type</Text>
-              <Text style={styles.infoValue}>{job.type.replace('-', ' ')}</Text>
-            </View>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Match Score</Text>
-              <Text style={[styles.infoValue, { color: getMatchScoreColor(job.matchScore) }]}>
-                {job.matchScore}% Match
-              </Text>
-            </View>
-          </View>
-        </View> */}
-        
       </ScrollView>
 
       {/* Bottom Actions */}
       <View style={styles.bottomActions}>
-        <TouchableOpacity style={styles.secondaryActionButton} onPress={handleSave}>
-          <Text style={styles.primaryActionButtonText}>Save Job</Text>
-        </TouchableOpacity>
         <TouchableOpacity style={styles.secondaryActionButton} onPress={() => {
           router.push({
             pathname: '/document-setup',
@@ -335,6 +242,10 @@ export default function JobDetailScreen() {
           });
         }}>
           <Text style={styles.secondaryActionText}>Create Tailored Application</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.secondaryActionButton, job.saved && styles.savedButton]} onPress={handleSave}>
+          <Ionicons name={job.saved ? "heart" : "heart-outline"} size={20} color={job.saved ? Colors.primary.goldenYellow : Colors.primary.navyBlue} />
+          <Text style={[styles.secondaryActionText, job.saved && styles.savedText]}>{job.saved ? 'Saved' : 'Save Job'}</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -487,61 +398,6 @@ const styles = StyleSheet.create({
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
     marginTop: Layout.spacing.md,
   },
-  requirementItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginTop: Layout.spacing.md,
-  },
-  requirementBullet: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.text.primary,
-    marginRight: Layout.spacing.sm,
-    marginTop: 5,
-  },
-  requirementText: {
-    flex: 1,
-    fontSize: Typography.fontSize.base,
-    color: Colors.text.primary,
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
-  },
-  skillsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Layout.spacing.sm,
-    marginTop: Layout.spacing.md,
-  },
-  skillTag: {
-    backgroundColor: Colors.primary.goldenYellow,
-    paddingHorizontal: Layout.spacing.md,
-    paddingVertical: Layout.spacing.sm,
-    borderRadius: Layout.borderRadius.full,
-  },
-  skillText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.text.primary,
-  },
-  infoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Layout.spacing.lg,
-    marginTop: Layout.spacing.md,
-  },
-  infoItem: {
-    flex: 1,
-    minWidth: '40%',
-  },
-  infoLabel: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.text.secondary,
-    marginBottom: Layout.spacing.xs,
-  },
-  infoValue: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.text.primary,
-    textTransform: 'capitalize',
-  },
   bottomActions: {
     position: 'absolute',
     bottom: 0,
@@ -680,5 +536,12 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.base,
     fontWeight: Typography.fontWeight.bold,
     color: Colors.text.primary,
+  },
+  savedButton: {
+    backgroundColor: Colors.background.tertiary,
+    borderColor: Colors.primary.goldenYellow,
+  },
+  savedText: {
+    color: Colors.primary.goldenYellow,
   },
 });

@@ -18,7 +18,7 @@ import Layout from '../../constants/Layout';
 import XLogo from '../../components/XLogo';
 
 const { width: screenWidth } = Dimensions.get('window');
-const gridItemSize = (screenWidth - Layout.spacing.lg * 4) / 3;
+const gridItemSize = (screenWidth - Layout.spacing.lg * 4) / 5;
 
 interface GridItem {
   id: string;
@@ -26,6 +26,7 @@ interface GridItem {
   icon: keyof typeof Ionicons.glyphMap | 'logo' | 'x-logo';
   route?: string;
   color: string;
+  logoColor: string;
   backgroundColor: string;
   action?: () => void;
 }
@@ -69,6 +70,7 @@ export default function HomeScreen() {
       icon: 'briefcase',
       route: 'jobs',
       color: Colors.text.primary,
+      logoColor: Colors.text.primary,
       backgroundColor: Colors.primary.goldenYellow,
     },
     {
@@ -76,7 +78,8 @@ export default function HomeScreen() {
       title: 'My Profile',
       icon: 'person-circle',
       route: 'profile',
-      color: Colors.text.inverse,
+      color: Colors.text.primary,
+      logoColor: Colors.neutral.white,
       backgroundColor: Colors.archetypes.helper.primary,
     },
     {
@@ -84,7 +87,8 @@ export default function HomeScreen() {
       title: 'Grovelop/X',
       icon: 'x-logo',
       route: 'grovelop-x',
-      color: Colors.text.inverse,
+      color: Colors.text.primary,
+      logoColor: Colors.neutral.white,
       backgroundColor: Colors.primary.warmOrange,
     },
     {
@@ -92,7 +96,8 @@ export default function HomeScreen() {
       title: 'ActivityPad',
       icon: 'construct',
       route: 'workbench',
-      color: Colors.text.inverse,
+      color: Colors.text.primary,
+      logoColor: Colors.neutral.white,
       backgroundColor: Colors.archetypes.thinker.primary,
     },
     {
@@ -100,16 +105,15 @@ export default function HomeScreen() {
       title: '',
       icon: 'logo',
       color: Colors.neutral.white,
+      logoColor: Colors.neutral.white,
       backgroundColor: Colors.neutral.white,
-      action: () => {
-        // Maybe show app info or achievements
-      },
     },
     {
       id: 'start',
       title: 'New Activity',
       icon: 'play-circle',
-      color: Colors.text.inverse,
+      color: Colors.text.primary,
+      logoColor: Colors.neutral.white,
       backgroundColor: Colors.success,
       action: () => {
         // Maybe start a new activity or assessment
@@ -122,6 +126,7 @@ export default function HomeScreen() {
       icon: 'settings',
       route: 'settings',
       color: Colors.text.primary,
+      logoColor: Colors.text.primary,
       backgroundColor: Colors.neutral.gray300,
     },
     {
@@ -129,7 +134,8 @@ export default function HomeScreen() {
       title: 'Development\n History',
       icon: 'trending-up',
       route: 'my-development',
-      color: Colors.text.inverse,
+      color: Colors.text.primary,
+      logoColor: Colors.neutral.white,
       backgroundColor: Colors.archetypes.creator.primary,
     },
     {
@@ -137,39 +143,42 @@ export default function HomeScreen() {
       title: 'Help &\nSupport',
       icon: 'help-circle',
       route: 'help',
-      color: Colors.text.inverse,
+      color: Colors.text.primary,
+      logoColor: Colors.neutral.white,
       backgroundColor: Colors.archetypes.persuader.primary,
     },
   ];
 
   const renderGridItem = (item: GridItem) => (
-    <TouchableOpacity
-      key={item.id}
-      style={[styles.gridItem, { backgroundColor: item.backgroundColor }]}
-      onPress={() => {
-        if (item.action) {
-          item.action();
-        } else if (item.route) {
-          handleNavigation(item.route);
-        }
-      }}
-      activeOpacity={0.8}
-    >
-      {item.icon === 'logo' ? (
-        <Image 
-          source={require('../../assets/images/logo.png')} 
-          style={styles.logoImage}
-          resizeMode="contain"
-        />
-      ) : item.icon === 'x-logo' ? (
-        <XLogo size={32} color={item.color} />
-      ) : (
-        <Ionicons name={item.icon} size={32} color={item.color} />
-      )}
+    <View style={styles.gridItemWrapper}>
+      <TouchableOpacity
+        key={item.id}
+        style={[styles.gridItem, { backgroundColor: item.backgroundColor }]}
+        onPress={() => {
+          if (item.action) {
+            item.action();
+          } else if (item.route) {
+            handleNavigation(item.route);
+          }
+        }}
+        activeOpacity={0.8}
+      >
+        {item.icon === 'logo' ? (
+          <Image 
+            source={require('../../assets/images/logo.png')} 
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+        ) : item.icon === 'x-logo' ? (
+          <XLogo size={32} color={item.logoColor} />
+        ) : (
+          <Ionicons name={item.icon} size={32} color={item.logoColor} />
+        )}
+      </TouchableOpacity>
       <Text style={[styles.gridItemText, { color: item.color }]}>
         {item.title}
       </Text>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -181,32 +190,8 @@ export default function HomeScreen() {
             <Text style={styles.welcomeText}>
               Welcome back, {user?.name || 'User'}!
             </Text>
-            {/* <Text style={styles.subtitleText}>
-              {user?.archetype?.primary 
-                ? `Your archetype: ${user.archetype.primary.charAt(0).toUpperCase() + user.archetype.primary.slice(1)}`
-                : 'Ready to explore your potential?'
-              }
-            </Text> */}
           </View>
-          {/* <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons name="notifications-outline" size={24} color={Colors.text.primary} />
-          </TouchableOpacity> */}
         </View>
-
-        {/* Daily Insight Card */}
-        {/* {user?.archetype && (
-          <View style={styles.insightCard}>
-            <View style={styles.insightHeader}>
-              <Ionicons name="bulb" size={20} color={Colors.primary.goldenYellow} />
-              <Text style={styles.insightTitle}>Today's Insight</Text>
-            </View>
-            <Text style={styles.insightText}>
-              As a {user.archetype.primary}, focus on leveraging your analytical strengths 
-              to tackle complex challenges today. Consider starting a new project that 
-              requires deep thinking and problem-solving.
-            </Text>
-          </View>
-        )} */}
 
         {/* Main Grid */}
         <View style={styles.gridContainer}>
@@ -214,40 +199,6 @@ export default function HomeScreen() {
             {gridItems.map(renderGridItem)}
           </View>
         </View>
-
-        {/* Recent Activity */}
-        {/* <View style={styles.recentSection}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          <View style={styles.activityList}>
-            <View style={styles.activityItem}>
-              <View style={styles.activityIcon}>
-                <Ionicons name="checkmark-circle" size={20} color={Colors.success} />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Completed: Communication Skills Workshop</Text>
-                <Text style={styles.activityTime}>2 hours ago</Text>
-              </View>
-            </View>
-            <View style={styles.activityItem}>
-              <View style={styles.activityIcon}>
-                <Ionicons name="bookmark" size={20} color={Colors.primary.goldenYellow} />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Saved: Senior Developer position at TechCorp</Text>
-                <Text style={styles.activityTime}>1 day ago</Text>
-              </View>
-            </View>
-            <View style={styles.activityItem}>
-              <View style={styles.activityIcon}>
-                <Ionicons name="document-text" size={20} color={Colors.primary.navyBlue} />
-              </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>Generated new resume for Data Analyst role</Text>
-                <Text style={styles.activityTime}>3 days ago</Text>
-              </View>
-            </View>
-          </View>
-        </View> */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -274,41 +225,6 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
     marginBottom: Layout.spacing.xs,
   },
-  subtitleText: {
-    fontSize: Typography.fontSize.base,
-    color: Colors.text.secondary,
-  },
-  notificationButton: {
-    width: Layout.touchTarget.small,
-    height: Layout.touchTarget.small,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  insightCard: {
-    backgroundColor: Colors.background.secondary,
-    marginHorizontal: Layout.spacing.lg,
-    marginBottom: Layout.spacing.lg,
-    padding: Layout.spacing.lg,
-    borderRadius: Layout.borderRadius.md,
-    borderLeftWidth: 4,
-    borderLeftColor: Colors.primary.goldenYellow,
-  },
-  insightHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Layout.spacing.sm,
-  },
-  insightTitle: {
-    fontSize: Typography.fontSize.base,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.text.primary,
-    marginLeft: Layout.spacing.sm,
-  },
-  insightText: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.text.secondary,
-    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
-  },
   gridContainer: {
     paddingHorizontal: Layout.spacing.lg,
     marginBottom: Layout.spacing.xl,
@@ -331,6 +247,10 @@ const styles = StyleSheet.create({
     borderRadius: Layout.borderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: Layout.spacing.md,
+  },
+  gridItemWrapper: {
+    alignItems: 'center',
     padding: Layout.spacing.md,
   },
   gridItemText: {
@@ -369,35 +289,5 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.xs,
     color: Colors.text.secondary,
     textAlign: 'center',
-  },
-  recentSection: {
-    paddingHorizontal: Layout.spacing.lg,
-  },
-  activityList: {
-    gap: Layout.spacing.md,
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: Colors.background.secondary,
-    padding: Layout.spacing.md,
-    borderRadius: Layout.borderRadius.md,
-  },
-  activityIcon: {
-    marginRight: Layout.spacing.md,
-    marginTop: Layout.spacing.xs,
-  },
-  activityContent: {
-    flex: 1,
-  },
-  activityTitle: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.text.primary,
-    marginBottom: Layout.spacing.xs,
-  },
-  activityTime: {
-    fontSize: Typography.fontSize.xs,
-    color: Colors.text.tertiary,
   },
 });

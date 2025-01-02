@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
-  TextInput,
   Alert,
   Modal,
 } from 'react-native';
@@ -17,7 +15,7 @@ import Typography from '../../constants/Typography';
 import Layout from '../../constants/Layout';
 import { JobListing } from '../../types';
 import { router } from 'expo-router';
-import { Search } from '../../components';
+import { useJobStore } from '../../store/useJobStore';
 
 type TabType = 'discover' | 'saved-documents' | 'favourites';
 
@@ -91,8 +89,12 @@ export default function JobsScreen() {
   const [activeTab, setActiveTab] = useState<TabType>('discover');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
-  const [jobs, setJobs] = useState(mockJobs);
   const [showFilterModal, setShowFilterModal] = useState(false);
+  const { jobs, saveJob, unsaveJob, fetchJobs } = useJobStore();
+  
+  useEffect(() => {
+    fetchJobs();
+  }, []);
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -108,53 +110,15 @@ export default function JobsScreen() {
     return matchesSearch && matchesFilter;
   });
 
-  const handleSaveJob = (jobId: string) => {
-    const updatedJobs = jobs.map(job => {
-      if (job.id === jobId) {
-        const newSavedState = !job.saved;
-        // Show feedback
-        Alert.alert(
-          newSavedState ? 'Job Saved!' : 'Job Removed',
-          newSavedState ? 'This job has been added to your saved jobs.' : 'This job has been removed from your saved jobs.',
-          [{ text: 'OK' }]
-        );
-        return { ...job, saved: newSavedState };
-      }
-      return job;
-    });
-    setJobs(updatedJobs);
-  };
-
-  const handleApplyJob = (jobId: string) => {
+  const handleSaveJob = async (jobId: string) => {
     const job = jobs.find(j => j.id === jobId);
     if (!job) return;
     
-    Alert.alert(
-      `Apply for ${job.title}`,
-      `You are about to apply for the ${job.title} position at ${job.company}. This will mark the job as applied and prepare your application materials.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Apply Now', 
-          onPress: () => {
-            setJobs(jobs.map(currentJob => 
-              currentJob.id === jobId ? { ...currentJob, applied: true } : currentJob
-            ));
-            
-            // Show success with next steps
-            Alert.alert(
-              'Application Submitted!',
-              `Your application for ${job.title} at ${job.company} has been submitted successfully. You can track your application status in the Applications section.`,
-              [
-                { text: 'View Applications', onPress: () => console.log('Navigate to applications') },
-                { text: 'OK' }
-              ]
-            );
-          },
-          style: 'default'
-        },
-      ]
-    );
+    if (job.saved) {
+      await unsaveJob(jobId);
+    } else {
+      await saveJob(jobId);
+    }
   };
 
   const getMatchScoreColor = (score: number) => {
@@ -167,7 +131,7 @@ export default function JobsScreen() {
   const getHeaderTitle = () => {
     switch (activeTab) {
       case 'saved-documents':
-        return 'Saved CVs and Cover Letters';
+        return 'Saved Documents';
       case 'favourites':
         return 'Saved Jobs';
       default:
@@ -180,47 +144,6 @@ export default function JobsScreen() {
       case 'discover':
         return (
           <>
-            {/* Search */}
-            {/* <View style={styles.searchContainer}>
-              <Search
-                placeholder="Search jobs, companies, skills..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                onSearch={(query) => {
-                  console.log('Searching for:', query);
-                }}
-              />
-            </View> */}
-
-            {/* Filters */}
-            {/* <View style={styles.filtersContainer}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
-                {[
-                  { key: 'all', label: 'All Jobs', count: jobs.length },
-                  { key: 'all_matches', label: 'All Matches', count: jobs.filter(j => j.matchScore >= 60).length },
-                  { key: 'very_high_success', label: 'Very High Success', count: jobs.filter(j => j.matchScore >= 90).length },
-                  { key: 'saved', label: 'Saved', count: jobs.filter(j => j.saved).length },
-                  { key: 'applied', label: 'Applied', count: jobs.filter(j => j.applied).length },
-                ].map((filter) => (
-                  <TouchableOpacity
-                    key={filter.key}
-                    style={[
-                      styles.filterChip,
-                      activeFilter === filter.key && styles.activeFilterChip,
-                    ]}
-                    onPress={() => setActiveFilter(filter.key as FilterType)}
-                  >
-                    <Text style={[
-                      styles.filterText,
-                      activeFilter === filter.key && styles.activeFilterText,
-                    ]}>
-                      {filter.label} ({filter.count})
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View> */}
-
             {/* Jobs List */}
             <View style={styles.jobsList}>
               <FlashList
@@ -280,94 +203,72 @@ export default function JobsScreen() {
 
   const renderJobCard = ({ item: job }: { item: JobListing }) => (
     <View style={styles.jobCard}>
-      {/* Job Header */}
-      <View style={styles.jobHeader}>
-        <View style={styles.jobMainInfo}>
-          <Text style={styles.jobTitle}>{job.title}</Text>
-          <Text style={styles.companyName}>{job.company}</Text>
-          <View style={styles.jobMeta}>
-            <Ionicons name="location-outline" size={14} color={Colors.text.secondary} />
-            <Text style={styles.locationText}>{job.location}</Text>
-            <View style={styles.jobType}>
-              <Text style={styles.jobTypeText}>{job.type.replace('-', ' ')}</Text>
+      <TouchableOpacity 
+        onPress={() => {
+          router.push({
+            pathname: '/job-detail',
+            params: { jobId: job.id }
+          });
+        }}>
+
+        {/* Job Header */}
+        <View style={styles.jobHeader}>
+          <View style={styles.jobMainInfo}>
+            <Text style={styles.jobTitle}>{job.title}</Text>
+            <Text style={styles.companyName}>{job.company}</Text>
+            <View style={styles.jobMeta}>
+              <Ionicons name="location-outline" size={14} color={Colors.text.secondary} />
+              <Text style={styles.locationText}>{job.location}</Text>
+              <View style={styles.jobType}>
+                <Text style={styles.jobTypeText}>{job.type.replace('-', ' ')}</Text>
+              </View>
             </View>
           </View>
-        </View>
-        
-        <View style={styles.jobActions}>
-          <View style={[styles.matchScore, { backgroundColor: getMatchScoreColor(job.matchScore) }]}>
-            <Text style={styles.matchScoreText}>{job.matchScore}%</Text>
+          
+          <View style={styles.jobActions}>
+            <View style={[styles.matchScore, { backgroundColor: getMatchScoreColor(job.matchScore) }]}>
+              <Text style={styles.matchScoreText}>{job.matchScore}%</Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.saveButton}
+              onPress={() => handleSaveJob(job.id)}
+            >
+              <Ionicons 
+                name={job.saved ? "heart" : "heart-outline"} 
+                size={20} 
+                color={job.saved ? Colors.primary.goldenYellow : Colors.text.secondary} 
+              />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity 
-            style={styles.saveButton}
-            onPress={() => handleSaveJob(job.id)}
-          >
-            <Ionicons 
-              name={job.saved ? "heart" : "heart-outline"} 
-              size={20} 
-              color={job.saved ? Colors.primary.goldenYellow : Colors.text.secondary} 
-            />
-          </TouchableOpacity>
         </View>
-      </View>
 
-      {/* Salary */}
-      {job.salary && (
-        <View style={styles.salaryContainer}>
-          <Ionicons name="cash-outline" size={16} color={Colors.success} />
-          <Text style={styles.salaryText}>
-            ${job.salary.min.toLocaleString()} - ${job.salary.max.toLocaleString()} {job.salary.currency}
-          </Text>
-        </View>
-      )}
-
-      {/* Description */}
-      <Text style={styles.jobDescription} numberOfLines={2}>
-        {job.description}
-      </Text>
-
-      {/* Skills */}
-      <View style={styles.skillsContainer}>
-        {job.skills.slice(0, 3).map((skill, index) => (
-          <View key={index} style={styles.skillTag}>
-            <Text style={styles.skillText}>{skill}</Text>
+        {/* Salary */}
+        {job.salary && (
+          <View style={styles.salaryContainer}>
+            <Ionicons name="cash-outline" size={16} color={Colors.success} />
+            <Text style={styles.salaryText}>
+              ${job.salary.min.toLocaleString()} - ${job.salary.max.toLocaleString()} {job.salary.currency}
+            </Text>
           </View>
-        ))}
-        {job.skills.length > 3 && (
-          <Text style={styles.moreSkills}>+{job.skills.length - 3} more</Text>
         )}
-      </View>
 
-      {/* Actions */}
-      {/* <View style={styles.jobCardActions}>
-        <TouchableOpacity 
-          style={styles.viewButton}
-          onPress={() => {
-            router.push({
-              pathname: '/job-detail',
-              params: { jobId: job.id }
-            });
-          }}
-        >
-          <Text style={styles.viewButtonText}>View Details</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[
-            styles.applyButton,
-            job.applied && styles.appliedButton,
-          ]}
-          onPress={() => handleApplyJob(job.id)}
-          disabled={job.applied}
-        >
-          <Text style={[
-            styles.applyButtonText,
-            job.applied && styles.appliedButtonText,
-          ]}>
-            {job.applied ? 'Applied' : 'Apply Now'}
-          </Text>
-        </TouchableOpacity>
-      </View> */}
+        {/* Description */}
+        <Text style={styles.jobDescription} numberOfLines={2}>
+          {job.description}
+        </Text>
+
+        {/* Skills */}
+        <View style={styles.skillsContainer}>
+          {job.skills.slice(0, 3).map((skill, index) => (
+            <View key={index} style={styles.skillTag}>
+              <Text style={styles.skillText}>{skill}</Text>
+            </View>
+          ))}
+          {job.skills.length > 3 && (
+            <Text style={styles.moreSkills}>+{job.skills.length - 3} more</Text>
+          )}
+        </View>
+      </TouchableOpacity>
     </View>
   );
 
@@ -382,12 +283,6 @@ export default function JobsScreen() {
           <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{getHeaderTitle()}</Text>
-        {/* <TouchableOpacity 
-          style={styles.filterButton}
-          onPress={() => setShowFilterModal(true)}
-        >
-          <Ionicons name="options-outline" size={24} color={Colors.text.primary} />
-        </TouchableOpacity> */}
       </View>
 
       {/* Tab Content */}
@@ -537,12 +432,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  filterButton: {
-    width: Layout.touchTarget.small,
-    height: Layout.touchTarget.small,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   contentContainer: {
     flex: 1,
   },
@@ -576,37 +465,6 @@ const styles = StyleSheet.create({
   activeBottomTabText: {
     color: Colors.primary.navyBlue,
     fontWeight: Typography.fontWeight.semibold,
-  },
-  searchContainer: {
-    paddingHorizontal: Layout.spacing.lg,
-    marginBottom: Layout.spacing.md,
-  },
-  filtersContainer: {
-    paddingBottom: Layout.spacing.md,
-  },
-  filters: {
-    paddingHorizontal: Layout.spacing.lg,
-    gap: Layout.spacing.sm,
-  },
-  filterChip: {
-    backgroundColor: Colors.background.secondary,
-    paddingHorizontal: Layout.spacing.md,
-    paddingVertical: Layout.spacing.sm,
-    borderRadius: Layout.borderRadius.full,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  activeFilterChip: {
-    backgroundColor: Colors.primary.goldenYellow,
-    borderColor: Colors.primary.goldenYellow,
-  },
-  filterText: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.text.secondary,
-    fontWeight: Typography.fontWeight.medium,
-  },
-  activeFilterText: {
-    color: Colors.text.primary,
   },
   jobsList: {
     flex: 1,
@@ -706,7 +564,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     alignItems: 'center',
     gap: Layout.spacing.xs,
-    marginBottom: Layout.spacing.lg,
   },
   skillTag: {
     backgroundColor: Colors.background.tertiary,
@@ -722,42 +579,6 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.xs,
     color: Colors.text.tertiary,
     fontStyle: 'italic',
-  },
-  jobCardActions: {
-    flexDirection: 'row',
-    gap: Layout.spacing.md,
-  },
-  viewButton: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: Colors.primary.navyBlue,
-    borderRadius: Layout.borderRadius.md,
-    paddingVertical: Layout.spacing.sm,
-    alignItems: 'center',
-  },
-  viewButtonText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.medium,
-    color: Colors.primary.navyBlue,
-  },
-  applyButton: {
-    flex: 1,
-    backgroundColor: Colors.primary.navyBlue,
-    borderRadius: Layout.borderRadius.md,
-    paddingVertical: Layout.spacing.sm,
-    alignItems: 'center',
-  },
-  appliedButton: {
-    backgroundColor: Colors.success,
-  },
-  applyButtonText: {
-    fontSize: Typography.fontSize.sm,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.text.inverse,
-  },
-  appliedButtonText: {
-    color: Colors.text.inverse,
   },
   emptyState: {
     flex: 1,

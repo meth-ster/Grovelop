@@ -73,7 +73,15 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>My Profile</Text>
+          <View style={styles.headerLeft}>
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <Ionicons name="arrow-back" size={24} color={Colors.text.primary} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>My Profile</Text>
+          </View>
           <View style={styles.headerActions}>
             <TouchableOpacity 
               style={styles.headerButton}
@@ -312,6 +320,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Layout.spacing.lg,
     paddingVertical: Layout.spacing.lg,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  backButton: {
+    width: Layout.touchTarget.small,
+    height: Layout.touchTarget.small,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: Layout.spacing.sm,
   },
   headerTitle: {
     fontSize: Typography.fontSize['2xl'],
