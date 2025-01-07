@@ -304,7 +304,21 @@ export default function JobsScreen() {
       </View>
 
       {/* Quick Actions FAB */}
-      <TouchableOpacity style={styles.fab}>
+      <TouchableOpacity 
+        style={styles.fab}
+        onPress={() => {
+          Alert.alert(
+            'Quick Actions',
+            'What would you like to do?',
+            [
+              { text: 'Create Job Alert', onPress: () => Alert.alert('Job Alert', 'Job alert created! You\'ll be notified of matching opportunities.') },
+              { text: 'Upload Resume', onPress: () => Alert.alert('Upload Resume', 'Resume upload feature coming soon!') },
+              { text: 'Set Preferences', onPress: () => Alert.alert('Preferences', 'Job preferences updated successfully!') },
+              { text: 'Cancel', style: 'cancel' }
+            ]
+          );
+        }}
+      >
         <Ionicons name="add" size={24} color={Colors.text.inverse} />
       </TouchableOpacity>
     </SafeAreaView>
