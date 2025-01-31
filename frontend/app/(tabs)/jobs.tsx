@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -15,7 +16,8 @@ import Colors from '../../constants/Colors';
 import Typography from '../../constants/Typography';
 import Layout from '../../constants/Layout';
 import { JobListing } from '../../types';
-
+import { router } from 'expo-router';
+import { Search } from '../../components';
 // Mock job data
 const mockJobs: JobListing[] = [
   {
@@ -80,12 +82,13 @@ const mockJobs: JobListing[] = [
   },
 ];
 
-type FilterType = 'all' | 'saved' | 'applied';
+type FilterType = 'all' | 'saved' | 'applied' | 'all_matches' | 'very_high_success';
 
 export default function JobsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [jobs, setJobs] = useState(mockJobs);
+  const [showFilterModal, setShowFilterModal] = useState(false);
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -94,7 +97,9 @@ export default function JobsScreen() {
     
     const matchesFilter = activeFilter === 'all' || 
                          (activeFilter === 'saved' && job.saved) ||
-                         (activeFilter === 'applied' && job.applied);
+                         (activeFilter === 'applied' && job.applied) ||
+                         (activeFilter === 'all_matches' && job.matchScore >= 60) ||
+                         (activeFilter === 'very_high_success' && job.matchScore >= 90);
     
     return matchesSearch && matchesFilter;
   });
@@ -253,23 +258,28 @@ export default function JobsScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Job Opportunities</Text>
-        <TouchableOpacity style={styles.filterButton}>
+        <TouchableOpacity 
+          style={styles.filterButton}
+          onPress={() => setShowFilterModal(true)}
+        >
           <Ionicons name="options-outline" size={24} color={Colors.text.primary} />
         </TouchableOpacity>
+      </View>
+      <View style={styles.headerSubtitleContainer}>
+        <Text style={styles.headerSubtitleText}>Jobs matched to your aspirations</Text>
       </View>
 
       {/* Search */}
       <View style={styles.searchContainer}>
-        <View style={styles.searchInput}>
-          <Ionicons name="search" size={20} color={Colors.text.secondary} />
-          <TextInput
-            style={styles.searchText}
-            placeholder="Search jobs, companies, skills..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor={Colors.text.tertiary}
-          />
-        </View>
+        <Search
+          placeholder="Search jobs, companies, skills..."
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onSearch={(query) => {
+            // Optional: Add any additional search logic here
+            console.log('Searching for:', query);
+          }}
+        />
       </View>
 
       {/* Filters */}
@@ -277,6 +287,8 @@ export default function JobsScreen() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filters}>
           {[
             { key: 'all', label: 'All Jobs', count: jobs.length },
+            { key: 'all_matches', label: 'All Matches', count: jobs.filter(j => j.matchScore >= 60).length },
+            { key: 'very_high_success', label: 'Very High Success', count: jobs.filter(j => j.matchScore >= 90).length },
             { key: 'saved', label: 'Saved', count: jobs.filter(j => j.saved).length },
             { key: 'applied', label: 'Applied', count: jobs.filter(j => j.applied).length },
           ].map((filter) => (
@@ -305,7 +317,6 @@ export default function JobsScreen() {
           data={filteredJobs}
           renderItem={renderJobCard}
           keyExtractor={(item) => item.id}
-          estimatedItemSize={200}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.jobsListContent}
         />
@@ -329,6 +340,51 @@ export default function JobsScreen() {
       >
         <Ionicons name="add" size={24} color={Colors.text.inverse} />
       </TouchableOpacity>
+
+      {/* Filter Modal - Display Only */}
+      <Modal
+        visible={showFilterModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowFilterModal(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowFilterModal(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalContent}
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Filter Options</Text>
+              <TouchableOpacity 
+                onPress={() => setShowFilterModal(false)}
+                style={styles.closeButton}
+              >
+                <Ionicons name="close" size={20} color={Colors.text.primary} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.modalBody}>
+              <Text style={styles.modalDescription}>
+                Use the filter chips above to filter jobs by category. This modal is for display purposes only.
+              </Text>
+              
+              <View style={styles.modalInfo}>
+                <Text style={styles.modalInfoTitle}>Available Filters:</Text>
+                <Text style={styles.modalInfoText}>• All Jobs - Shows all available positions</Text>
+                <Text style={styles.modalInfoText}>• All Matches - Jobs with 60%+ match score</Text>
+                <Text style={styles.modalInfoText}>• Very High Success - Jobs with 90%+ match score</Text>
+                <Text style={styles.modalInfoText}>• Saved - Your bookmarked jobs</Text>
+                <Text style={styles.modalInfoText}>• Applied - Jobs you've applied to</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -343,12 +399,25 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Layout.spacing.lg,
-    paddingVertical: Layout.spacing.lg,
+    paddingTop: Layout.spacing.lg,
+    paddingBottom: Layout.spacing.sm
   },
   headerTitle: {
     fontSize: Typography.fontSize['2xl'],
     fontWeight: Typography.fontWeight.bold,
     color: Colors.text.primary,
+  },
+  headerSubtitle: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.secondary,
+  },
+  headerSubtitleContainer: {
+    paddingHorizontal: Layout.spacing.lg,
+    marginBottom: Layout.spacing.md,
+  },
+  headerSubtitleText: {
+    fontSize: Typography.fontSize.base,
+    color: Colors.text.secondary,
   },
   filterButton: {
     width: Layout.touchTarget.small,
@@ -359,20 +428,6 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: Layout.spacing.lg,
     marginBottom: Layout.spacing.md,
-  },
-  searchInput: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.background.secondary,
-    borderRadius: Layout.borderRadius.md,
-    paddingHorizontal: Layout.spacing.md,
-    paddingVertical: Layout.spacing.sm,
-  },
-  searchText: {
-    flex: 1,
-    fontSize: Typography.fontSize.base,
-    color: Colors.text.primary,
-    marginLeft: Layout.spacing.sm,
   },
   filtersContainer: {
     paddingBottom: Layout.spacing.md,
@@ -567,5 +622,72 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: 70,
+    paddingRight: Layout.spacing.md,
+  },
+  modalContent: {
+    backgroundColor: Colors.background.primary,
+    borderRadius: Layout.borderRadius.md,
+    width: 230,
+    maxHeight: 400,
+    elevation: 8,
+    shadowColor: Colors.text.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Layout.spacing.md,
+    paddingVertical: Layout.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.neutral.gray200,
+  },
+  modalTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+    backgroundColor: Colors.background.secondary,
+  },
+  modalBody: {
+    paddingVertical: Layout.spacing.md,
+    paddingHorizontal: Layout.spacing.md,
+  },
+  modalDescription: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.secondary,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.sm,
+    marginBottom: Layout.spacing.md,
+  },
+  modalInfo: {
+    marginTop: Layout.spacing.sm,
+  },
+  modalInfoTitle: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Layout.spacing.sm,
+  },
+  modalInfoText: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.secondary,
+    lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.xs,
+    marginBottom: Layout.spacing.xs,
   },
 });

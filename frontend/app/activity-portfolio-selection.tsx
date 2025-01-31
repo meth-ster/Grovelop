@@ -242,7 +242,7 @@ export default function ActivityPortfolioSelectionScreen() {
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Portfolio Selection</Text>
-          <Text style={styles.headerSubtitle}>Choose activities to highlight</Text>
+          <Text style={styles.headerSubtitle}>Select Evidence from Your Development.</Text>
         </View>
         <TouchableOpacity onPress={() => {
           Alert.alert('Help', 'Select activities that best demonstrate your qualifications for this role. Higher relevance scores indicate better alignment.');

@@ -9,6 +9,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -98,14 +99,13 @@ export default function WelcomeScreen() {
           {/* Hero Section */}
           <View style={styles.heroSection}>
             <View style={styles.logoContainer}>
-              <Text style={styles.logoText}>Grovelop</Text>
+                <Image source={require('../assets/images/logo.png')} style={styles.logoImage} resizeMode="contain" />
             </View>
             <Text style={styles.tagline}>
-              Unlock Your Career Potential with AI-Powered Development
+              Realise Your Professional Potential
             </Text>
             <Text style={styles.description}>
-              Discover your unique career archetype, generate personalized activities, 
-              and accelerate your professional growth with intelligent insights.
+              Transform your career through personalized development activities based on your unique professional DNA and  ﬁ nd the right place to realise your professional aspirations.
             </Text>
           </View>
 
@@ -113,15 +113,15 @@ export default function WelcomeScreen() {
           <View style={styles.benefitsSection}>
             <View style={styles.benefitItem}>
               <Ionicons name="analytics" size={24} color={Colors.primary.goldenYellow} />
-              <Text style={styles.benefitText}>AI-Powered Career Analysis</Text>
+              <Text style={styles.benefitText}>Professional DNA Analysis</Text>
             </View>
             <View style={styles.benefitItem}>
               <Ionicons name="trending-up" size={24} color={Colors.primary.goldenYellow} />
-              <Text style={styles.benefitText}>Personalized Growth Activities</Text>
+              <Text style={styles.benefitText}>Personalised Development Activities</Text>
             </View>
             <View style={styles.benefitItem}>
               <Ionicons name="briefcase" size={24} color={Colors.primary.goldenYellow} />
-              <Text style={styles.benefitText}>Smart Job Matching</Text>
+              <Text style={styles.benefitText}>Smart Job Matching & Coaching</Text>
             </View>
           </View>
 
@@ -250,6 +250,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: Layout.spacing.xl,
     paddingBottom: Layout.spacing.lg,
+  },
+  logoImage: {
+    width: 200,
+    height: 200,
   },
   logoContainer: {
     marginBottom: Layout.spacing.md,

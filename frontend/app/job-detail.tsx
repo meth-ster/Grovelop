@@ -141,10 +141,6 @@ export default function JobDetailScreen() {
             <Text style={styles.postedDate}>Posted 3 days ago</Text>
           </View>
           
-          <View style={[styles.matchScore, { backgroundColor: getMatchScoreColor(job.matchScore) }]}>
-            <Text style={styles.matchScoreText}>{job.matchScore}%</Text>
-            <Text style={styles.matchScoreLabel}>Match</Text>
-          </View>
         </View>
 
         {/* Profile Match Analysis */}
@@ -168,30 +164,6 @@ export default function JobDetailScreen() {
           </View>
         )}
 
-        {/* Action Buttons as specified in PDF */}
-        <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.secondaryActionButton} onPress={handleSave}>
-            <Ionicons name="bookmark-outline" size={20} color={Colors.primary.navyBlue} />
-            <Text style={styles.secondaryActionText}>Save Job</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.secondaryActionButton} onPress={() => {
-            Alert.alert('Message Employer', 'Direct messaging feature coming soon!');
-          }}>
-            <Ionicons name="mail-outline" size={20} color={Colors.primary.navyBlue} />
-            <Text style={styles.secondaryActionText}>Message Employer</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity style={styles.primaryActionButton} onPress={() => {
-          router.push({
-            pathname: '/document-setup',
-            params: { jobId: job.id, jobTitle: job.title, company: job.company }
-          });
-        }}>
-          <Text style={styles.primaryActionButtonText}>Create Tailored Application</Text>
-          <Ionicons name="arrow-forward" size={20} color={Colors.text.inverse} />
-        </TouchableOpacity>
-
         {/* Job Description - Expandable */}
         <View style={styles.section}>
           <TouchableOpacity 
@@ -211,7 +183,7 @@ export default function JobDetailScreen() {
         </View>
 
         {/* Requirements - Highlighted Matching */}
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <TouchableOpacity 
             style={styles.expandableHeader}
             onPress={() => toggleSection('requirements')}
@@ -251,7 +223,7 @@ export default function JobDetailScreen() {
               })}
             </View>
           )}
-        </View>
+        </View> */}
 
         {/* Company Intelligence */}
         <View style={styles.section}>
@@ -313,7 +285,7 @@ export default function JobDetailScreen() {
         </View>
 
         {/* Skills */}
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>Required Skills</Text>
           <View style={styles.skillsContainer}>
             {job.skills.map((skill, index) => (
@@ -322,10 +294,10 @@ export default function JobDetailScreen() {
               </View>
             ))}
           </View>
-        </View>
+        </View> */}
 
         {/* Job Info */}
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>Job Information</Text>
           <View style={styles.infoGrid}>
             <View style={styles.infoItem}>
@@ -347,7 +319,32 @@ export default function JobDetailScreen() {
               </Text>
             </View>
           </View>
+        </View> */}
+
+        {/* Action Buttons as specified in PDF */}
+        <View style={styles.actionButtons}>
+          <TouchableOpacity style={styles.secondaryActionButton} onPress={handleSave}>
+            <Ionicons name="bookmark-outline" size={20} color={Colors.primary.navyBlue} />
+            <Text style={styles.secondaryActionText}>Save Job</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.secondaryActionButton} onPress={() => {
+            Alert.alert('Message Employer', 'Direct messaging feature coming soon!');
+          }}>
+            <Ionicons name="mail-outline" size={20} color={Colors.primary.navyBlue} />
+            <Text style={styles.secondaryActionText}>Message Employer</Text>
+          </TouchableOpacity>
         </View>
+
+        <TouchableOpacity style={styles.primaryActionButton} onPress={() => {
+          router.push({
+            pathname: '/document-setup',
+            params: { jobId: job.id, jobTitle: job.title, company: job.company }
+          });
+        }}>
+          <Text style={styles.primaryActionButtonText}>Create Tailored Application</Text>
+          <Ionicons name="arrow-forward" size={20} color={Colors.text.inverse} />
+        </TouchableOpacity>
+        
       </ScrollView>
 
       {/* Bottom Actions */}
@@ -385,7 +382,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semibold,
+    fontWeight: Typography.fontWeight.bold,
     color: Colors.text.primary,
   },
   shareButton: {
@@ -400,7 +397,6 @@ const styles = StyleSheet.create({
   jobHeader: {
     flexDirection: 'row',
     padding: Layout.spacing.lg,
-    backgroundColor: Colors.background.secondary,
   },
   jobMainInfo: {
     flex: 1,
@@ -457,8 +453,8 @@ const styles = StyleSheet.create({
   salaryContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: Layout.spacing.lg,
-    backgroundColor: Colors.background.tertiary,
+    paddingHorizontal: Layout.spacing.lg,
+    paddingBottom: Layout.spacing.md,
   },
   salaryText: {
     fontSize: Typography.fontSize.lg,
@@ -503,23 +499,23 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
-    marginBottom: Layout.spacing.md,
   },
   descriptionText: {
     fontSize: Typography.fontSize.base,
     color: Colors.text.primary,
     lineHeight: Typography.lineHeight.relaxed * Typography.fontSize.base,
+    marginTop: Layout.spacing.md,
   },
   requirementItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: Layout.spacing.sm,
+    marginTop: Layout.spacing.md,
   },
   requirementBullet: {
     fontSize: Typography.fontSize.base,
     color: Colors.text.primary,
     marginRight: Layout.spacing.sm,
-    marginTop: 2,
+    marginTop: 5,
   },
   requirementText: {
     flex: 1,
@@ -531,6 +527,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Layout.spacing.sm,
+    marginTop: Layout.spacing.md,
   },
   skillTag: {
     backgroundColor: Colors.primary.goldenYellow,
@@ -547,6 +544,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Layout.spacing.lg,
+    marginTop: Layout.spacing.md,
   },
   infoItem: {
     flex: 1,
@@ -594,11 +592,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: Layout.spacing.md,
-  },
-  requirementBullet: {
-    marginRight: Layout.spacing.sm,
-    marginTop: 2,
   },
   matchingBullet: {
     // Already styled with icon
@@ -639,6 +632,7 @@ const styles = StyleSheet.create({
   },
   companyIntelligence: {
     gap: Layout.spacing.md,
+    marginTop: Layout.spacing.md,
   },
   intelligenceItem: {
     flexDirection: 'row',
@@ -669,6 +663,7 @@ const styles = StyleSheet.create({
   },
   benefitsList: {
     gap: Layout.spacing.sm,
+    marginTop: Layout.spacing.md,
   },
   benefitItem: {
     flexDirection: 'row',
@@ -684,7 +679,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Layout.spacing.md,
     paddingHorizontal: Layout.spacing.lg,
-    marginBottom: Layout.spacing.lg,
+    marginVertical: Layout.spacing.lg,
   },
   secondaryActionButton: {
     flex: 1,
