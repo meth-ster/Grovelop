@@ -104,7 +104,53 @@ const mockQuestions: Question[] = [
     category: 'work_style',
     order: 6,
   },
-  // Add more questions as needed...
+  {
+    id: '7',
+    type: 'single_choice',
+    text: 'What motivates you most at work?',
+    options: [
+      { id: '7a', text: 'Recognition and praise', value: 'recognition' },
+      { id: '7b', text: 'Financial rewards', value: 'money' },
+      { id: '7c', text: 'Learning new things', value: 'learning' },
+      { id: '7d', text: 'Making a difference', value: 'impact' },
+    ],
+    required: true,
+    category: 'motivation',
+    order: 7,
+  },
+  {
+    id: '8',
+    type: 'slider',
+    text: 'How comfortable are you with taking risks?',
+    description: 'Rate from 1 (very uncomfortable) to 10 (love taking risks)',
+    required: true,
+    category: 'personality',
+    order: 8,
+  },
+  {
+    id: '9',
+    type: 'multiple_choice',
+    text: 'Which work environments do you thrive in? (Select all that apply)',
+    options: [
+      { id: '9a', text: 'Fast-paced startup', value: 'startup' },
+      { id: '9b', text: 'Large corporation', value: 'corporate' },
+      { id: '9c', text: 'Remote work', value: 'remote' },
+      { id: '9d', text: 'Creative agency', value: 'creative' },
+      { id: '9e', text: 'Non-profit organization', value: 'nonprofit' },
+    ],
+    required: true,
+    category: 'environment',
+    order: 9,
+  },
+  {
+    id: '10',
+    type: 'text_input',
+    text: 'Describe your ideal work day in a few sentences.',
+    description: 'What would a perfect work day look like for you?',
+    required: true,
+    category: 'preferences',
+    order: 10,
+  },
 ];
 
 export default function AssessmentScreen() {
